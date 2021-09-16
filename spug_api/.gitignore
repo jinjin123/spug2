@@ -8,3 +8,4 @@ migrations/
 /repos/*
 /logs/*
 celerybeat-schedule
+spug/settings.py

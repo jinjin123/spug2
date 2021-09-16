@@ -8,6 +8,8 @@ from decimal import Decimal
 import string
 import random
 import json
+import requests
+from django.conf import settings
 
 
 # 转换时间格式到字符串
@@ -109,3 +111,85 @@ def get_request_real_ip(headers: dict):
     if not x_real_ip:
         x_real_ip = headers.get('x-real-ip', '')
     return x_real_ip.split(',')[0]
+
+
+class RequestApiAgent:
+    host = None
+    timeout = 30
+    verify = False
+    headers = None
+    data = None
+    request_map = {
+        "create": {
+            "method": requests.post,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
+        "delete": {
+            "method": requests.delete,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
+        "list": {
+            "method": requests.get,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
+        "retrieve": {
+            "method": requests.get,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
+        "put": {
+            "method": requests.put,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
+        "update": {
+            "method": requests.put,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        }
+    }
+
+    def send_request(self, crud_key, kwargs):
+        if crud_key not in self.request_map.keys():
+            raise KeyError("Unsupported CRUD_KEY: `{this_key}` ""not in {support_keys}".format(
+                this_key=crud_key,
+                support_keys=list(self.request_map.keys()))
+            )
+        request = self.request_map[crud_key]
+        return request["method"](
+            url=kwargs["url"],
+            data=self.data if not kwargs.get("data",None) else kwargs["data"],
+            # json=kwargs,
+            # params=kwargs,
+            # timeout=self.timeout if not kwargs.get("timeout", None) else kwargs["timeout"],
+            verify=self.verify if not kwargs.get("verify", None) else kwargs["verify"],
+            timeout=self.timeout,
+            headers=self.headers if not kwargs.get("headers", None) else kwargs["headers"],
+        )
+
+    def create(self, *args, **kwargs):
+        # return self.send_request("create", kwargs).json()
+        return self.send_request("create", kwargs).text
+
+    def close(self, *args, **kwargs):
+        # return self.send_request("close", kwargs).json()
+        return self.send_request("close", kwargs).text
+
+    def put(self, *args, **kwargs):
+        return self.send_request("put", kwargs).content
+        # return self.send_request("put", kwargs).text
+
+    def list(self, *args, **kwargs):
+        return self.send_request("list", kwargs)
+        # return self.send_request("list", kwargs).text
+
+
