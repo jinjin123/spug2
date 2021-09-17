@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace
 from apps.config.models import Config
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 import subprocess
@@ -171,6 +171,28 @@ class DeployView(View):
             repo_dir = os.path.join(settings.REPOS_DIR, str(form.id))
             subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
+
+
+# class DeployRancherNsView(View):
+#     def get(self, request):
+#         # v2.3.14 临时数据初始化
+#         ns = list(RancherNamespace.objects.all().values("id","namespace"))
+#         # conf = list(RancherConfigMap.objects.all().values("configid"))
+#         # tmp = {}
+#         # tmp["ns"] = ns
+#         # tmp["conf"] = conf
+#         # if not request.user.is_supper:
+#         #     query['id__in'] = request.user.deploy_perms['apps']
+#         return json_response(ns)
+#
+# class DeployRancherConfView(View):
+#     def get(self, request):
+#         # v2.3.14 临时数据初始化
+#         conf = list(RancherConfigMap.objects.all().values("id","configid","namespace_id","configMap_k","configMap_v"))
+#         # tmp = {}
+#         # tmp["conf"] = conf
+#         return json_response(conf)
+
 
 
 def get_versions(request, d_id):

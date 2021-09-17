@@ -115,7 +115,7 @@ class DeployExtend2(models.Model, ModelMixin):
 
 
 class RancherNamespace(models.Model,ModelMixin):
-    namespace = models.CharField(max_length=50, primary_key=True, verbose_name='命名空间')
+    namespace = models.CharField(max_length=50, verbose_name='命名空间')
     namespace_id = models.CharField(max_length=50, verbose_name='项目id')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
@@ -127,12 +127,13 @@ class RancherNamespace(models.Model,ModelMixin):
 
     class Meta:
         db_table = 'rancher_namespace'
+        unique_together=("id","namespace")
 
 
 class RancherConfigMap(models.Model, ModelMixin):
     namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='项目id')
     configname = models.CharField(max_length=100, db_index=True, verbose_name='配置文件名')
-    configid = models.CharField(max_length=100, primary_key=True, verbose_name='配置文件更新id')
+    configid = models.CharField(max_length=100,  verbose_name='配置文件更新id')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
     configMap_v = models.TextField(db_index=True, verbose_name='配置映射内容')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
@@ -144,11 +145,12 @@ class RancherConfigMap(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_configmap'
+        unique_together=("id","configid")
 
 class RancherConfigMapVersion(models.Model, ModelMixin):
     configmap_id = models.ForeignKey(RancherConfigMap, on_delete=models.PROTECT, verbose_name='configMapid')
     configname = models.CharField(max_length=100, db_index=True, verbose_name='配置文件名')
-    configid = models.CharField(max_length=100, primary_key=True, verbose_name='配置文件更新id')
+    configid = models.CharField(max_length=100,  verbose_name='配置文件更新id')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
@@ -160,3 +162,4 @@ class RancherConfigMapVersion(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_configmaphisotry'
+        unique_together = ("id", "configid")

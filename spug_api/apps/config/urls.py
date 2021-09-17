@@ -13,4 +13,8 @@ urlpatterns = [
     path('environment/', EnvironmentView.as_view()),
     path('service/', ServiceView.as_view()),
     path('history/', HistoryView.as_view()),
+    path('rsnamespace/', RancherNsView.as_view()),
+    path('rsconf/',RancherConfConfView.as_view()),
+    path('rsconfagg/', RancherAggMap.as_view()),
+    path('rsconfig/', RancherConfManagerView.as_view()),
 ]

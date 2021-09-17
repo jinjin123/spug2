@@ -4,9 +4,46 @@
 from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
-from apps.app.models import Deploy
+from apps.app.models import Deploy,RancherConfigMap,RancherNamespace,RancherConfigMapVersion
 from apps.config.models import *
 import json
+
+
+class RancherNsView(View):
+    def get(self, request):
+        # v2.3.14 临时数据初始化
+        ns = list(RancherNamespace.objects.all().values("id","namespace"))
+        # conf = list(RancherConfigMap.objects.all().values("configid"))
+        # tmp = {}
+        # tmp["ns"] = ns
+        # tmp["conf"] = conf
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['apps']
+        return json_response(ns)
+
+class RancherConfConfView(View):
+    def get(self, request):
+        # v2.3.14 临时数据初始化
+        conf = list(RancherConfigMap.objects.all().values("id","configid","namespace_id","configMap_k","configMap_v"))
+        # tmp = {}
+        # tmp["conf"] = conf
+        return json_response(conf)
+
+class RancherAggMap(View):
+    def get(self,request):
+        conf = RancherConfigMap.objects.all()
+        tmp = []
+        for x in conf:
+            tmp.append({
+                "id":x.id,
+                "configid": x.configid,
+                "configname": x.configname,
+                "namespace": x.namespace.namespace,
+                "configmap_k": x.configMap_k,
+                "configmap_v": x.configMap_v,
+            })
+        return json_response(tmp)
+
 
 
 class EnvironmentView(View):
@@ -82,6 +119,48 @@ class ServiceView(View):
             Service.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
+class RancherConfManagerView(View):
+    def get(self, request):
+        services = RancherConfigMapVersion.objects.all()
+        return json_response(services)
+
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('config_k', help='请输入映射key'),
+            Argument('config_v', help='请输入映射value'),
+            Argument('configname', required=False),
+            Argument('namespace', required=False),
+            Argument('configid', required=False)
+        ).parse(request.body)
+        if error is None:
+            service = RancherConfigMap.objects.filter(id=form.id).first()
+            # if service and service.configid != form.configid:
+            #     return json_response(error=f'唯一标识符 {form.id} 已存在，请更改后重试')
+            # if form.id:
+            #     RancherConfigMap.objects.filter(pk=form.id).update(**form)
+            # else:
+            RancherConfigMapVersion.objects.create(created_by=request.user, **form)
+        return json_response(error=error)
+
+    def put(self,request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('config_k', help='请输入映射key'),
+            Argument('config_v', help='请输入映射value'),
+            Argument('configname', required=False),
+            Argument('namespace', required=False),
+            Argument('configid', required=False)
+        ).parse(request.body)
+        if error is None:
+            service = RancherConfigMap.objects.filter(id=form.id).first()
+            if service and service.configid != form.configid:
+                return json_response(error=f'唯一标识符 {form.configname} 已存在，请更改后重试')
+            if form.id:
+                RancherConfigMap.objects.filter(id=form.id).update(**form)
+            else:
+                return json_response(error=f'{form.configname} 老配置已丢失')
+        return json_response(error=error)
 
 class ConfigView(View):
     def get(self, request):
