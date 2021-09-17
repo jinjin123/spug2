@@ -1,0 +1,27 @@
+.ChildBox{
+    position: fixed;
+    top: 8%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+}
+.ChildBox > .ChildContent {
+    background: rgb(255, 255, 255);
+    height: 100%;
+    width: 40%;
+    float: right;
+}
+
+.ModelBox {
+    float: right;
+}
+:global .CodeMirror{
+    height: 450px;
+    /* top:100px; */
+}
+/* :global .ant-modal{
+    float: right;
+    width: 40% !important;
+    top:0;
+/* }  */

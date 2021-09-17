@@ -1,0 +1,7 @@
+.modalbox > .ant-modal {
+     height: 100%;
+}
+
+.modalbox > .ant-modal > .ant-modal-content {
+     height: 100%;
+}
