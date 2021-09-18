@@ -113,17 +113,25 @@ class DeployExtend2(models.Model, ModelMixin):
     class Meta:
         db_table = 'deploy_extend2'
 
+class RancherProject(models.Model,ModelMixin):
+    project_name = models.CharField(max_length=80, verbose_name='项目名称')
+    project_id = models.CharField(max_length=50, verbose_name='项目id')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
+
+    class Meta:
+        db_table = 'rancher_project'
+        unique_together=("id","project_id")
 
 class RancherNamespace(models.Model,ModelMixin):
     namespace = models.CharField(max_length=50, verbose_name='命名空间')
     namespace_id = models.CharField(max_length=50, verbose_name='项目id')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
-
-
-    def to_dict(self, *args, **kwargs):
-        tmp = super().to_dict(*args, **kwargs)
-        return tmp
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
 
     class Meta:
         db_table = 'rancher_namespace'
@@ -138,30 +146,28 @@ class RancherConfigMap(models.Model, ModelMixin):
     configMap_v = models.TextField(db_index=True, verbose_name='配置映射内容')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
-
-
-    def to_dict(self, *args, **kwargs):
-        tmp = super().to_dict(*args, **kwargs)
-        return tmp
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
+    old_id = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'rancher_configmap'
         unique_together=("id","configid")
 
 class RancherConfigMapVersion(models.Model, ModelMixin):
-    configmap_id = models.ForeignKey(RancherConfigMap, on_delete=models.PROTECT, verbose_name='configMapid')
+    # configmap_id = models.ForeignKey(RancherConfigMap, on_delete=models.PROTECT, verbose_name='configMapid')
+    namespace = models.CharField(max_length=100)
     configname = models.CharField(max_length=100, db_index=True, verbose_name='配置文件名')
     configid = models.CharField(max_length=100,  verbose_name='配置文件更新id')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
     configMap_v = models.CharField(max_length=100, db_index=True, verbose_name='配置映射内容')
-    old_version = models.IntegerField()
-
-    def to_dict(self, *args, **kwargs):
-        tmp = super().to_dict(*args, **kwargs)
-        return tmp
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    old_id = models.IntegerField()
+    env_id = models.IntegerField()
 
     class Meta:
         db_table = 'rancher_configmaphisotry'
         unique_together = ("id", "configid")
+        ordering = ('-create_time',)

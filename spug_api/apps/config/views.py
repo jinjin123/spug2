@@ -13,12 +13,6 @@ class RancherNsView(View):
     def get(self, request):
         # v2.3.14 临时数据初始化
         ns = list(RancherNamespace.objects.all().values("id","namespace"))
-        # conf = list(RancherConfigMap.objects.all().values("configid"))
-        # tmp = {}
-        # tmp["ns"] = ns
-        # tmp["conf"] = conf
-        # if not request.user.is_supper:
-        #     query['id__in'] = request.user.deploy_perms['apps']
         return json_response(ns)
 
 class RancherConfConfView(View):
@@ -33,15 +27,10 @@ class RancherAggMap(View):
     def get(self,request):
         conf = RancherConfigMap.objects.all()
         tmp = []
-        for x in conf:
-            tmp.append({
-                "id":x.id,
-                "configid": x.configid,
-                "configname": x.configname,
-                "namespace": x.namespace.namespace,
-                "configmap_k": x.configMap_k,
-                "configmap_v": x.configMap_v,
-            })
+        for item in conf:
+            data = item.to_dict()
+            data["namespace"] = item.namespace.namespace
+            tmp.append(data)
         return json_response(tmp)
 
 
@@ -121,8 +110,12 @@ class ServiceView(View):
 
 class RancherConfManagerView(View):
     def get(self, request):
-        services = RancherConfigMapVersion.objects.all()
-        return json_response(services)
+        form, error = JsonParser(
+            Argument('configid',  help='configid丢失'),
+            Argument('old_id', type=int, help='老配置id丢失'),
+        ).parse(request.GET)
+        config = RancherConfigMapVersion.objects.filter(old_id=form.old_id)
+        return json_response(config)
 
     def post(self,request):
         form, error = JsonParser(
@@ -131,35 +124,37 @@ class RancherConfManagerView(View):
             Argument('config_v', help='请输入映射value'),
             Argument('configname', required=False),
             Argument('namespace', required=False),
-            Argument('configid', required=False)
+            Argument('configid', required=False),
+            Argument('o_id', required=False),
+            Argument('envs', required=False)
         ).parse(request.body)
         if error is None:
-            service = RancherConfigMap.objects.filter(id=form.id).first()
-            # if service and service.configid != form.configid:
-            #     return json_response(error=f'唯一标识符 {form.id} 已存在，请更改后重试')
-            # if form.id:
-            #     RancherConfigMap.objects.filter(pk=form.id).update(**form)
-            # else:
             RancherConfigMapVersion.objects.create(created_by=request.user, **form)
         return json_response(error=error)
 
     def put(self,request):
         form, error = JsonParser(
-            Argument('id', type=int, required=False),
-            Argument('config_k', help='请输入映射key'),
-            Argument('config_v', help='请输入映射value'),
+            # Argument('id', type=int, required=False),
+            Argument('configMap_k', help='请输入映射key'),
+            Argument('configMap_v', help='请输入映射value'),
             Argument('configname', required=False),
             Argument('namespace', required=False),
-            Argument('configid', required=False)
+            Argument('configid', required=False),
+            Argument('old_id', required=False),
+            Argument('envs', type=list, filter=lambda x: len(x), help='请选择环境'),
         ).parse(request.body)
         if error is None:
-            service = RancherConfigMap.objects.filter(id=form.id).first()
-            if service and service.configid != form.configid:
-                return json_response(error=f'唯一标识符 {form.configname} 已存在，请更改后重试')
-            if form.id:
-                RancherConfigMap.objects.filter(id=form.id).update(**form)
-            else:
-                return json_response(error=f'{form.configname} 老配置已丢失')
+            config = RancherConfigMap.objects.filter(id=form.old_id)
+            if not config:
+                return json_response(error='未找到指定对象')
+            RancherConfigMap.objects.filter(id=form.old_id).update(configMap_v=form.configMap_v)
+            envs = form.pop('envs')
+            map_obj_v = list(config)[0].configMap_v
+            new_v = form.pop("configMap_v")
+            for env_id in envs:
+                # RancherConfigMap.objects.create(env_id=env_id,**form)
+                RancherConfigMapVersion.objects.create(env_id=env_id,create_by=request.user,configMap_v=map_obj_v,**form)
+
         return json_response(error=error)
 
 class ConfigView(View):
