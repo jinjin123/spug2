@@ -25,6 +25,7 @@ class ComForm extends React.Component {
       loading: false,
       envs: this.isModify ? [store.record.env_id] : []
     }
+    
   }
 
   handleSubmit = () => {
@@ -56,6 +57,7 @@ class ComForm extends React.Component {
 
   render() {
     const info = store.record;
+    const codeRead = store.codeRead;
     const {envs} = this.state;
     const {getFieldDecorator} = this.props.form;
     return (
@@ -95,7 +97,9 @@ class ComForm extends React.Component {
                             options={{
                               mode: 'shell',
                               theme: 'monokai',
-                              lineNumbers: true
+                              fontSize: '11px',
+                              lineNumbers: true,
+                              readOnly:codeRead
                             }}
                           />
                 )}

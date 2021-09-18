@@ -11,7 +11,10 @@ class Store {
   @observable record = {};
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable historyVisible = false;
   @observable env = {};
+  @observable codeRead = false;
+  @observable vrecords = [];
 
   @observable f_name;
 
@@ -22,9 +25,18 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  showForm = (info = {}) => {
+  showForm = (info,status = {}) => {
     this.formVisible = true;
-    this.record = info
+    this.record = info;
+    this.codeRead = !status ? false : true;
+  }
+  showHistory = (info = {}) => {
+    this.isFetching = true;
+    this.historyVisible = true;
+    this.record = info;
+    return http.get('/api/config/rsconfig/',{params:{configid: info.configid,old_id: info.id}})
+    .then(res => this.vrecords = res)
+    .finally(() => this.isFetching = false)
   }
 }
 
