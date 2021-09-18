@@ -16,10 +16,12 @@ import 'codemirror/theme/monokai.css';
 import styles from './form.module.css';
 import envStore from '../environment/store'
 import './form.css';
+import CodeMirrorWrapper from "./CodeMirrorWrapper";
 @observer
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
+    // this.isModify = store.record.id !== undefined;
     this.state = {
       loading: false,
       envs: this.isModify ? [store.env.id] : []
@@ -29,7 +31,10 @@ class ComForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    formData['id'] = store.record.id;
+    formData['o_id'] = store.record.id;
+    formData['envs'] = this.state.envs;
+    // request = http.post('/api/config/', formData)
+
     http.post('/api/config/service/', formData)
       .then(res => {
         message.success('操作成功');
@@ -65,8 +70,20 @@ class ComForm extends React.Component {
       onCancel={() => store.formVisible = false}
       confirmLoading={this.state.loading}
       onOk={this.handleSubmit}>
-        {/* <div className={styles.ChildBox}> */}
-          {/* <div className={styles.ChildContent}> */}
+        {/* <div className={styles.ChildBox}> 
+          <div className={styles.ChildContent}>
+                <CodeMirror 
+                            options={{
+                              mode: 'shell',
+                              theme: 'monokai',
+                              lineNumbers: true
+                            }}
+                            onChange={(editor, data, value) => {
+                              console.log(editor)
+                            }}
+                          />
+          </div>
+        </div> */}
             <Form labelCol={{span: 2}} wrapperCol={{span: 22}}>
               <Form.Item required label="Key">
                 {getFieldDecorator('config_k', {initialValue: info['configmap_k']})(
@@ -74,14 +91,12 @@ class ComForm extends React.Component {
                 )}
               </Form.Item>
               <Form.Item required label="Value">
-                {getFieldDecorator('config_v', {initialValue: info['configmap_v']})(
-                            <CodeMirror 
+                {this.props.form.getFieldDecorator('config_v', {initialValue: info['configmap_v']})(
+                            <CodeMirrorWrapper 
                             options={{
                               mode: 'shell',
                               theme: 'monokai',
                               lineNumbers: true
-                            }}
-                            onChange={(editor, data, value) => {
                             }}
                           />
                 )}
@@ -115,8 +130,6 @@ class ComForm extends React.Component {
                 ))}
               </Form.Item>
             </Form>
-          {/* </div> */}
-        {/* </div> */}
       </Modal>
     )
   }

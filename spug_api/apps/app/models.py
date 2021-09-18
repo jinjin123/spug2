@@ -139,6 +139,7 @@ class RancherConfigMap(models.Model, ModelMixin):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
 
+
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         return tmp
@@ -155,6 +156,7 @@ class RancherConfigMapVersion(models.Model, ModelMixin):
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
     configMap_v = models.CharField(max_length=100, db_index=True, verbose_name='配置映射内容')
+    old_version = models.IntegerField()
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
