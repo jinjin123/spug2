@@ -24,10 +24,18 @@ class RancherConfigMap extends React.Component{
             title: '无可用环境',
             content: <div>配置依赖应用的运行环境，请在 <a href="/config/environment">环境管理</a> 中创建环境。</div>
           })
-        } 
+        } else {
+          this.updateEnv()
+        }
       })
-    } 
+    } else {
+      this.updateEnv()
+    }
   }
+
+  updateEnv = (env) => {
+    store.env = env || envStore.records[0] || {};
+  };
 
   render(){
       return (

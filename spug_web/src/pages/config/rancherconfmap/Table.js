@@ -18,7 +18,6 @@ class ComTable extends React.Component {
     // if (rsaggStore.records.length === 0) {
     //   rsaggStore.fetchRecords()
     // }
-    console.log(store)
   }
 
   handleDelete = (text) => {
@@ -62,6 +61,7 @@ class ComTable extends React.Component {
               <Action>
                 <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
                 <Action.Button auth="config.src.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+                <Action.Button auth="config.src.edit" onClick={() => store.showForm(info)}>版本</Action.Button>
                 {/* <Action.Link auth="config.src.view_config" to={`/config/setting/src/${info.id}`}>配置</Action.Link> */}
               </Action>
             )}/>

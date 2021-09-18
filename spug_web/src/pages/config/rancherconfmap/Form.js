@@ -8,7 +8,6 @@ import { observer } from 'mobx-react';
 import {Modal, Form, Input, Checkbox,  Row, Col, message} from 'antd';
 import http from 'libs/http';
 import store from './store';
-import {UnControlled as CodeMirror} from 'react-codemirror2';
 import 'codemirror/lib/codemirror.js';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/shell/shell.js';
@@ -21,21 +20,21 @@ import CodeMirrorWrapper from "./CodeMirrorWrapper";
 class ComForm extends React.Component {
   constructor(props) {
     super(props);
-    // this.isModify = store.record.id !== undefined;
+    this.isModify = store.record.id !== undefined;
     this.state = {
       loading: false,
-      envs: this.isModify ? [store.env.id] : []
+      envs: this.isModify ? [store.record.env_id] : []
     }
   }
 
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    formData['o_id'] = store.record.id;
+    formData['old_id'] = store.record.id;
     formData['envs'] = this.state.envs;
     // request = http.post('/api/config/', formData)
 
-    http.post('/api/config/service/', formData)
+    http.put('/api/config/rsconfig/', formData)
       .then(res => {
         message.success('操作成功');
         store.formVisible = false;
@@ -86,12 +85,12 @@ class ComForm extends React.Component {
         </div> */}
             <Form labelCol={{span: 2}} wrapperCol={{span: 22}}>
               <Form.Item required label="Key">
-                {getFieldDecorator('config_k', {initialValue: info['configmap_k']})(
+                {getFieldDecorator('configMap_k', {initialValue: info['configMap_k']})(
                   <Input disabled={true} placeholder=""  />
                 )}
               </Form.Item>
               <Form.Item required label="Value">
-                {this.props.form.getFieldDecorator('config_v', {initialValue: info['configmap_v']})(
+                {this.props.form.getFieldDecorator('configMap_v', {initialValue: info['configMap_v']})(
                             <CodeMirrorWrapper 
                             options={{
                               mode: 'shell',
