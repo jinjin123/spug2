@@ -55,7 +55,7 @@ class ComTable extends React.Component {
           <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
           <Table.Column title="命名空间" dataIndex="namespace"/>
           <Table.Column title="配置文件" dataIndex="configname"/>
-          {/* <Table.Column title="配置文件id" dataIndex="configid"/> */}
+          <Table.Column title="环境" dataIndex="envname"/>
           {hasPermission('config.src.edit|config.src.del|config.src.view_config') && (
             <Table.Column title="操作" render={info => (
               <Action>

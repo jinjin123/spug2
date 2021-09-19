@@ -10,12 +10,33 @@ import http from 'libs/http';
 import store from './store';
 import 'codemirror/lib/codemirror.js';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/shell/shell.js';
+import 'codemirror/mode/yaml/yaml.js';
 import 'codemirror/theme/monokai.css';
+import 'codemirror/addon/scroll/annotatescrollbar.js'
+import 'codemirror/addon/search/matchesonscrollbar.js'
+import 'codemirror/addon/search/match-highlighter.js'
+import 'codemirror/addon/search/jump-to-line.js'
+
+import 'codemirror/addon/dialog/dialog.js'
+import 'codemirror/addon/dialog/dialog.css'
+import 'codemirror/addon/search/searchcursor.js'
+import 'codemirror/addon/search/search.js'
+// 折叠
+import 'codemirror/addon/fold/foldcode.js';  // 代码折叠
+import 'codemirror/addon/fold/foldgutter.js'; // 代码折叠
+import 'codemirror/addon/fold/brace-fold.js'; // 代码折叠
+import 'codemirror/addon/fold/comment-fold.js'; // 代码折叠
+import 'codemirror/addon/lint/lint.js';  // 错误校验
+import 'codemirror/addon/lint/javascript-lint.js';  // js错误校验
+import 'codemirror/addon/lint/yaml-lint.js';
+import 'codemirror/addon/selection/active-line.js';  // 当前行高亮
+
+import 'codemirror/addon/lint/lint.css'  // 代码错误提示
 import styles from './form.module.css';
 import envStore from '../environment/store'
 import './form.css';
 import CodeMirrorWrapper from "./CodeMirrorWrapper";
+window.jsyaml = require('js-yaml')
 @observer
 class ComForm extends React.Component {
   constructor(props) {
@@ -95,10 +116,17 @@ class ComForm extends React.Component {
                 {this.props.form.getFieldDecorator('configMap_v', {initialValue: info['configMap_v']})(
                             <CodeMirrorWrapper 
                             options={{
-                              mode: 'shell',
+                              mode: 'text/yaml',
                               theme: 'monokai',
-                              fontSize: '11px',
+                              smartIndent:true,
+                              foldGutter: true,
+                              lineWrapping: true,
+                              gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+                              matchBrackets:true,
                               lineNumbers: true,
+                              lint:true,
+                              styleActiveLine: true,          // 选中行高亮
+                              indentUnit:4,
                               readOnly:codeRead
                             }}
                           />
