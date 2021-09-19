@@ -30,9 +30,7 @@ class RancherAggMap(View):
         conf = RancherConfigMap.objects.all()
         tmp = []
         for item in conf:
-            data = item.to_dict()
-            data["namespace"] = item.namespace.namespace
-            data["envname"] = item.env.name
+            data = item.to_dict(excludes=("create_by_id","project_id","namespace_id","modify_time"))
             tmp.append(data)
         return json_response(tmp)
 

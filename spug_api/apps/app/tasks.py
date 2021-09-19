@@ -8,8 +8,8 @@ from apps.app.models import RancherNamespace,RancherConfigMap
 
 @app.task
 def get_namespace():
-    url = settings.RANCHER_DEV_URL
-    token = settings.RANCHER_TOKEN
+    url = settings.RANCHER_DEV_NS_URL
+    token = settings.RANCHER_DEV_TOKEN
     kwargs = {
         "url": url,
         "headers": {"Authorization": token, "Content-Type": "application/json"}
@@ -33,7 +33,7 @@ def get_configMap():
     ns = RancherNamespace.objects.all().values("namespace_id")
     for xx in ns:
         url = settings.RANCHER_CONFIGMAP.format(xx["namespace_id"])
-        token = settings.RANCHER_TOKEN
+        token = settings.RANCHER_DEV_TOKEN
         kwargs = {
             "url": url,
             "headers": {"Authorization": token, "Content-Type": "application/json"}
