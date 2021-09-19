@@ -17,6 +17,8 @@ class Store {
   @observable vrecords = [];
 
   @observable f_name;
+  @observable fullmode=false;
+  @observable fullmode_flag=0;
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -38,6 +40,16 @@ class Store {
     .then(res => this.vrecords = res)
     .finally(() => this.isFetching = false)
   }
+  showFullMode = (status = {}) => {
+    if(this.fullmode_flag == 0 ){
+      this.fullmode = !status ? false : true;
+      this.fullmode_flag = 1;
+    }else{
+      this.fullmode_flag=0;
+      this.fullmode=false
+    }
+  }
+
 }
 
 export default new Store()

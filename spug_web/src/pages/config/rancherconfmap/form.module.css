@@ -27,3 +27,10 @@
     width: 40% !important;
     top:0;
 /* }  */
+
+.fullscreen {
+    z-index: 100;
+    position: absolute !important;
+    left: 640px;
+    /* top: -10px; */
+}

@@ -11,7 +11,7 @@ import Footer from './Footer'
 import { Router } from '../libs/router';
 import { updatePermissions} from '../libs';
 import styles from './layout.module.css';
-
+import fullicon from "./Fullscreen.png";
 
 export default class extends React.Component {
   constructor(props) {
@@ -47,3 +47,5 @@ export default class extends React.Component {
     )
   }
 }
+
+export {fullicon}

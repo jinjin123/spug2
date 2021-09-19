@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import {Modal, Form, Input, Checkbox,  Row, Col, message} from 'antd';
+import {Modal, Form, Input, Checkbox,  Row, Col, message, Button} from 'antd';
 import http from 'libs/http';
 import store from './store';
 import 'codemirror/lib/codemirror.js';
@@ -30,12 +30,15 @@ import 'codemirror/addon/lint/lint.js';  // 错误校验
 import 'codemirror/addon/lint/javascript-lint.js';  // js错误校验
 import 'codemirror/addon/lint/yaml-lint.js';
 import 'codemirror/addon/selection/active-line.js';  // 当前行高亮
-
 import 'codemirror/addon/lint/lint.css'  // 代码错误提示
+
+import 'codemirror/addon/display/fullscreen.css';
+import 'codemirror/addon/display/fullscreen.js';
 import styles from './form.module.css';
 import envStore from '../environment/store'
 import './form.css';
 import CodeMirrorWrapper from "./CodeMirrorWrapper";
+import {fullicon} from  'layout'
 window.jsyaml = require('js-yaml')
 @observer
 class ComForm extends React.Component {
@@ -44,10 +47,11 @@ class ComForm extends React.Component {
     this.isModify = store.record.id !== undefined;
     this.state = {
       loading: false,
-      envs: this.isModify ? [store.record.env_id] : []
+      envs: this.isModify ? [store.record.env_id] : [],
+      full: false
     }
-    
   }
+
 
   handleSubmit = () => {
     this.setState({loading: true});
@@ -80,6 +84,7 @@ class ComForm extends React.Component {
     const info = store.record;
     const codeRead = store.codeRead;
     const {envs} = this.state;
+    const fullmode = store.fullmode;
     const {getFieldDecorator} = this.props.form;
     return (
       <Modal
@@ -113,6 +118,7 @@ class ComForm extends React.Component {
                 )}
               </Form.Item>
               <Form.Item required label="Value">
+              <Button size="small" className={styles.fullscreen} onClick={()=> store.showFullMode(true)}><img src={fullicon}/></Button>
                 {this.props.form.getFieldDecorator('configMap_v', {initialValue: info['configMap_v']})(
                             <CodeMirrorWrapper 
                             options={{
@@ -127,6 +133,7 @@ class ComForm extends React.Component {
                               lint:true,
                               styleActiveLine: true,          // 选中行高亮
                               indentUnit:4,
+                              fullScreen: fullmode,
                               readOnly:codeRead
                             }}
                           />
