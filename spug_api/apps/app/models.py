@@ -6,6 +6,7 @@ from libs import ModelMixin, human_datetime
 from apps.account.models import User
 from apps.config.models import Environment
 import json
+from django_mysql.models.fields import SizedTextField
 
 
 class App(models.Model, ModelMixin):
@@ -143,7 +144,7 @@ class RancherConfigMap(models.Model, ModelMixin):
     configname = models.CharField(max_length=100, db_index=True, verbose_name='配置文件名')
     configid = models.CharField(max_length=100,  verbose_name='配置文件更新id')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
-    configMap_v = models.TextField(verbose_name='配置映射内容')
+    configMap_v = SizedTextField(size_class=3,verbose_name='配置映射内容')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -162,7 +163,7 @@ class RancherConfigMapVersion(models.Model, ModelMixin):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
-    configMap_v = models.CharField(max_length=100, db_index=True, verbose_name='配置映射内容')
+    configMap_v = SizedTextField(size_class=3,verbose_name='配置映射内容')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
     old_id = models.IntegerField()
     env_id = models.IntegerField()

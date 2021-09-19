@@ -1,6 +1,8 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+import datetime
+
 from django.views.generic import View
 from django.db.models import F
 from libs import json_response, JsonParser, Argument
@@ -30,6 +32,7 @@ class RancherAggMap(View):
         for item in conf:
             data = item.to_dict()
             data["namespace"] = item.namespace.namespace
+            data["envname"] = item.env.name
             tmp.append(data)
         return json_response(tmp)
 
@@ -147,12 +150,11 @@ class RancherConfManagerView(View):
             config = RancherConfigMap.objects.filter(id=form.old_id)
             if not config:
                 return json_response(error='未找到指定对象')
-            RancherConfigMap.objects.filter(id=form.old_id).update(configMap_v=form.configMap_v)
+            RancherConfigMap.objects.filter(id=form.old_id).update(configMap_v=form.configMap_v,modify_time=datetime.datetime.now())
             envs = form.pop('envs')
             map_obj_v = list(config)[0].configMap_v
             new_v = form.pop("configMap_v")
             for env_id in envs:
-                # RancherConfigMap.objects.create(env_id=env_id,**form)
                 RancherConfigMapVersion.objects.create(env_id=env_id,create_by=request.user,configMap_v=map_obj_v,**form)
 
         return json_response(error=error)
