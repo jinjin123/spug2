@@ -1,0 +1,60 @@
+FROM centos:7
+MAINTAINER chankongching <chankongching@gmail.com>
+
+ENV NGINX_VERSION 1.19
+
+RUN set -x && \
+    yum install -y gcc \
+    cyrus-sasl-devel \
+    unzip \
+    wget \
+    gcc-c++ \
+    autoconf \
+    automake \
+    libtool \
+    libldap2-dev \
+    python-setuptools \
+    make \
+    zlib \
+    zlib-devel \
+    openssl \
+    openssl-devel \
+    libffi-devel \
+    pcre-devel \
+    libxml2 \
+    libxml2-devel \
+    libcurl \
+    libcurl-devel \
+    libpng-devel \
+    libjpeg-devel \
+    freetype-devel \
+    libmcrypt-devel \
+    python-devel \
+    openldap-devel \
+    python-dev \
+    cmake
+
+
+RUN set -x && \
+    mkdir -p /var/www/{html,phpext} && \
+    useradd -r -s /sbin/nologin -d /var/www/html -m -k no www && \
+
+#Download nginx & php
+    mkdir -p /home/nginx-php && cd $_ && \
+    curl -Lk http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | gunzip | tar x -C /home/nginx-php 
+
+RUN set -x && \
+    cd /home/nginx-php/nginx-$NGINX_VERSION && \
+    ./configure --prefix=/usr/local/nginx \
+    --user=www --group=www \
+    --error-log-path=/var/log/nginx_error.log \
+    --http-log-path=/var/log/nginx_access.log \
+    --pid-path=/var/run/nginx.pid \
+    --with-pcre \
+    --with-http_ssl_module \
+    --without-mail_pop3_module \
+    --without-mail_imap_module \
+    --with-http_gzip_static_module && \
+    make && make install
+
+

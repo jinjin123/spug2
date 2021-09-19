@@ -143,7 +143,7 @@ class RancherConfigMap(models.Model, ModelMixin):
     configname = models.CharField(max_length=100, db_index=True, verbose_name='配置文件名')
     configid = models.CharField(max_length=100,  verbose_name='配置文件更新id')
     configMap_k = models.CharField(max_length=100, db_index=True, verbose_name='配置映射键')
-    configMap_v = models.TextField(db_index=True, verbose_name='配置映射内容')
+    configMap_v = models.TextField(verbose_name='配置映射内容')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
