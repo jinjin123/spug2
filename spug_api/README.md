@@ -1,0 +1,2 @@
+- python manage.py updatedb
+- python manage.py user add -u spug -p spug.dev -n 管理员 -s

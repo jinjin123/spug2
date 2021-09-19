@@ -19,6 +19,7 @@ class Store {
   @observable f_name;
   @observable fullmode=false;
   @observable fullmode_flag=0;
+  @observable project;
 
   fetchRecords = () => {
     this.isFetching = true;

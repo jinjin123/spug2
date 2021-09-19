@@ -41,10 +41,13 @@ class RancherConfigMap extends React.Component{
       return (
         <AuthCard auth="config.rancher.view">
           <SearchForm>
-            <SearchForm.Item span={8} title="命名空间名称">
+            <SearchForm.Item span={8} title="项目">
+              <Input allowClear value={store.project} onChange={e => store.project = e.target.value} placeholder="请输入"/>
+            </SearchForm.Item>
+            <SearchForm.Item span={8} title="命名空间">
               <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
             </SearchForm.Item>
-            <SearchForm.Item span={8}>
+            <SearchForm.Item span={2}>
               <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
             </SearchForm.Item>
           </SearchForm>

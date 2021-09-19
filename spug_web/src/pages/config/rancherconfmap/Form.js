@@ -144,9 +144,14 @@ class ComForm extends React.Component {
                       <Input disabled={true} placeholder=""  />
                     )}
               </Form.Item>
-              <Form.Item hidden>
+              <Form.Item label="所属项目">
+                  {getFieldDecorator('project', {initialValue: info['project']})(
+                      <Input disabled={this.isModify} placeholder=""  />
+                    )}
+              </Form.Item>
+              <Form.Item label="命名空间">
                   {getFieldDecorator('namespace', {initialValue: info['namespace']})(
-                      <Input disabled={true} placeholder=""  />
+                      <Input disabled={this.isModify} placeholder=""  />
                     )}
               </Form.Item>
               <Form.Item hidden>
