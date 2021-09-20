@@ -20,13 +20,33 @@ class Store {
   @observable fullmode=false;
   @observable fullmode_flag=0;
   @observable project;
-
+  @observable pjtips = [];
+  @observable pjtip;
+  @observable nstips = [];
+  @observable nstip;
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/config/rsconfagg/')
-      .then(res => this.records = res)
+      .then(res=> {
+        this.records =res
+        if((this.pjtips).length<1){
+          let tmp = [];
+          this.records.map((item) =>{
+            tmp.push(item.project)
+          })
+          this.pjtips = [...new Set(tmp)]
+        }
+        if((this.nstips).length<1){
+          let tmp = [];
+          this.records.map((item) =>{
+            tmp.push(item.namespace)
+          })
+          this.nstips = [...new Set(tmp)]
+        }
+      })
       .finally(() => this.isFetching = false)
   };
+
 
   showForm = (info,status = {}) => {
     this.formVisible = true;
@@ -49,6 +69,11 @@ class Store {
       this.fullmode_flag=0;
       this.fullmode=false
     }
+  }
+  showAddForm = () => {
+    this.formVisible = true;
+    this.record = {};
+    this.codeRead = false;
   }
 
 }

@@ -61,6 +61,7 @@ class ComTable extends React.Component {
           <Table.Column title="配置文件" dataIndex="configname"/>
           <Table.Column title="键" dataIndex="configMap_k"/>
           <Table.Column title="环境" dataIndex="envname"/>
+          <Table.Column title="创建人" dataIndex="create_by"/>
           {hasPermission('config.src.edit|config.src.del|config.src.view_config') && (
             <Table.Column title="操作" render={info => (
               <Action>

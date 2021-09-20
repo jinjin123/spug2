@@ -5,8 +5,9 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import {Modal, Form, Input, Checkbox,  Row, Col, message, Button} from 'antd';
+import { Modal, Form, Input, Checkbox, Row, Col, message, Button,Tooltip} from 'antd';
 import http from 'libs/http';
+// import request from 'libs/request';
 import store from './store';
 import 'codemirror/lib/codemirror.js';
 import 'codemirror/lib/codemirror.css';
@@ -38,7 +39,7 @@ import styles from './form.module.css';
 import envStore from '../environment/store'
 import './form.css';
 import CodeMirrorWrapper from "./CodeMirrorWrapper";
-import {fullicon} from  'layout'
+import { fullicon } from 'layout'
 window.jsyaml = require('js-yaml')
 @observer
 class ComForm extends React.Component {
@@ -54,18 +55,26 @@ class ComForm extends React.Component {
 
 
   handleSubmit = () => {
-    this.setState({loading: true});
+    this.setState({ loading: true });
     const formData = this.props.form.getFieldsValue();
     formData['old_id'] = store.record.id;
     formData['envs'] = this.state.envs;
-    // request = http.post('/api/config/', formData)
-
-    http.put('/api/config/rsconfig/', formData)
+    if(this.isModify){
+      http.put('/api/config/rsconfig/', formData)
       .then(res => {
         message.success('操作成功');
         store.formVisible = false;
         store.fetchRecords()
-      }, () => this.setState({loading: false}))
+      }, () => this.setState({ loading: false }))
+      
+    }else{
+      http.post('/api/config/rsconfig/', formData)
+      .then(res => {
+        message.success('操作成功');
+        store.formVisible = false;
+        store.fetchRecords()
+      }, () => this.setState({ loading: false }))
+    }
   };
 
   handleEnvCheck = (id) => {
@@ -76,27 +85,34 @@ class ComForm extends React.Component {
       } else {
         this.state.envs.push(id);
       }
-      this.setState({envs: this.state.envs})
+      this.setState({ envs: this.state.envs })
     }
   };
+  handlePjTips = e => {
+    store.pjtip = store.pjtips.filter(item=>item.toLowerCase().includes((e.target.value).toLowerCase())).join(",")
+  }
+
+  handleNsTips = e => {
+    store.nstip = store.nstips.filter(item=>item.toLowerCase().includes((e.target.value).toLowerCase())).join(",")
+  }
 
   render() {
     const info = store.record;
     const codeRead = store.codeRead;
-    const {envs} = this.state;
+    const { envs } = this.state;
     const fullmode = store.fullmode;
-    const {getFieldDecorator} = this.props.form;
+    const { getFieldDecorator } = this.props.form;
     return (
       <Modal
-      visible
-      width={800}
-      style={{ float: 'right',top: 0}}
-      wrapClassName={'modalbox'}
-      maskClosable={false}
-      title={store.record.id ? '更新配置' : '新增配置'}
-      onCancel={() => store.formVisible = false}
-      confirmLoading={this.state.loading}
-      onOk={this.handleSubmit}>
+        visible
+        width={800}
+        style={{ float: 'right', top: 0 }}
+        wrapClassName={'modalbox'}
+        maskClosable={false}
+        title={store.record.id ? '更新配置' : '新增配置'}
+        onCancel={() => store.formVisible = false}
+        confirmLoading={this.state.loading}
+        onOk={this.handleSubmit}>
         {/* <div className={styles.ChildBox}> 
           <div className={styles.ChildContent}>
                 <CodeMirror 
@@ -111,68 +127,78 @@ class ComForm extends React.Component {
                           />
           </div>
         </div> */}
-            <Form labelCol={{span: 2}} wrapperCol={{span: 22}}>
-              <Form.Item required label="Key">
-                {getFieldDecorator('configMap_k', {initialValue: info['configMap_k']})(
-                  <Input disabled={true} placeholder=""  />
-                )}
-              </Form.Item>
-              <Form.Item required label="Value">
-              <Button size="small" className={styles.fullscreen} onClick={()=> store.showFullMode(true)}><img src={fullicon}/></Button>
-                {this.props.form.getFieldDecorator('configMap_v', {initialValue: info['configMap_v']})(
-                            <CodeMirrorWrapper 
-                            options={{
-                              mode: 'text/yaml',
-                              theme: 'monokai',
-                              smartIndent:true,
-                              foldGutter: true,
-                              lineWrapping: true,
-                              gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
-                              matchBrackets:true,
-                              lineNumbers: true,
-                              lint:true,
-                              styleActiveLine: true,          // 选中行高亮
-                              indentUnit:4,
-                              fullScreen: fullmode,
-                              readOnly:codeRead
-                            }}
-                          />
-                )}
-              </Form.Item>
-              <Form.Item hidden>
-                  {getFieldDecorator('configname', {initialValue: info['configname']})(
-                      <Input disabled={true} placeholder=""  />
-                    )}
-              </Form.Item>
-              <Form.Item label="所属项目">
-                  {getFieldDecorator('project', {initialValue: info['project']})(
-                      <Input disabled={this.isModify} placeholder=""  />
-                    )}
-              </Form.Item>
-              <Form.Item label="命名空间">
-                  {getFieldDecorator('namespace', {initialValue: info['namespace']})(
-                      <Input disabled={this.isModify} placeholder=""  />
-                    )}
-              </Form.Item>
-              <Form.Item hidden>
-                  {getFieldDecorator('configid', {initialValue: info['configid']})(
-                      <Input disabled={true} placeholder=""  />
-                    )}
-              </Form.Item>
-              <Form.Item label="选择环境">
-                {envStore.records.map((item, index) => (
-                  <Row
-                    key={item.id}
-                    onClick={() => this.handleEnvCheck(item.id)}
-                    style={{cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : ''}}>
-                    <Col span={2}><Checkbox disabled={this.isModify} checked={envs.includes(item.id)}/></Col>
-                    <Col span={4} className={styles.ellipsis}>{item.key}</Col>
-                    <Col span={9} className={styles.ellipsis}>{item.name}</Col>
-                    <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
-                  </Row>
-                ))}
-              </Form.Item>
-            </Form>
+        <Form labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+          <Form.Item required label="Key">
+              {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })(
+                <Input disabled={this.isModify} placeholder="" />
+              )}
+          </Form.Item>
+          <Form.Item required label="Value">
+            <Button size="small" className={styles.fullscreen} onClick={() => store.showFullMode(true)}><img src={fullicon} /></Button>
+            {this.props.form.getFieldDecorator('configMap_v', { initialValue: info['configMap_v'] })(
+              <CodeMirrorWrapper
+                options={{
+                  mode: 'text/yaml',
+                  theme: 'monokai',
+                  smartIndent: true,
+                  foldGutter: true,
+                  lineWrapping: true,
+                  gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+                  matchBrackets: true,
+                  lineNumbers: true,
+                  lint: true,
+                  styleActiveLine: true,          // 选中行高亮
+                  indentUnit: 4,
+                  fullScreen: fullmode,
+                  readOnly: codeRead
+                }}
+              />
+            )}
+          </Form.Item>
+          <Form.Item hidden>
+            {getFieldDecorator('configname', { initialValue: info['configname'] })(
+              <Input disabled={true} placeholder="" />
+            )}
+          </Form.Item>
+          <Form.Item label="所属项目">
+            <Tooltip title={store.pjtip} color={"black"} key={1}>
+              {getFieldDecorator('project', { initialValue: info['project'] })(
+                // <Input disabled={this.isModify} placeholder="" onChange={e => store.pjtips = e.target.value}/>
+                <Input disabled={this.isModify} placeholder="" onChange={this.handlePjTips}/>
+              )}
+            </Tooltip>
+          </Form.Item>
+          <Form.Item label="命名空间">
+            <Tooltip title={store.nstip} color={"black"} key={1}>
+            {getFieldDecorator('namespace', { initialValue: info['namespace'] })(
+              <Input disabled={this.isModify} placeholder=""onChange={this.handleNsTips} />
+            )}
+            </Tooltip>
+          </Form.Item>
+          <Form.Item label="配置文件">
+            {getFieldDecorator('configname', { initialValue: info['configname'] })(
+              <Input disabled={this.isModify} placeholder="" />
+            )}
+          </Form.Item>
+          <Form.Item hidden>
+            {getFieldDecorator('configid', { initialValue: info['configid'] })(
+              <Input disabled={true} placeholder="" />
+            )}
+          </Form.Item>
+          <Form.Item label="选择环境">
+            {envStore.records.map((item, index) => (
+              <Row
+                key={item.id}
+                onClick={() => this.handleEnvCheck(item.id)}
+                style={{ cursor: 'pointer', borderTop: index ? '1px solid #e8e8e8' : '' }}>
+                <Col span={2}><Checkbox disabled={this.isModify} checked={envs.includes(item.id)} /></Col>
+                <Col span={4} className={styles.ellipsis}>{item.key}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.name}</Col>
+                <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
+              </Row>
+            ))}
+          </Form.Item>
+        </Form>
       </Modal>
     )
   }

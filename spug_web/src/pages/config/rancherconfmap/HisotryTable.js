@@ -63,6 +63,7 @@ class HistoryConfig extends React.Component {
             <Table.Column title="命名空间" dataIndex="namespace"/>
             <Table.Column title="配置文件" dataIndex="configname"/>
             <Table.Column title="创建时间" dataIndex="create_time"/>
+            <Table.Column title="创建人" dataIndex="create_by"/>
             {/* <Table.Column title="配置文件id" dataIndex="configid"/> */}
             {hasPermission('config.src.edit|config.src.del|config.src.view_config') && (
               <Table.Column title="操作" render={info => (
