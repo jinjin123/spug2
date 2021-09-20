@@ -181,6 +181,11 @@ class RancherConfigMapVersion(models.Model, ModelMixin):
     old_id = models.IntegerField()
     env_id = models.IntegerField()
 
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['project'] = self.project.project_name
+        tmp['create_by'] = self.create_by.username
+        return tmp
 
     class Meta:
         db_table = 'rancher_configmaphisotry'

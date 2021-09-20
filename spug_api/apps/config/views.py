@@ -5,11 +5,13 @@ import datetime
 
 from django.views.generic import View
 from django.db.models import F
-from libs import json_response, JsonParser, Argument
-from apps.app.models import Deploy,RancherConfigMap,RancherNamespace,RancherConfigMapVersion
+from libs import json_response, JsonParser, Argument,RequestApiAgent
+from apps.app.models import Deploy,RancherConfigMap,RancherNamespace,RancherConfigMapVersion,RancherProject
 from apps.config.models import *
 import json
-
+from django.conf import settings
+import logging
+logger = logging.getLogger('spug_log')
 
 class RancherNsView(View):
     def get(self, request):
@@ -116,26 +118,70 @@ class RancherConfManagerView(View):
             Argument('old_id', type=int, help='老配置id丢失'),
         ).parse(request.GET)
         config = RancherConfigMapVersion.objects.filter(old_id=form.old_id)
-        return json_response(config)
+        tmp = []
+        for item in config:
+            cc = item.to_dict(excludes=("create_by_id","project_id","namespace_id","modify_time"))
+            tmp.append(cc)
+        return json_response(tmp)
 
     def post(self,request):
         form, error = JsonParser(
-            Argument('id', type=int, required=False),
-            Argument('config_k', help='请输入映射key'),
-            Argument('config_v', help='请输入映射value'),
-            Argument('configname', required=False),
-            Argument('namespace', required=False),
-            Argument('configid', required=False),
-            Argument('o_id', required=False),
-            Argument('envs', required=False)
+            # Argument('id', type=int, required=False),
+            Argument('configMap_k',required=True, help='请输入映射key'),
+            Argument('configMap_v',required=True,  help='请输入映射value'),
+            Argument('configname',required=True,help='请输入配置文件名'),
+            Argument('namespace',required=True, help="请输入命名空间"),
+            Argument('project', required=True, help="请输入项目名"),
+            # Argument('configid', required=False),
+            # Argument('o_id', required=False),
+            Argument('envs', type=list, filter=lambda x: len(x), help='请选择环境'),
         ).parse(request.body)
         if error is None:
-            RancherConfigMapVersion.objects.create(created_by=request.user, **form)
+            envs = form.pop('envs')
+            cn = RancherConfigMap.objects.filter(configname=form.configname)
+            if cn:
+              return json_response(error='配置文件名已存在')
+            global kwargs
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"},
+                "data": {},
+            }
+            nstmp = form.pop("namespace")
+            pj = RancherProject.objects.filter(project_name=form.pop("project")).first()
+            ns = RancherNamespace.objects.filter(namespace=nstmp).first()
+            try:
+                for env_id in envs:
+                    tmp = {
+                        "type": "configMap",
+                        "data": {form.configMap_k: form.configMap_v},
+                        "name": form.configname,
+                        "namespaceId": nstmp
+                    }
+                    if env_id == 1:
+                        kwargs["headers"]["Authorization"] = settings.RANCHER_DEV_TOKEN
+                        kwargs["url"] = settings.RANCHER_DEV_ADD_CONFIGMAP.format(pj.project_id)
+                        kwargs["data"] = json.dumps(tmp)
+                        logger.info(msg="rancher configmap create args: " + str(kwargs))
+                        res = json.loads(RequestApiAgent().create(**kwargs))
+                        logger.info(msg="rancher configmap create call: " + json.dumps(res))
+                        RancherConfigMap.objects.create(env_id=env_id, project=pj, namespace=ns, configid=res["id"],create_by=request.user, **form)
+                    if env_id == 2:
+                        kwargs["headers"]["Authorization"] = settings.RANCHER_PRD_TOKEN
+                        kwargs["url"] = settings.RANCHER_PRD_ADD_CONFIGMAP.format(pj.project_id)
+                        kwargs["data"] = json.dumps(tmp)
+                        logger.info(msg="rancher configmap create args: " + str(kwargs))
+                        res = json.loads(RequestApiAgent().create(**kwargs))
+                        logger.info(msg="rancher configmap create call: " + json.dumps(res))
+                        RancherConfigMap.objects.create(env_id=env_id,project=pj, namespace=ns,configid=res["id"],create_by=request.user,**form)
+            except Exception as e:
+                logger.error(kwargs)
+                logger.error("create rancher configmap err: "+ str(e))
         return json_response(error=error)
 
     def put(self,request):
         form, error = JsonParser(
-            # Argument('id', type=int, required=False),
+            Argument('project',  required=False),
             Argument('configMap_k', help='请输入映射key'),
             Argument('configMap_v', help='请输入映射value'),
             Argument('configname', required=False),
@@ -152,8 +198,9 @@ class RancherConfManagerView(View):
             envs = form.pop('envs')
             map_obj_v = list(config)[0].configMap_v
             new_v = form.pop("configMap_v")
+            pj = RancherProject.objects.filter(project_name=form.pop("project")).first()
             for env_id in envs:
-                RancherConfigMapVersion.objects.create(env_id=env_id,create_by=request.user,configMap_v=map_obj_v,**form)
+                RancherConfigMapVersion.objects.create(env_id=env_id,project=pj,create_by=request.user,configMap_v=map_obj_v,**form)
 
         return json_response(error=error)
 

@@ -32,7 +32,7 @@ def get_namespace():
 def get_configMap():
     ns = RancherNamespace.objects.all().values("namespace_id")
     for xx in ns:
-        url = settings.RANCHER_CONFIGMAP.format(xx["namespace_id"])
+        url = settings.RANCHER_DEV_CONFIGMAP.format(xx["namespace_id"])
         token = settings.RANCHER_DEV_TOKEN
         kwargs = {
             "url": url,

@@ -64,7 +64,7 @@ class Mytest(unittest.TestCase):
         ns = RancherProject.objects.all().values("project_id")
         for xx in ns:
             # print(x["namespace_id"])
-            url = settings.RANCHER_CONFIGMAP.format(xx["project_id"])
+            url = settings.RANCHER_DEV_CONFIGMAP.format(xx["project_id"])
             token = settings.RANCHER_DEV_TOKEN
             kwargs = {
                 "url": url,
@@ -96,22 +96,23 @@ class Mytest(unittest.TestCase):
                 print(x)
                 print(e)
                 return e
-    # def test(self):
-    #     ns = RancherNamespace.objects.all().values("namespace_id")
-    #     print(list(ns))
-    #     conf = RancherConfigMap.objects.filter(id=381)
-    #     print(list(conf)[0].configMap_v)
-    #     tmp= []
-    #     for x in conf:
-    #         tmp.append({
-    #             "id":x.id,
-    #             "configid": x.configid,
-    #             "configname": x.configname,
-    #             "namespace": x.namespace.namespace,
-    #             "configmap_k": x.configMap_k,
-    #             "configmap_v": x.configMap_v,
-    #         })
-    #         # print(x.namespace.namespace)
-    #         print(tmp)
+    def test(self):
+        ns = RancherNamespace.objects.all().values("namespace_id")
+        print(list(ns))
+        conf = RancherNamespace.objects.filter(namespace='default').first()
+        print(conf)
+        print(list(conf)[0].project_id)
+        tmp= []
+        for x in conf:
+            tmp.append({
+                "id":x.id,
+                "configid": x.configid,
+                "configname": x.configname,
+                "namespace": x.namespace.namespace,
+                "configmap_k": x.configMap_k,
+                "configmap_v": x.configMap_v,
+            })
+            # print(x.namespace.namespace)
+            print(tmp)
 
 
