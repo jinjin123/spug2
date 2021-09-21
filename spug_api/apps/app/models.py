@@ -189,6 +189,7 @@ class RancherConfigMap(models.Model, ModelMixin):
         tmp['namespace'] = self.namespace.namespace
         tmp['envname'] = self.env.name
         tmp['project'] = self.project.project_name
+        tmp['project_id'] = self.project.project_id
         tmp['create_by'] = self.create_by.username
         return tmp
 
@@ -213,6 +214,7 @@ class RancherConfigMapVersion(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['project'] = self.project.project_name
+        tmp['project_id'] = self.project.project_id
         tmp['create_by'] = self.create_by.username
         return tmp
 
