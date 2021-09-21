@@ -32,7 +32,7 @@ class RancherAggMap(View):
         conf = RancherConfigMap.objects.all()
         tmp = []
         for item in conf:
-            data = item.to_dict(excludes=("create_by_id","project_id","namespace_id","modify_time"))
+            data = item.to_dict(excludes=("create_by_id","namespace_id","modify_time"))
             tmp.append(data)
         return json_response(tmp)
 
@@ -120,7 +120,7 @@ class RancherConfManagerView(View):
         config = RancherConfigMapVersion.objects.filter(old_id=form.old_id)
         tmp = []
         for item in config:
-            cc = item.to_dict(excludes=("create_by_id","project_id","namespace_id","modify_time"))
+            cc = item.to_dict(excludes=("create_by_id","namespace_id","modify_time"))
             tmp.append(cc)
         return json_response(tmp)
 
@@ -182,12 +182,13 @@ class RancherConfManagerView(View):
 
     def put(self,request):
         form, error = JsonParser(
-            Argument('project',  required=False),
+            Argument('project',  required=True),
+            Argument('project_id',  required=True),
             Argument('configMap_k', help='请输入映射key'),
             Argument('configMap_v', help='请输入映射value'),
             Argument('configname', required=False),
             Argument('namespace', required=False),
-            Argument('configid', required=False),
+            Argument('configid', required=True),
             Argument('old_id', required=False),
             Argument('envs', type=list, filter=lambda x: len(x), help='请选择环境'),
         ).parse(request.body)
@@ -195,6 +196,19 @@ class RancherConfManagerView(View):
             config = RancherConfigMap.objects.filter(id=form.old_id)
             if not config:
                 return json_response(error='未找到指定对象')
+            project_id = form.pop("project_id")
+            kwargs = {
+                "url": settings.RANCHER_DEV_PUT_CONFIGMAP.format(project_id,form.configid),
+                "headers": {"Authorization": settings.RANCHER_DEV_TOKEN, "Content-Type": "application/json"},
+                "data": json.dumps({"data":{form.configMap_k:form.configMap_v}})
+            }
+            try:
+                res = RequestApiAgent().put(**kwargs).content
+                logger.info(msg="rancher update configmap call: " + str(res))
+            except Exception as  e:
+                logger.error("rancher update configmap faild: "+ str(e))
+                return json_response(error=str(e))
+
             RancherConfigMap.objects.filter(id=form.old_id).update(configMap_v=form.configMap_v,modify_time=datetime.datetime.now())
             envs = form.pop('envs')
             map_obj_v = list(config)[0].configMap_v

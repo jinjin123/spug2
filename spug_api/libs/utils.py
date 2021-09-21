@@ -185,7 +185,7 @@ class RequestApiAgent:
         return self.send_request("close", kwargs).content
 
     def put(self, *args, **kwargs):
-        return self.send_request("put", kwargs).content
+        return self.send_request("put", kwargs)
         # return self.send_request("put", kwargs).text
 
     def list(self, *args, **kwargs):
