@@ -1,7 +1,7 @@
 from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
-from apps.app.models import RancherNamespace,RancherConfigMap,RancherProject
+from apps.app.models import RancherNamespace,RancherConfigMap,RancherProject,RancherDeployment
 import unittest
 
 
@@ -96,6 +96,51 @@ class Mytest(unittest.TestCase):
                 print(x)
                 print(e)
                 return e
+
+    def test_get_rancher_svc(self):
+        pj= RancherProject.objects.all().values("project_id")
+        for xx in pj:
+            url = settings.RANCHER_DEV_SVC_URL.format(xx["project_id"])
+            token = settings.RANCHER_DEV_TOKEN
+            kwargs = {
+                "url": url,
+                "headers": {"Authorization": token,"Content-Type": "application/json"}
+            }
+            try:
+                res = RequestApiAgent().list(**kwargs)
+                datalist = (json.loads(res.content))["data"]
+                svc_bulk = []
+                global x, v_name
+                for x in datalist:
+                    if x.get("volumes"):
+                       volumes_v = x["volumes"]
+                       for v_v in volumes_v:
+                            if v_v.get("configMap"):
+                                v_name = v_v["configMap"]["name"]
+                            else:
+                                v_name = "0"
+                    else:
+                       volumes_v = 0
+                       v_name = "0"
+                    svc_bulk.append(RancherDeployment(
+                            deployname=x["name"],
+                            deployid=x["id"],
+                            deploy_type=x["type"],
+                            createts=x["createdTS"],
+                            state=x["state"],
+                            replica=x.get("scale",0),
+                            volumes_detail=volumes_v,
+                            volumes=v_name,
+                            namespace=RancherNamespace.objects.filter(namespace=x["namespaceId"]).first(),
+                            project=RancherProject.objects.filter(project_id=x["projectId"]).first()
+                         )
+                    )
+
+                RancherDeployment.objects.bulk_create(svc_bulk)
+            except Exception as e:
+                print(x)
+                print(e)
+                return e
     def test(self):
         ns = RancherNamespace.objects.all().values("namespace_id")
         print(list(ns))
@@ -114,5 +159,6 @@ class Mytest(unittest.TestCase):
             })
             # print(x.namespace.namespace)
             print(tmp)
+
 
 

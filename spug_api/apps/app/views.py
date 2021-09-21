@@ -5,12 +5,15 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment
 from apps.config.models import Config
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 import subprocess
 import json
 import os
+from libs.utils import RequestApiAgent
+import logging
+logger = logging.getLogger('spug_log')
 
 
 class AppView(View):
@@ -171,6 +174,44 @@ class DeployView(View):
             repo_dir = os.path.join(settings.REPOS_DIR, str(form.id))
             subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
+
+class RancherSvcView(View):
+    def get(self,request):
+        svc = RancherDeployment.objects.all()
+        tmp = []
+        for item in svc:
+            data = item.to_dict(excludes=("create_by_id", "project_id", "namespace_id", "modify_time"))
+            tmp.append(data)
+        return json_response(tmp)
+
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('project_id', required=True, help='项目id'),
+            Argument('deployid', required=True, help='应用id'),
+            Argument('env_id',required=True, help='环境id'),
+        ).parse(request.body)
+        if error is None:
+            #todo: db -> env rancher url
+            kwargs = {
+                "url": settings.RANCHER_DEV_SVC_REDO_URL.format(form.project_id,form.deployid),
+                "headers": {"Authorization": settings.RANCHER_DEV_TOKEN, "Content-Type": "application/json"}
+            }
+            try:
+                res = RequestApiAgent().create(**kwargs)
+                logger.info(msg="rancher redploy call: " + str(res))
+            except Exception as  e:
+                logger.error("redeploy pod faild: "+ str(e))
+                return json_response(error=str(e))
+
+        return json_response(error=error)
+
+
+
+    def put(self,request):
+        pass
+
+    def delete(self,request):
+        pass
 
 
 # class DeployRancherNsView(View):

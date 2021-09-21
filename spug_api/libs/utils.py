@@ -178,7 +178,7 @@ class RequestApiAgent:
 
     def create(self, *args, **kwargs):
         # return self.send_request("create", kwargs).json()
-        return self.send_request("create", kwargs).content
+        return self.send_request("create", kwargs)
 
     def close(self, *args, **kwargs):
         # return self.send_request("close", kwargs).json()

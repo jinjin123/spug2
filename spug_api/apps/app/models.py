@@ -140,6 +140,35 @@ class RancherNamespace(models.Model, ModelMixin):
         db_table = 'rancher_namespace'
         unique_together = ("env", "namespace","project")
 
+class RancherDeployment(models.Model, ModelMixin):
+    project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")
+    namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='所属命名空间')
+    deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname')
+    deployid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一')
+    deploy_type = models.CharField(max_length=80, db_index=True, verbose_name='部署类型')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    createts = models.BigIntegerField(verbose_name="创建时间戳用来计算差异过去的时间回滚")
+    state = models.CharField(max_length=80, db_index=True, verbose_name='状态')
+    replica = models.IntegerField(default=1, db_index=True, verbose_name='副本scale伸缩')
+    volumes_detail= SizedTextField(size_class=3, verbose_name='配置映射卷list')
+    volumes = models.CharField(max_length=100, db_index=True, verbose_name='关联数据卷')
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['namespace'] = self.namespace.namespace
+        tmp['envname'] = self.env.name
+        tmp['project'] = self.project.project_name
+        tmp['project_id'] = self.project.project_id
+        tmp['create_by'] = self.create_by.username
+        return tmp
+
+    class Meta:
+        db_table = 'rancher_deployment'
+        unique_together = ("env", "deployname","deployid","namespace","project")
+
 
 class RancherConfigMap(models.Model, ModelMixin):
     project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")

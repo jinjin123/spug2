@@ -163,7 +163,7 @@ class RancherConfManagerView(View):
                         kwargs["url"] = settings.RANCHER_DEV_ADD_CONFIGMAP.format(pj.project_id)
                         kwargs["data"] = json.dumps(tmp)
                         logger.info(msg="rancher configmap create args: " + str(kwargs))
-                        res = json.loads(RequestApiAgent().create(**kwargs))
+                        res = json.loads(RequestApiAgent().create(**kwargs).content)
                         logger.info(msg="rancher configmap create call: " + json.dumps(res))
                         RancherConfigMap.objects.create(env_id=env_id, project=pj, namespace=ns, configid=res["id"],create_by=request.user, **form)
                     if env_id == 2:
@@ -171,12 +171,13 @@ class RancherConfManagerView(View):
                         kwargs["url"] = settings.RANCHER_PRD_ADD_CONFIGMAP.format(pj.project_id)
                         kwargs["data"] = json.dumps(tmp)
                         logger.info(msg="rancher configmap create args: " + str(kwargs))
-                        res = json.loads(RequestApiAgent().create(**kwargs))
+                        res = json.loads(RequestApiAgent().create(**kwargs).contnet)
                         logger.info(msg="rancher configmap create call: " + json.dumps(res))
                         RancherConfigMap.objects.create(env_id=env_id,project=pj, namespace=ns,configid=res["id"],create_by=request.user,**form)
             except Exception as e:
                 logger.error(kwargs)
                 logger.error("create rancher configmap err: "+ str(e))
+                return json_response(error=str(e))
         return json_response(error=error)
 
     def put(self,request):
