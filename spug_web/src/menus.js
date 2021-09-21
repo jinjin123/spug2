@@ -16,6 +16,7 @@ export default [
     icon: 'flag', title: '应用发布', auth: 'deploy.app.view|deploy.request.view|deploy.rancher.view', child: [
       {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app'},
       {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request'},
+      {title: 'rancher应用管理', auth: 'deploy.app.view', path: '/deploy/rancher'},
     ]
   },
   {icon: 'schedule', title: '任务计划', auth: 'schedule.schedule.view', path: '/schedule'},
@@ -24,7 +25,7 @@ export default [
       {title: '环境管理', auth: 'config.env.view', path: '/config/environment'},
       {title: '服务配置', auth: 'config.src.view', path: '/config/service'},
       {title: '应用配置', auth: 'config.app.view', path: '/config/app'},
-      {title: 'rancher配置', auth: 'config.rancher.view', path: '/config/rancherconf'},
+      {title: 'rancher数据卷配置', auth: 'config.rancher.view', path: '/config/rancherconf'},
     ]
   },
   {icon: 'monitor', title: '监控中心', auth: 'monitor.monitor.view', path: '/monitor'},

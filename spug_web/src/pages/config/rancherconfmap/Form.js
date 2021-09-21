@@ -185,6 +185,11 @@ class ComForm extends React.Component {
               <Input disabled={true} placeholder="" />
             )}
           </Form.Item>
+          <Form.Item hidden>
+            {getFieldDecorator('project_id', { initialValue: info['project_id'] })(
+              <Input disabled={true} placeholder="" />
+            )}
+          </Form.Item>
           <Form.Item label="选择环境">
             {envStore.records.map((item, index) => (
               <Row

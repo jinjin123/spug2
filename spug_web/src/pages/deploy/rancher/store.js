@@ -7,7 +7,7 @@ import { observable, computed } from "mobx";
 import http from 'libs/http';
 
 class Store {
-  @observable records = {};
+  @observable records = [];
   @observable record = {};
   @observable deploy = {};
   @observable page = 0;
@@ -21,64 +21,30 @@ class Store {
 
   @observable f_name;
   @observable f_desc;
-
-  @computed get currentRecord() {
-    return this.records[`a${this.app_id}`]
-  }
+  @observable project;
+  @observable ns;
+  @observable app;
+  @observable envname;
+  @observable volume;
+  // @observable loadings = [];
 
   fetchRecords = () => {
     this.isFetching = true;
-    http.get('/api/app/')
-      .then(res => {
-        const tmp = {};
-        for (let item of res) {
-          tmp[`a${item.id}`] = item
-        }
-        this.records = tmp
-      })
+    return http.get('/api/app/deploy/svc')
+      .then(res => this.records = res)
       .finally(() => this.isFetching = false)
   };
 
-  loadDeploys = (app_id) => {
-    return http.get('/api/app/deploy/', {params: {app_id}})
-      .then(res => this.records[`a${app_id}`]['deploys'] = res)
-  };
-
-  showForm = (e, info) => {
-    if (e) e.stopPropagation();
-    this.record = info || {};
-    this.formVisible = true;
-  };
-
-  showExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
-    if (e) e.stopPropagation();
-    this.page = 0;
-    this.app_id = app_id;
-    this.isReadOnly = isReadOnly
-    if (info) {
-      if (info.extend === '1') {
-        this.ext1Visible = true
-      } else {
-        this.ext2Visible = true
-      }
-      isClone && delete info.id;
-      this.deploy = info
-    } else {
-      this.addVisible = true;
-    }
-  };
-
-  addHost = () => {
-    this.deploy['host_ids'].push(undefined)
-  };
-
-  editHost = (index, v) => {
-    this.deploy['host_ids'][index] = v
-  };
-
-  delHost = (index) => {
-    this.deploy['host_ids'].splice(index, 1)
-  }
+  // enterLoading = index => {
+  //   const newLoadings = [this.loadings];
+  //   newLoadings[index] = true;
+  //   this.loadings = newLoadings;
+  //   setTimeout(() => {
+  //     const newLoadings = [this.loadings];
+  //     newLoadings[index] = false;
+  //     this.loadings = newLoadings;
+  //   }, 6000);
+  // };
 }
 
 export default new Store()

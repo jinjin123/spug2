@@ -42,6 +42,9 @@ class ComTable extends React.Component {
     if (store.project) {
       data = data.filter(item => item['project'].toLowerCase().includes(store.project.toLowerCase()))
     }
+    if (store.configname) {
+      data = data.filter(item => item['configname'].toLowerCase().includes(store.configname.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table
@@ -58,7 +61,7 @@ class ComTable extends React.Component {
           <Table.Column title="序号" key="series" render={(_, __, index) => index + 1}/>
           <Table.Column title="所属项目" dataIndex="project"/>
           <Table.Column title="命名空间" dataIndex="namespace"/>
-          <Table.Column title="配置文件" dataIndex="configname"/>
+          <Table.Column title="数据卷名" dataIndex="configname"/>
           <Table.Column title="键" dataIndex="configMap_k"/>
           <Table.Column title="环境" dataIndex="envname"/>
           <Table.Column title="创建人" dataIndex="create_by"/>
