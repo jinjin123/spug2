@@ -35,16 +35,6 @@ class Store {
       .finally(() => this.isFetching = false)
   };
 
-  // enterLoading = index => {
-  //   const newLoadings = [this.loadings];
-  //   newLoadings[index] = true;
-  //   this.loadings = newLoadings;
-  //   setTimeout(() => {
-  //     const newLoadings = [this.loadings];
-  //     newLoadings[index] = false;
-  //     this.loadings = newLoadings;
-  //   }, 6000);
-  // };
 }
 
 export default new Store()

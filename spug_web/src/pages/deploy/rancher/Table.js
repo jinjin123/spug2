@@ -103,9 +103,9 @@ class ComTable extends React.Component {
             <Column title="操作" render={info => (
               <Action>
                 <Action.Button auth="deploy.src.edit" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)}>重新部署</Action.Button>
-                <Action.Button auth="deploy.src.del" onClick={() => this.handleDelete(info)}>回滚</Action.Button>
-                <Action.Button auth="deploy.src.edit" onClick={() => store.showHistory(info)}>伸缩</Action.Button>
-                <Action.Button auth="deploy.src.edit" onClick={() => store.showHistory(info)}>终端</Action.Button>
+                <Action.Button auth="deploy.src.del" >回滚</Action.Button>
+                <Action.Button auth="deploy.src.edit" >伸缩</Action.Button>
+                <Action.Button auth="deploy.src.edit" >终端</Action.Button>
               </Action>
             )}/>
           )}
