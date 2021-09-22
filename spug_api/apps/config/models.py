@@ -20,6 +20,14 @@ class Environment(models.Model, ModelMixin):
         db_table = 'environments'
         ordering = ('-id',)
 
+class RancherApiConfig(models.Model,ModelMixin):
+    url = models.CharField(max_length=255,verbose_name="API url")
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT,db_index=True,verbose_name="dev/prod")
+    token = models.CharField(max_length=255,null=True,db_index=True,verbose_name="token/default test")
+    label = models.CharField(max_length=80,db_index=True,verbose_name="action tag")
+
+    class Meta:
+        db_table = 'rancher_api'
 
 class Service(models.Model, ModelMixin):
     name = models.CharField(max_length=50)

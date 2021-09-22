@@ -9,7 +9,7 @@ DATABASES = {
         'NAME': 'spug',
         'USER': 'spug',
         'PASSWORD': 'spug.dev',
-        'HOST': '192.168.50.146',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
         # 'OPTIONS': {
         #     'unix_socket': '/var/lib/mysql/mysql.sock',

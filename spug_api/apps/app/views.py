@@ -6,7 +6,7 @@ from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment
-from apps.config.models import Config
+from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 import subprocess
 import json
@@ -188,19 +188,29 @@ class RancherSvcView(View):
         form, error = JsonParser(
             Argument('project_id', required=True, help='项目id'),
             Argument('deployid', required=True, help='应用id'),
-            Argument('env_id',required=True, help='环境id'),
+            Argument('env_id',type=int,required=True, help='环境id'),
         ).parse(request.body)
         if error is None:
-            #todo: db -> env rancher url
             kwargs = {
-                "url": settings.RANCHER_DEV_SVC_REDO_URL.format(form.project_id,form.deployid),
-                "headers": {"Authorization": settings.RANCHER_DEV_TOKEN, "Content-Type": "application/json"}
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
             try:
-                res = RequestApiAgent().create(**kwargs)
-                logger.info(msg="rancher redploy call: " + str(res))
+                logger.info(msg="#######redeploy pod start ########")
+                if form.env_id == 1:
+                    Action = RancherApiConfig.objects.filter(env_id=1, label="REDOSVC").first()
+                    kwargs["headers"]["Authorization"] = Action.token
+                    kwargs["url"] = (Action.url).format(form.project_id,form.deployid)
+                    res = RequestApiAgent().create(**kwargs)
+                    logger.info(msg="#####rancher redploy dev call:###### " + str(res.status_code))
+                if form.env_id == 2:
+                    Action = RancherApiConfig.objects.filter(env_id=2, label="REDOSVC").first()
+                    kwargs["headers"]["Authorization"] = Action.token
+                    kwargs["url"] = (Action.url).format(form.project_id,form.deployid)
+                    res = RequestApiAgent().create(**kwargs)
+                    logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
             except Exception as  e:
-                logger.error("redeploy pod faild: "+ str(e))
+                logger.error("#######redeploy pod faild: ########"+ str(e))
                 return json_response(error=str(e))
 
         return json_response(error=error)

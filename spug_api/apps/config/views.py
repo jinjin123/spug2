@@ -151,24 +151,26 @@ class RancherConfManagerView(View):
             pj = RancherProject.objects.filter(project_name=form.pop("project")).first()
             ns = RancherNamespace.objects.filter(namespace=nstmp).first()
             try:
+                tmp = {
+                    "type": "configMap",
+                    "data": {form.configMap_k: form.configMap_v},
+                    "name": form.configname,
+                    "namespaceId": nstmp
+                }
                 for env_id in envs:
-                    tmp = {
-                        "type": "configMap",
-                        "data": {form.configMap_k: form.configMap_v},
-                        "name": form.configname,
-                        "namespaceId": nstmp
-                    }
                     if env_id == 1:
-                        kwargs["headers"]["Authorization"] = settings.RANCHER_DEV_TOKEN
-                        kwargs["url"] = settings.RANCHER_DEV_ADD_CONFIGMAP.format(pj.project_id)
+                        Action = RancherApiConfig.objects.filter(env_id=1,label="ADDCONFIGMAP").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(pj.project_id)
                         kwargs["data"] = json.dumps(tmp)
                         logger.info(msg="rancher configmap create args: " + str(kwargs))
                         res = json.loads(RequestApiAgent().create(**kwargs).content)
                         logger.info(msg="rancher configmap create call: " + json.dumps(res))
                         RancherConfigMap.objects.create(env_id=env_id, project=pj, namespace=ns, configid=res["id"],create_by=request.user, **form)
                     if env_id == 2:
-                        kwargs["headers"]["Authorization"] = settings.RANCHER_PRD_TOKEN
-                        kwargs["url"] = settings.RANCHER_PRD_ADD_CONFIGMAP.format(pj.project_id)
+                        Action = RancherApiConfig.objects.filter(env_id=2,label="ADDCONFIGMAP").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(pj.project_id)
                         kwargs["data"] = json.dumps(tmp)
                         logger.info(msg="rancher configmap create args: " + str(kwargs))
                         res = json.loads(RequestApiAgent().create(**kwargs).contnet)
@@ -198,24 +200,34 @@ class RancherConfManagerView(View):
                 return json_response(error='未找到指定对象')
             project_id = form.pop("project_id")
             kwargs = {
-                "url": settings.RANCHER_DEV_PUT_CONFIGMAP.format(project_id,form.configid),
-                "headers": {"Authorization": settings.RANCHER_DEV_TOKEN, "Content-Type": "application/json"},
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"},
                 "data": json.dumps({"data":{form.configMap_k:form.configMap_v}})
             }
-            try:
-                res = RequestApiAgent().put(**kwargs).content
-                logger.info(msg="rancher update configmap call: " + str(res))
-            except Exception as  e:
-                logger.error("rancher update configmap faild: "+ str(e))
-                return json_response(error=str(e))
 
             RancherConfigMap.objects.filter(id=form.old_id).update(configMap_v=form.configMap_v,modify_time=datetime.datetime.now())
             envs = form.pop('envs')
             map_obj_v = list(config)[0].configMap_v
             new_v = form.pop("configMap_v")
             pj = RancherProject.objects.filter(project_name=form.pop("project")).first()
-            for env_id in envs:
-                RancherConfigMapVersion.objects.create(env_id=env_id,project=pj,create_by=request.user,configMap_v=map_obj_v,**form)
+            try:
+                for env_id in envs:
+                    if env_id == 1:
+                        Action = RancherApiConfig.objects.filter(env_id=1, label="PUTCONFIGMAP").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(project_id,form.configid)
+                        res = RequestApiAgent().put(**kwargs).content
+                        logger.info(msg="rancher update dev  configmap call: " + str(res))
+                    if env_id == 2:
+                        Action = RancherApiConfig.objects.filter(env_id=2, label="PUTCONFIGMAP").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(project_id,form.configid)
+                        res = RequestApiAgent().put(**kwargs).content
+                        logger.info(msg="rancher update prod  configmap call: " + str(res))
+
+                    RancherConfigMapVersion.objects.create(env_id=env_id,project=pj,create_by=request.user,configMap_v=map_obj_v,**form)
+            except Exception as  e:
+                logger.error("rancher update configmap faild: " + str(e))
 
         return json_response(error=error)
 
