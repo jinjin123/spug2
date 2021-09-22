@@ -25,6 +25,7 @@ class Store {
   @observable nstips = [];
   @observable nstip;
   @observable configname;
+  @observable envname;
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/config/rsconfagg/')

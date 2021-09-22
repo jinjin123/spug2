@@ -54,6 +54,9 @@ class RancherConfigMap extends React.Component{
             <SearchForm.Item span={4} title="数据卷名">
               <Input allowClear value={store.configname} onChange={e => store.configname = (e.target.value).trim()} placeholder="请输入"/>
             </SearchForm.Item>
+            <SearchForm.Item span={4} title="环境">
+              <Input allowClear value={store.envname} onChange={e => store.envname = (e.target.value).trim()} placeholder="请输入"/>
+            </SearchForm.Item>
             <SearchForm.Item span={2}>
               <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
             </SearchForm.Item>

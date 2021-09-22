@@ -45,6 +45,9 @@ class ComTable extends React.Component {
     if (store.configname) {
       data = data.filter(item => item['configname'].toLowerCase().includes(store.configname.toLowerCase()))
     }
+    if (store.envname) {
+      data = data.filter(item => item['envname'].toLowerCase().includes(store.envname.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table
