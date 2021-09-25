@@ -122,11 +122,23 @@ class Mytest(unittest.TestCase):
                     else:
                        volumes_v = 0
                        v_name = "0"
+                    if x.get("containers"):
+                        cbox = x.get("containers")
+                        img = [cc["image"] for cc in cbox]
+                    if x.get("publicEndpoints"):
+                        pp = x.get("publicEndpoints")
+                        pubsvc = [{"address":x["addresses"],"port":x["port"] , "svcname": x["serviceId"]} for x in pp ]
+                    else:
+                        pubsvc = "0"
+
+
                     svc_bulk.append(RancherDeployment(
                             deployname=x["name"],
                             deployid=x["id"],
                             deploy_type=x["type"],
                             createts=x["createdTS"],
+                            img=img[0],
+                            pubsvc=pubsvc,
                             state=x["state"],
                             replica=x.get("scale",0),
                             volumes_detail=volumes_v,

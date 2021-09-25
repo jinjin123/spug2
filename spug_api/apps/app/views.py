@@ -203,12 +203,18 @@ class RancherSvcView(View):
                     kwargs["url"] = (Action.url).format(form.project_id,form.deployid)
                     res = RequestApiAgent().create(**kwargs)
                     logger.info(msg="#####rancher redploy dev call:###### " + str(res.status_code))
+                    if res.status_code != 200:
+                        logger.error(msg="#####rancher redploy dev call:###### " + str(res))
+                        return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                 if form.env_id == 2:
                     Action = RancherApiConfig.objects.filter(env_id=2, label="REDOSVC").first()
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = (Action.url).format(form.project_id,form.deployid)
                     res = RequestApiAgent().create(**kwargs)
                     logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
+                    if res.status_code != 200:
+                        logger.error(msg="#####rancher redploy prod call:###### " + str(res))
+                        return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
             except Exception as  e:
                 logger.error("#######redeploy pod faild: ########"+ str(e))
                 return json_response(error=str(e))

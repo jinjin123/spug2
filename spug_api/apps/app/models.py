@@ -38,6 +38,10 @@ class Deploy(models.Model, ModelMixin):
         ('1', '常规发布'),
         ('2', '自定义发布'),
     )
+    PUBTAG = (
+        ('1', '主机发布'),
+        ('2', 'rancher发布'),
+    )
     app = models.ForeignKey(App, on_delete=models.PROTECT)
     env = models.ForeignKey(Environment, on_delete=models.PROTECT)
     host_ids = models.TextField()
@@ -49,6 +53,7 @@ class Deploy(models.Model, ModelMixin):
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)
     updated_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+    pub_tag = models.CharField(max_length=2, choices=PUBTAG)
 
     @property
     def extend_obj(self):
@@ -144,8 +149,10 @@ class RancherDeployment(models.Model, ModelMixin):
     project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")
     namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='所属命名空间')
     deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname')
+    img = models.CharField(max_length=255,  verbose_name='部署img')
+    pubsvc = models.CharField(max_length=300, default="0", verbose_name='暴露端口与服务地址')
     deployid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一')
-    deploy_type = models.CharField(max_length=80, db_index=True, verbose_name='部署类型')
+    deploy_type = models.CharField(max_length=80,default="0", db_index=True, verbose_name='部署类型')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     createts = models.BigIntegerField(verbose_name="创建时间戳用来计算差异过去的时间回滚")

@@ -8,7 +8,7 @@ from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 from libs import json_response, JsonParser, Argument, human_datetime, human_time
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy, DeployExtend2
+from apps.app.models import Deploy, DeployExtend2,App
 from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
@@ -156,6 +156,46 @@ class RequestView(View):
                 return json_response(count)
             else:
                 return json_response(error='请至少使用一个删除条件')
+        return json_response(error=error)
+
+class RequestRancherDeployView(View):
+    def post(self, request):
+        form, error = JsonParser(
+            # Argument('id', type=int, required=False),
+            Argument('deployid',  help='缺少必要参数'),
+            Argument('app_name', help='请输申请应用标题'),
+            Argument('update_img', help='镜像丢失'),
+            Argument('env_id', help='环境丢失'),
+        ).parse(request.body)
+        if error is None:
+            deploy_app = App.objects.filter(key=form.app_name).first()
+            if not deploy_app:
+                App.objects.create(
+                    name=form.app_name,
+                    key=form.app_name,
+                    created_by=request.user
+                )
+            deploy = Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first()
+            if not deploy:
+                Deploy.objects.create(
+                    app=App.objects.filter(key=form.app_name).first(),
+                    env_id=form.env_id,
+                    host_ids=[],
+                    is_audit=1,
+                    extend=2,
+                    rst_notify='{"mode": "0"}',
+                    created_by=request.user,
+                    pub_tag=2
+                )
+            DeployRequest.objects.create(
+                created_by=request.user,
+                name=form.app_name,
+                type=1,
+                extra='[null]',
+                host_ids='[]',
+                status=1,
+                deploy=Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first(),
+            )
         return json_response(error=error)
 
 
