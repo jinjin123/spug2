@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ant-design/icons": "^2.1.1",
     "@antv/data-set": "^0.10.2",
     "ace-builds": "^1.4.7",
-    "antd": "^3.25.0",
     "axios": "^0.21.1",
     "bizcharts": "^3.5.6",
     "codemirror": "^5.62.3",
@@ -48,7 +46,9 @@
     ]
   },
   "devDependencies": {
+    "@ant-design/icons": "^2.1.1",
     "@babel/plugin-proposal-decorators": "^7.7.0",
+    "antd": "^3.26.14",
     "babel-plugin-import": "^1.12.2",
     "customize-cra": "^0.8.0",
     "react-app-rewired": "^2.1.5"

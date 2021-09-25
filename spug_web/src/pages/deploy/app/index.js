@@ -12,6 +12,7 @@ import ComForm from './Form';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import AddSelect from './AddSelect';
+// import AddRancherSelect from './AddRancherSelect';
 import store from './store';
 
 export default observer(function () {
@@ -34,6 +35,7 @@ export default observer(function () {
       <ComTable/>
       {store.formVisible && <ComForm />}
       {store.addVisible && <AddSelect />}
+      {/* {store.addRancherVisible && <AddRancherSelect />} */}
       {store.ext1Visible &&  <Ext1Form />}
       {store.ext2Visible &&  <Ext2Form />}
     </AuthCard>

@@ -18,23 +18,25 @@ export default observer(function Ext2Setup1() {
     setEnvs(ids.filter(x => x !== store.deploy.env_id))
   }
 
-  useEffect(() => {
-    if (store.currentRecord['deploys'] === undefined) {
-      store.loadDeploys(store.app_id).then(updateEnvs)
-    } else {
-      updateEnvs()
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (store.currentRecord['deploys'] === undefined) {
+  //     store.loadDeploys(store.app_id).then(updateEnvs)
+  //   } else {
+  //     updateEnvs()
+  //   }
+  // }, [])
 
-  const info = store.deploy;
+  const info = store.record;
+  console.log(info)
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="发布环境">
         <Col span={16}>
-          <Select disabled={store.isReadOnly} value={info.env_id} onChange={v => info.env_id = v} placeholder="请选择发布环境">
-            {envStore.records.map(item => (
+          <Select disabled value={info["env_id"]} onChange={v => info.env_id = v} placeholder="请选择发布环境">
+            {/* {envStore.records.map(item => (
               <Select.Option disabled={envs.includes(item.id)} value={item.id} key={item.id}>{item.name}</Select.Option>
-            ))}
+            ))} */}
+            <Select.Option disabled value={info["env_id"]} key={info.env_id}>{info["envname"]}</Select.Option>
           </Select>
         </Col>
         <Col span={6} offset={2}>
@@ -43,13 +45,15 @@ export default observer(function Ext2Setup1() {
       </Form.Item>
       <Form.Item label="发布审核">
         <Switch
-          disabled={store.isReadOnly}
+          disabled
+          defaultChecked
           checkedChildren="开启"
           unCheckedChildren="关闭"
-          checked={info['is_audit']}
-          onChange={v => info['is_audit'] = v}/>
+          checked={info['is_audit']=true}
+          // onChange={v => info['is_audit'] = v}
+          />
       </Form.Item>
-      <Form.Item label="消息通知" extra={<span>
+      {/* <Form.Item label="消息通知" extra={<span>
         应用审核及发布成功或失败结果通知，
         <a target="_blank" rel="noopener noreferrer"
            href="https://spug.cc/docs/install-error/#%E9%92%89%E9%92%89%E6%94%B6%E4%B8%8D%E5%88%B0%E9%80%9A%E7%9F%A5%EF%BC%9F">钉钉收不到通知？</a>
@@ -64,11 +68,11 @@ export default observer(function Ext2Setup1() {
             <Select.Option value="2">Webhook</Select.Option>
           </Select>
         )}
-               disabled={store.isReadOnly || info['rst_notify']['mode'] === '0'}
-               value={info['rst_notify']['value']}
-               onChange={e => info['rst_notify']['value'] = e.target.value}
-               placeholder="请输入"/>
-      </Form.Item>
+        disabled={store.isReadOnly || info['rst_notify']['mode'] === '0'}
+        value={info['rst_notify']['value']}
+        onChange={e => info['rst_notify']['value'] = e.target.value}
+        placeholder="请输入"/>
+      </Form.Item> */}
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
           type="primary"

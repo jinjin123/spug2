@@ -155,7 +155,7 @@ class ComForm extends React.Component {
               />
             )}
           </Form.Item>
-          <Form.Item hidden>
+          <Form.Item hidden={true}>
             {getFieldDecorator('configname', { initialValue: info['configname'] })(
               <Input disabled={true} placeholder="" />
             )}
@@ -180,12 +180,12 @@ class ComForm extends React.Component {
               <Input disabled={this.isModify} placeholder="" />
             )}
           </Form.Item>
-          <Form.Item hidden>
+          <Form.Item hidden={true}>
             {getFieldDecorator('configid', { initialValue: info['configid'] })(
               <Input disabled={true} placeholder="" />
             )}
           </Form.Item>
-          <Form.Item hidden>
+          <Form.Item hidden={true}>
             {getFieldDecorator('project_id', { initialValue: info['project_id'] })(
               <Input disabled={true} placeholder="" />
             )}

@@ -30,7 +30,7 @@ export default observer(function Ext2From() {
       footer={null}>
       <Steps current={store.page} className={styles.steps}>
         <Steps.Step key={0} title="基本配置"/>
-        <Steps.Step key={1} title="发布主机"/>
+        <Steps.Step key={1} title={store.rancherPublish ? "发布参数" : "发布主机"}/>
         <Steps.Step key={2} title="执行动作"/>
       </Steps>
       {store.page === 0 && <Setup1/>}

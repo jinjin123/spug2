@@ -16,8 +16,10 @@ class Store {
   @observable isFetching = false;
   @observable formVisible = false;
   @observable addVisible = false;
+  @observable addRancherVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable rancherPublish = false;
 
   @observable f_name;
   @observable f_desc;
@@ -65,6 +67,24 @@ class Store {
       this.deploy = info
     } else {
       this.addVisible = true;
+    }
+  };
+  showRancerExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
+    if (e) e.stopPropagation();
+    this.page = 0;
+    this.app_id = app_id;
+    this.isReadOnly = isReadOnly
+    if (info) {
+      if (info.extend === '1') {
+        this.ext1Visible = true
+      } else {
+        this.ext2Visible = true
+      }
+      isClone && delete info.id;
+      this.deploy = info
+    } else {
+      this.addRancherVisible = true;
+      this.rancherPublish = true;
     }
   };
 

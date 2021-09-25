@@ -10,19 +10,50 @@ import { hasHostPermission } from 'libs';
 import store from './store';
 import hostStore from 'pages/host/store';
 import styles from './index.module.css';
-
+// import svcStore from 'pages/deploy/rancher/store';
 @observer
 class Ext2Setup2 extends React.Component {
   componentDidMount() {
-    if (hostStore.records.length === 0) {
+    if (hostStore.records.length === 0 && !store.rancherPublish ) {
       hostStore.fetchRecords()
     }
+    // if(svcStore.records.length ===0 && store.rancherPublish){
+    //   svcStore.fetchRecords()
+    // }
   }
 
   render() {
     const info = store.deploy;
     return (
-      <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+      // store.rancherPublish ?
+      // <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
+      //   <Form.Item required label="所属项目">
+      //     {info['host_ids'].map((id, index) => (
+      //       <React.Fragment key={index}>
+      //         <Select
+      //           value={id}
+      //           showSearch
+      //           disabled={store.isReadOnly}
+      //           placeholder="请选择"
+      //           optionFilterProp="children"
+      //           style={{width: '80%', marginRight: 10}}
+      //           filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+      //           onChange={v => store.editHost(index, v)}>
+      //           {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (
+      //             <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>
+      //               {`${item.name}(${item['hostname']}:${item['port']})`}
+      //             </Select.Option>
+      //           ))}
+      //         </Select>
+      //         {!store.isReadOnly && info['host_ids'].length > 1 && (
+      //           <Icon className={styles.delIcon} type="minus-circle-o" onClick={() => store.delHost(index)}/>
+      //         )}
+      //       </React.Fragment>
+      //     ))}
+      //   </Form.Item>
+      //   </Form>
+      // :
+        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item required label="发布目标主机">
           {info['host_ids'].map((id, index) => (
             <React.Fragment key={index}>
@@ -57,7 +88,7 @@ class Ext2Setup2 extends React.Component {
                   onClick={() => store.page += 1}>下一步</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
-      </Form>
+      </Form> 
     )
   }
 }

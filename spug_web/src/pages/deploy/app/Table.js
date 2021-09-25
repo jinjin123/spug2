@@ -153,6 +153,7 @@ class ComTable extends React.Component {
         {hasPermission('deploy.app.edit|deploy.app.del') && (
           <Table.Column width={260} title="操作" render={info => (
             <Action>
+              <Action.Button auth="deploy.app.edit" onClick={e => store.showRancerExtForm(e, info.id)}>新建rancher应用发布</Action.Button>
               <Action.Button auth="deploy.app.edit" onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
               <Action.Button auth="deploy.app.edit" onClick={e => this.handleClone(e, info.id)}>克隆发布</Action.Button>
               <Action.Button auth="deploy.app.edit" onClick={e => store.showForm(e, info)}>编辑</Action.Button>

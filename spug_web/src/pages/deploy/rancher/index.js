@@ -6,16 +6,12 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Input, Button,Select } from 'antd';
-import { SearchForm, AuthDiv, AuthCard } from 'components';
+import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
 import ComTable from './Table';
-import ComForm from './Form';
-import Ext1Form from './Ext1Form';
-import Ext2Form from './Ext2Form';
-import AddSelect from './AddSelect';
 import store from './store';
-import nsStore from 'pages/config/namespace/store';
-import confStore from 'pages/config/configmap/store';
-
+import DeployForm from './DeployForm';
+import AddRancherSelect from './AddRancherSelect';
+import Ext2Form from './Ext2Form';
 @observer
 class Rancher extends  React.Component {
   constructor(props){
@@ -26,15 +22,6 @@ class Rancher extends  React.Component {
       }
   }
   
-  componentDidMount(){
-    // if (nsStore.records.length === 0) {
-    //   nsStore.fetchRecords()
-    // }
-    // if (confStore.records.length === 0) {
-    //   confStore.fetchRecords()
-    // }
-   
-  }
  
   render(){
     return (
@@ -55,8 +42,15 @@ class Rancher extends  React.Component {
             <SearchForm.Item span={3} title="环境">
               <Input allowClear value={store.envname} onChange={e => store.envname = (e.target.value).trim()} placeholder="请输入"/>
             </SearchForm.Item>
+            <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+              <AuthButton auth="deploy.rancher.edit_config" 
+                          type="primary" icon="plus" onClick={() => store.showAddForm()}>部署服务</AuthButton>
+            </SearchForm.Item>
         </SearchForm>
         <ComTable/>
+        {store.deployForm && <DeployForm/>}
+        {store.addRancherVisible && <AddRancherSelect />}
+        {store.ext2Visible &&  <Ext2Form />}
       </AuthCard>
     )
   }

@@ -5,37 +5,37 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Steps } from 'antd';
+import { Modal, Steps,Form } from 'antd';
 import styles from './index.module.css';
 import Setup1 from './Ext2Setup1';
 import Setup2 from './Ext2Setup2';
 import Setup3 from './Ext2Setup3';
 import store from './store';
 
-export default observer(function Ext2From() {
-  const appName = store.currentRecord.name;
-  let title = `自定义发布 - ${appName}`;
-  if (store.deploy.id) {
-    store.isReadOnly ? title = '查看' + title : title = '编辑' + title;
-  } else {
-    title = '新建' + title
+@observer
+class Ext2From extends React.Component {
+  render(){
+    const appName = store.record.deployname;
+    let title = `常规发布 - ${appName}`;
+    return (
+      <Modal
+        visible
+        width={900}
+        maskClosable={false}
+        title={title}
+        onCancel={() => store.ext2Visible = false}
+        footer={null}>
+        <Steps current={store.page} className={styles.steps}>
+          <Steps.Step key={0} title="基本配置"/>
+          <Steps.Step key={1} title="发布参数"/>
+          <Steps.Step key={2} title="关联配置修改"/>
+        </Steps>
+        {store.page === 0 && <Setup1/>}
+        {store.page === 1 && <Setup2/>}
+        {store.page === 2 && <Setup3/>}
+      </Modal>
+    )
   }
-  return (
-    <Modal
-      visible
-      width={900}
-      maskClosable={false}
-      title={title}
-      onCancel={() => store.ext2Visible = false}
-      footer={null}>
-      <Steps current={store.page} className={styles.steps}>
-        <Steps.Step key={0} title="基本配置"/>
-        <Steps.Step key={1} title="发布主机"/>
-        <Steps.Step key={2} title="执行动作"/>
-      </Steps>
-      {store.page === 0 && <Setup1/>}
-      {store.page === 1 && <Setup2/>}
-      {store.page === 2 && <Setup3/>}
-    </Modal>
-  )
-})
+}
+
+export default Form.create()(Ext2From)
