@@ -10,4 +10,5 @@ urlpatterns = [
     path('request/rancher/', RequestRancherDeployView.as_view()),
     path('request/upload/', do_upload),
     path('request/<int:r_id>/', RequestDetailView.as_view()),
+    path('request/rancher/publish', RancherPublishView.as_view()),
 ]

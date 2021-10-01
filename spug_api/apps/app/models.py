@@ -120,9 +120,243 @@ class DeployExtend2(models.Model, ModelMixin):
         db_table = 'deploy_extend2'
 
 
+# class CMDB(models.Model, ModelMixin):
+#     STATUS_CHOOSE = (
+#         ('Y', 'up'),
+#         ('N', 'down'),
+#     )
+#     top_project = models.CharField(max_length=128, verbose_name="顶级项目", null=True)
+#     top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
+#     ipaddress = models.CharField(max_length=15, verbose_name="ip", null=True)
+#     service_pack = models.CharField(max_length=500, verbose_name="包含哪些服务类型包'',''", null=True)
+#     osType = models.CharField(max_length=155,verbose_name='系统类型', null=True)
+#     osVerion = models.CharField(max_length=100,verbose_name='发行版本', null=True)
+#     coreVerion = models.CharField(max_length=100,verbose_name='内核版本', null=True)
+#     disks_format = models.CharField(max_length=255,verbose_name='数据盘格式', null=True)
+#     disks = models.IntegerField(verbose_name='数据盘数量', null=True)
+#     disks_capacity = models.CharField(max_length=255, verbose_name="数据盘容量'',''", null=True)
+#     memory = models.IntegerField(verbose_name='内存GB', null=True)
+#     cpus = models.IntegerField(default=0, verbose_name='cpu数量', null=True)
+#     cpucore = models.IntegerField(default=0, verbose_name='cpu物理核', null=True)
+#     serial_num = models.CharField(verbose_name='序列号', max_length=100, null=True)
+#     status = models.CharField(choices=STATUS_CHOOSE, default='Y', verbose_name='同步监控状态(关机释放下线)', null=True)
+#     host_name = models.CharField(max_length=100, verbose_name='主机名', null=True)
+#     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
+#     host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
+#     ext_config1 = models.CharField(max_length=255, verbose_name='扩展信息', null=True)
+#     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
+#     opsper = models.CharField(max_length=200, verbose_name='运维负责人' ,null=True)
+#     zone = models.CharField(max_length=50,verbose_name="分组", null=True)
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
+
+# class ProjectService(models.Model, ModelMixin):
+#     STATUS_CHOOSE = (
+#         ('Y', 'up'),
+#         ('N', 'down'),
+#     )
+#     top_project = models.ForeignKey(CMDB, on_delete=models.PROTECT, verbose_name="所属顶级项目")
+#     project_name = models.CharField(db_index=True, max_length=80, verbose_name='rancher项目名称唯一', null=True)
+#     project_id = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+#     namespace = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+#     svcname = models.CharField(max_length=80, db_index=True, verbose_name='部署服务名称(在rancher下必须唯一)', null=True)
+#     img = models.CharField(max_length=255, verbose_name='部署镜像', null=True)
+#     deployid = models.CharField(max_length=80, db_index=True, verbose_name='发布部署app唯一', null=True)
+#     replica = models.IntegerField(default=1, db_index=True, verbose_name='pod副本scale伸缩', null=True)
+#     configName = models.CharField(max_length=200, verbose_name='配置映射卷名')
+#     configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]')
+#     pvcMap = models.CharField(max_length=200, verbose_name='pvc配置映射卷名称')
+#     pvcMapSize = models.CharField(max_length=200, verbose_name='pvc配置映射卷大小')
+#     rancher_url = models.CharField(max_length=200, verbose_name="rancher前缀url", null=True)
+#     status = models.CharField(choices=STATUS_CHOOSE, default='Y', verbose_name='同步服务监控状态(关机释放下线)', null=True)
+#     env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
+#     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
+#     opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
+#     depends_svc = models.CharField(max_length=500, verbose_name="依赖服务或组件多余注释", null=True)
+
+class tmp(models.Model, ModelMixin):
+    STATUS_CHOOSE = (
+        ('Y', 'up'),
+        ('N', 'down'),
+    )
+    top_project = models.CharField(max_length=100,  verbose_name="所属顶级项目id",null=True)
+    project_name = models.CharField(max_length=80,db_index=True, verbose_name='rancher项目名称唯一', null=True)
+    project_id = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    namespace = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+    namespaceid = models.CharField(max_length=50, verbose_name='rancher命名空间id唯一', null=True)
+    deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署服务名称(在rancher下必须唯一)', null=True)
+    deployid = models.CharField(max_length=80, db_index=True, verbose_name='发布部署app唯一', null=True)
+    img = models.CharField(max_length=255, verbose_name='部署镜像', null=True)
+    replica = models.IntegerField(default=1, db_index=True, verbose_name='pod副本scale伸缩', null=True)
+    configName = models.CharField(max_length=200, verbose_name='配置映射卷名',null=True)
+    configId = models.CharField(max_length=200, verbose_name='配置映射id',null=True)
+    configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]',null=True)
+    pvcName = models.CharField(max_length=200, verbose_name='pvc配置映射卷名称',null=True)
+    pvcid = models.CharField(max_length=100, verbose_name='pvcid',null=True)
+    pvcSize = models.CharField(max_length=200, verbose_name='pvc配置映射卷大小',null=True)
+    pvcMode = models.CharField(max_length=200, verbose_name='pvc访问模式',null=True)
+    rancher_url = models.CharField(max_length=200, verbose_name="rancher前缀url", null=True)
+    status = models.CharField(max_length=10,choices=STATUS_CHOOSE, default='Y', verbose_name='同步服务监控状态(关机释放下线)', null=True)
+    env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT,default=2)
+    developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
+    opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
+    depends_svc = models.CharField(max_length=500, verbose_name="依赖服务或组件多余注释", null=True)
+
+    class Meta:
+        db_table = 'tmp'
+
+
+# class ProjectServiceHistory(ProjectService, ModelMixin):
+#     service = models.ForeignKey(ProjectService, on_delete=models.PROTECT, verbose_name="所属服务")
+#
+#     class Meta(ProjectService.Meta):
+#         db_table = 'service_history'
+
+
+# class ProjectServiceApproval(ProjectService, ModelMixin):
+#     STATUS_CHOOSE = (
+#         ('-3', '发布异常'),
+#         ('-1', '已驳回'),
+#         ('0', '待审核'),
+#         ('1', '待发布'),
+#         ('2', '发布中'),
+#         ('3', '发布成功'),
+#     )
+#     TYPES = (
+#         ('1', '迭代发布'),
+#         ('2', 'bug发布'),
+#         ('3', '紧急发布'),
+#         ('4', '回滚发布')
+#     )
+#     service = models.ForeignKey(ProjectService, on_delete=models.PROTECT, verbose_name="所属服务")
+#     status = models.CharField(choices=STATUS_CHOOSE, default='0', verbose_name='审核状态', null=True)
+#     type = models.CharField(max_length=2, choices=TYPES, default='1', verbose_name="发布类型")
+#     handler = models.CharField(max_length=120,verbose_name='审核人')
+#     approval_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='审核时间')
+#
+#     class Meta(ProjectService.Meta):
+#         db_table = 'service_publish'
+#
+#
+# class Alarm(models.Model, ModelMixin):
+#     LEVEL_CHOOSE = (
+#         (0, '致命'),
+#         (1, '严重'),
+#         (2, '一般'),
+#         (3, '警告'),
+#         (4, '信息'),
+#     )
+#     ORIGIN_CHOOSE = (
+#         (0, 'zabbix'),
+#         (1, 'promethues'),
+#     )
+#     NOTIFY_TYPE_CHOOSE = (
+#         (0, 'sms;mail'),
+#         (1, 'sms'),
+#         (2, 'mail'),
+#         (3, 'sms;mail;wechat'),
+#     )
+#     RECOVERY_STATUS_CHOOSE = (
+#         (0, '未处理'),
+#         (1, '处理中'),
+#         (2, '忽略'),
+#         (3, '已解决'),
+#     )
+#     INDICATOR_CHOOSE = (
+#         (0, '网络'),
+#         (1, '程序'),
+#         (2, '硬件'),
+#         (3, '性能'),
+#         (5, '容器DCE'),
+#         (6, '容器k8s'),
+#         (7, '中间件'),
+#         (8, 'devops'),
+#         (9, '其他'),
+#         (10, '安全'),
+#         (11, '存储'),
+#     )
+#     STATUS_CHOOSE = (
+#         (0, '已发送'),
+#         (1, '未上报'),
+#         (2, '已确认'),
+#     )
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#     recovery_time = models.DateTimeField(null=True, db_index=True, verbose_name='恢复时间')
+#     ip = models.CharField(max_length=15, verbose_name='服务器ip')
+#     module = models.CharField(db_index=True, max_length=128, verbose_name='业务')
+#     opsper = models.CharField(max_length=64, null=True, verbose_name='运维负责人')
+#     developer = models.CharField(max_length=64, null=True, verbose_name='开发负责人')
+#     level = models.IntegerField(choices=LEVEL_CHOOSE, verbose_name='告警级别')
+#     origin = models.IntegerField(choices=ORIGIN_CHOOSE, verbose_name='告警来源')
+#     indicator = models.IntegerField(choices=INDICATOR_CHOOSE, verbose_name='告警指标')
+#     notify_type = models.IntegerField(choices=NOTIFY_TYPE_CHOOSE, default=0, verbose_name='通知方式')
+#     status = models.IntegerField(choices=STATUS_CHOOSE, default=1, verbose_name='发送状态')
+#     recovery_status = models.IntegerField(choices=RECOVERY_STATUS_CHOOSE, default=0, verbose_name='处理状态')
+#     sound_count = models.IntegerField(default=0, verbose_name='发声次数')
+#     hostname = models.CharField(default='', max_length=255, verbose_name='主机名')
+#     detail = models.TextField(null=True, verbose_name='告警详情')
+#     device_type = models.CharField(default='其他', max_length=255, verbose_name='设备类型')
+#     handler = models.CharField(max_length=100,null=True,verbose_name='处理人')
+#
+# class Event(models.Model,ModelMixin):
+#     LEVEL_CHOOSE = (
+#         (0, '普通事件'),
+#         (1, '严重故障'),
+#     )
+#     event_name = models.CharField(null=True, max_length=255, verbose_name='事件名')
+#     level = models.IntegerField(choices=LEVEL_CHOOSE, verbose_name='事件级别')
+#     report = models.CharField(null=True,verbose_name="报告文件名/上传报告服务器路径")
+#     handler = models.CharField(max_length=100,null=True,verbose_name='处理人')
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#
+# class ServicesBackup(models.Model,ModelMixin):
+#     host = models.ForeignKey(CMDB,on_delete=models.PROTECT, verbose_name="所属主机备份脚本")
+#     script_name = models.CharField(max_length=128,verbose_name="脚本名")
+#     script_content = models.TextField(verbose_name="脚本内容")
+#     crontime = models.CharField(max_length=128, verbose_name="定时周期")
+#     backupstatus = models.CharField(max_length=128, verbose_name="状态")
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#
+# class CheckReport(models.Model,ModelMixin):
+#     CHECK_CHOOSE = (
+#         (0,'未审核'),
+#         (1, '已审核')
+#     )
+#     system = models.CharField(max_length=128,verbose_name="巡检系统")
+#     system_url = models.CharField(max_length=128,verbose_name="巡检系统连接")
+#     screen = models.CharField(max_length=255,verbose_name="巡检截图/文件名")
+#     sys_check = models.CharField(choices=CHECK_CHOOSE,verbose_name="审核")
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+#
+# class BrowserTag(models.Model,ModelMixin):
+#     name = models.CharField(max_length=128,verbose_name="标签名")
+#     url = models.TextField(verbose_name="标签地址")
+#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+
 class RancherProject(models.Model, ModelMixin):
-    project_name = models.CharField(db_index=True, max_length=80, verbose_name='项目名称')
-    project_id = models.CharField(max_length=50, verbose_name='项目id')
+    # top_project = models.ForeignKey(CMDB, on_delete=models.PROTECT, verbose_name="所属顶级项目", )
+    project_name = models.CharField(db_index=True, max_length=80, verbose_name='rancher项目名称')
+    project_id = models.CharField(max_length=50, verbose_name='rancher项目id')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -130,7 +364,7 @@ class RancherProject(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_project'
-        unique_together = ("env", "project_name","project_id")
+        unique_together = ("env", "project_name", "project_id")
 
 
 class RancherNamespace(models.Model, ModelMixin):
@@ -143,22 +377,23 @@ class RancherNamespace(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_namespace'
-        unique_together = ("env", "namespace","project")
+        unique_together = ("env", "namespace", "project")
+
 
 class RancherDeployment(models.Model, ModelMixin):
     project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")
     namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='所属命名空间')
     deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname')
-    img = models.CharField(max_length=255,  verbose_name='部署img')
+    img = models.CharField(max_length=255, verbose_name='部署img')
     pubsvc = models.CharField(max_length=300, default="0", verbose_name='暴露端口与服务地址')
     deployid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一')
-    deploy_type = models.CharField(max_length=80,default="0", db_index=True, verbose_name='部署类型')
+    deploy_type = models.CharField(max_length=80, default="0", db_index=True, verbose_name='部署类型')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     createts = models.BigIntegerField(verbose_name="创建时间戳用来计算差异过去的时间回滚")
     state = models.CharField(max_length=80, db_index=True, verbose_name='状态')
     replica = models.IntegerField(default=1, db_index=True, verbose_name='副本scale伸缩')
-    volumes_detail= SizedTextField(size_class=3, verbose_name='配置映射卷list')
+    volumes_detail = SizedTextField(size_class=3, verbose_name='配置映射卷list')
     volumes = models.CharField(max_length=100, db_index=True, verbose_name='关联数据卷')
     env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -174,7 +409,36 @@ class RancherDeployment(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_deployment'
-        unique_together = ("env", "deployname","deployid","namespace","project")
+        unique_together = ("env", "deployname", "deployid", "namespace", "project")
+
+
+class RancherSvcPubStandby(models.Model, ModelMixin):
+    app = models.ForeignKey(App, on_delete=models.PROTECT)
+    createts = models.BigIntegerField(verbose_name="创建时间戳用来计算差异过去的时间回滚")
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    deploy_type = models.CharField(max_length=80, default="0", db_index=True, verbose_name='部署类型')
+    deployid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一')
+    deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname')
+    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
+    img = models.CharField(max_length=255, verbose_name='部署img')
+    project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")
+    namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='所属命名空间')
+    update_img = models.BooleanField()
+    is_audit = models.BooleanField()
+    replica = models.IntegerField(default=1, db_index=True, verbose_name='副本scale伸缩')
+    volumes_detail = SizedTextField(size_class=3, verbose_name='配置映射卷list')
+    volumes = models.CharField(max_length=100, db_index=True, verbose_name='关联数据卷')
+    pubsvc = models.CharField(max_length=300, default="0", verbose_name='暴露端口与服务地址')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['project_id'] = self.project.project_id
+        return tmp
+
+    class Meta:
+        db_table = 'rancher_publish'
 
 
 class RancherConfigMap(models.Model, ModelMixin):
@@ -190,7 +454,6 @@ class RancherConfigMap(models.Model, ModelMixin):
     env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
     old_id = models.IntegerField(default=0)
 
-
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['namespace'] = self.namespace.namespace
@@ -202,7 +465,7 @@ class RancherConfigMap(models.Model, ModelMixin):
 
     class Meta:
         db_table = 'rancher_configmap'
-        unique_together = ("env", "configname","namespace")
+        unique_together = ("env", "configname", "namespace")
 
 
 class RancherConfigMapVersion(models.Model, ModelMixin):

@@ -6,9 +6,11 @@ from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
-from libs import json_response, JsonParser, Argument, human_datetime, human_time
+
+from apps.config.models import RancherApiConfig
+from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy, DeployExtend2,App
+from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace
 from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
@@ -18,6 +20,9 @@ import subprocess
 import json
 import uuid
 import os
+import logging
+logger = logging.getLogger('spug_log')
+
 
 
 class RequestView(View):
@@ -34,7 +39,8 @@ class RequestView(View):
                 app_name=F('deploy__app__name'),
                 app_host_ids=F('deploy__host_ids'),
                 app_extend=F('deploy__extend'),
-                created_by_user=F('created_by__nickname')):
+                created_by_user=F('created_by__nickname'),
+                pub_tag=F('deploy__pub_tag')):
             tmp = item.to_dict()
             tmp['env_id'] = item.env_id
             tmp['env_name'] = item.env_name
@@ -46,6 +52,7 @@ class RequestView(View):
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
+            tmp['pub_tag'] = item.pub_tag
             data.append(tmp)
         return json_response(data)
 
@@ -158,20 +165,73 @@ class RequestView(View):
                 return json_response(error='请至少使用一个删除条件')
         return json_response(error=error)
 
+class RancherPublishView(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('app_id',  help='app_id'),
+            Argument('app_name', help='请输申请应用标题'),
+            Argument('env_id',type=int,help='环境丢失'),
+            Argument('deploy_id', type=int, help='环境丢失'),
+        ).parse(request.body)
+        if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            publish_args = (RancherSvcPubStandby.objects.filter(app_id=form.app_id).first()).to_dict()
+            try:
+                logger.info(msg="#######redeploy pod start ########")
+                if form.env_id == 1:
+                    if publish_args['update_img'] : #1 only config update #0 img update
+                        Action = RancherApiConfig.objects.filter(env_id=1, label="REDOSVC").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(publish_args['project_id'], publish_args['deployid'])
+                        res = RequestApiAgent().create(**kwargs)
+                        logger.info(msg="#####rancher redploy dev call:###### " + str(res.status_code))
+                        if res.status_code != 200:
+                            logger.error(msg="#####rancher redploy dev call:###### " + str(res))
+                            return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                        DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3)
+                # if form.env_id == 2:
+                #     Action = RancherApiConfig.objects.filter(env_id=2, label="REDOSVC").first()
+                #     kwargs["headers"]["Authorization"] = Action.token
+                #     kwargs["url"] = (Action.url).format(form.project_id, form.deployid)
+                #     res = RequestApiAgent().create(**kwargs)
+                #     logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
+                #     if res.status_code != 200:
+                #         logger.error(msg="#####rancher redploy prod call:###### " + str(res))
+                #         return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+            except Exception as  e:
+                print(e)
+                logger.error("#######redeploy pod faild: ########" + str(e))
+                return json_response(error=str(e))
+        return json_response(error=error)
+
+
 class RequestRancherDeployView(View):
     def post(self, request):
         form, error = JsonParser(
-            # Argument('id', type=int, required=False),
+            Argument('deployname',  help='deployname'),
             Argument('deployid',  help='缺少必要参数'),
             Argument('app_name', help='请输申请应用标题'),
             Argument('update_img', help='镜像丢失'),
             Argument('env_id', help='环境丢失'),
+            Argument('createts', help='unix time'),
+            Argument('project_id', help='project_id'),
+            Argument('img', help='img'),
+            Argument('namespace', help='namespace'),
+            Argument('is_audit', help='is_audit'),
+            Argument('pubsvc', help='pubsvc'),
+            Argument('replica', help='replica'),
+            Argument('deploy_type', help='deploy_type'),
+            Argument('volumes', help='volumes'),
+            Argument('volumes_detail', help='volumes_detail'),
         ).parse(request.body)
         if error is None:
             deploy_app = App.objects.filter(key=form.app_name).first()
             if not deploy_app:
                 App.objects.create(
-                    name=form.app_name,
+                    name=form.deployname,
                     key=form.app_name,
                     created_by=request.user
                 )
@@ -193,8 +253,15 @@ class RequestRancherDeployView(View):
                 type=1,
                 extra='[null]',
                 host_ids='[]',
-                status=1,
+                status=0,
                 deploy=Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first(),
+            )
+            RancherSvcPubStandby.objects.create(
+                create_by=request.user,
+                app=App.objects.filter(key=form.pop('app_name')).first(),
+                project=RancherProject.objects.filter(project_id=form.pop('project_id')).first(),
+                namespace=RancherNamespace.objects.filter(namespace=form.pop('namespace')).first(),
+                **form
             )
         return json_response(error=error)
 

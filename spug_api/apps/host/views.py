@@ -25,7 +25,8 @@ class HostView(View):
             if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
-        hosts = Host.objects.filter(deleted_by_id__isnull=True)
+        # hosts = Host.objects.filter(deleted_by_id__isnull=True)
+        hosts = Host.objects.all()
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
         return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
@@ -34,25 +35,25 @@ class HostView(View):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('zone', help='请输入主机类型'),
-            Argument('name', help='请输主机名称'),
+            # Argument('name', help='请输主机名称'),
             Argument('username', handler=str.strip, help='请输入登录用户名'),
-            Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
+            Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
             Argument('desc', required=False),
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
+            if valid_ssh(form.ipaddress, form.port, form.username, password=form.pop('password'),
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
-
+            # form.pop("created_by")
             if form.id:
                 Host.objects.filter(pk=form.pop('id')).update(**form)
-            elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
-                return json_response(error=f'已存在的主机名称【{form.name}】')
+            # elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
+            #     return json_response(error=f'已存在的主机名称【{form.name}】')
             else:
-                host = Host.objects.create(created_by=request.user, **form)
+                host = Host.objects.create(create_by=request.user, **form)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)
