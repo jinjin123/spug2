@@ -15,14 +15,42 @@ class ComTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false
+      loading: false,
+      loadings: [],
     }
   }
 
   componentDidMount() {
     store.fetchRecords()
   }
+  enterLoading = (raw,index) => {
+    console.log(raw)
+    this.setState(({ loadings }) => {
+      const newLoadings = [...loadings];
+      newLoadings["load"] = true;
+      newLoadings["id"] = raw.id;
+      return {
+        loadings: newLoadings,
+      };
+    });
+    setTimeout(() => {
+      this.setState(({ loadings }) => {
+        const newLoadings = [...loadings];
+        newLoadings["id"] = raw.id;
 
+        const formData = { app_id: raw.app_id, app_name: raw.app_name, env_id : raw.env_id, deploy_id: raw.deploy_id};
+        http.post('/api/deploy/request/rancher/publish',formData)
+        .then(res => {
+          message.success('发布成功');
+          store.fetchRecords()
+        })
+        .finally(() => newLoadings["load"] = false)
+        return {
+          loadings: newLoadings,
+        };
+      });
+    }, 4000);
+  };
   columns = [{
     title: '申请标题',
     dataIndex: 'name',
@@ -120,8 +148,12 @@ class ComTable extends React.Component {
             <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '1':
+          const {loadings} = this.state
           return <Action>
-            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
+            {info["pub_tag"] === '2'?  
+                <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
+            :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
+            }
             <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '2':

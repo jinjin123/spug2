@@ -176,11 +176,11 @@ class ComForm extends React.Component {
               <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
             </Col>
           </Form.Item>
-          <Form.Item required label="主机名称">
+          {/* <Form.Item required label="主机名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入主机名称"/>
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item required label="连接地址" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
@@ -188,8 +188,8 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 'calc(40%)'}}>
-              {getFieldDecorator('hostname', {initialValue: info['hostname']})(
-                <Input addonBefore="@" placeholder="主机名/IP"/>
+              {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
+                <Input addonBefore="@" placeholder="IP"/>
               )}
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>

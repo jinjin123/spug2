@@ -45,13 +45,13 @@ class Ext2Setup2 extends React.Component {
             )}
         </Form.Item>
         <Form.Item required label="应用名">
-            {getFieldDecorator('namespace', {initialValue: info['deployname']})(
+            {getFieldDecorator('deployname', {initialValue: info['deployname']})(
               <Input placeholder="应用名" disabled />
             )}
         </Form.Item>
         <Form.Item required label="镜像">
-            {getFieldDecorator('namespace', {initialValue: info['img']})(
-              <Input placeholder="镜像名"  disabled={info["update_img"]}/>
+            {getFieldDecorator('img', {initialValue: info['img']})(
+              <Input placeholder="镜像名"  disabled={info["update_img"]} onChange={e => info.img = e.target.value}/>
             )}
               <Switch
               // defaultChecked
