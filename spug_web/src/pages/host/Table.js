@@ -14,6 +14,13 @@ import store from './store';
 
 @observer
 class ComTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+        moreAction: [{"id":0,"v":"更多操作...."}]
+    };
+  
+  }
   componentDidMount() {
     store.fetchRecords()
   }
@@ -36,25 +43,31 @@ class ComTable extends React.Component {
     })
   };
   onChange = (info, action) => {
-    console.log(info,action);
     switch(action){
       case 1:
+        store.record = info
+        store.formVisible = true;
+        this.setState({
+          moreAction : [{"id": info.id,"v":"编辑"}]
+        })
+        setTimeout(() => {
+          this.setState({
+            moreAction : "更多操作...."
+          })
+        },1500)
         break;
         ;;
       case 2:
-        break;
-      ;;
-      case 3:
-        ;;
-      case 4:
         window.open(`/ssh/${info.id}`)
+        this.setState({
+          moreAction : [{"id": info.id,"v":"终端"}]
+        })
+        setTimeout(() => {
+          this.setState({
+            moreAction : "更多操作...."
+          })
+        },1500)
         break;
-      case 5:
-        
-        store.addRancherVisible = true;
-        store.record = info;
-        break;
-          ;;
     }
 
   };
@@ -110,7 +123,8 @@ class ComTable extends React.Component {
           <Table.Column title="安装服务" dataIndex="service_pack"/>
           <Table.Column title="补丁服务与版本" dataIndex="host_bug"/>
           <Table.Column title="扩展配置" dataIndex="ext_config1"/>
-          <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
+          <Table.Column title="环境" dataIndex="env"/>
+          <Table.Column ellipsis title="备注信息" dataIndex="comment"/>
           {hasPermission('host.host.edit|host.host.del|host.host.console') && (
             <Table.Column width={100} fixed="right" title="操作" render={info => (
               // <Action>
@@ -118,12 +132,9 @@ class ComTable extends React.Component {
               //   <Action.Button auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
               //   <Action.Button auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</Action.Button>
               // </Action>
-              <Select defaultValue="更多操作..." onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-              <Option value={1}>重新部署</Option>
-              <Option value={2}>回滚</Option>
-              <Option value={3}>伸缩</Option>
-              <Option value={4}>终端</Option>
-              <Option value={5}>发布</Option>
+              <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+              <Option value={1}>编辑</Option>
+              <Option value={2}>终端</Option>
             </Select>
             )}/>
           )}

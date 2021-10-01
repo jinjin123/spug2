@@ -204,6 +204,11 @@ class ComForm extends React.Component {
               {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>
           </Form.Item>
+          <Form.Item label="状态">
+            {getFieldDecorator('status', {initialValue: info['status']})(
+              <Input  placeholder="Y/N 上线或下线"/>
+            )}
+          </Form.Item>
           <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>

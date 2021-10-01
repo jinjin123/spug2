@@ -5,6 +5,7 @@
  */
 import { observable } from "mobx";
 import http from 'libs/http';
+import { message } from 'antd';
 
 class Store {
   @observable records = [];
@@ -38,6 +39,23 @@ class Store {
   showForm = (info = {}) => {
     this.formVisible = true;
     this.record = info
+  }
+  downExcel = () => {
+    return http.get(
+        '/api/file/excel/host',
+        {responseType:'blob'},)
+    .then(res => {
+      if(res){
+        let url = window.URL.createObjectURL(new Blob([res.data]));
+        let link = document.createElement("a");
+        link.style.display = "none";
+        link.href = url;
+        link.setAttribute("download", "资产信息汇总.xlsx");
+        link.click();
+        message.success('下载成功');
+      }
+    })
+    .finally(() => this.isFetching = false)
   }
 }
 
