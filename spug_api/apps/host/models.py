@@ -58,6 +58,7 @@ class Host(models.Model, ModelMixin):
 
     def get_ssh(self, pkey=None):
         pkey = pkey or self.private_key
+        ### hostname - >  ipaddress
         return SSH(self.ipaddress, self.port, self.username, pkey)
     #
     # def __repr__(self):
