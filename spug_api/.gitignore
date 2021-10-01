@@ -11,3 +11,4 @@ celerybeat-schedule
 spug/settings.py
 out/
 nohup.out
+upload/*

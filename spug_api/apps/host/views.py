@@ -40,7 +40,8 @@ class HostView(View):
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
-            Argument('desc', required=False),
+            Argument('status', required=False),
+            Argument('comment', required=False),
             Argument('password', required=False),
         ).parse(request.body)
         if error is None:
@@ -110,20 +111,20 @@ def post_import(request):
             summary['invalid'].append(i)
             continue
         data = AttrDict(
-            zone=row[0].value,
-            name=row[1].value,
-            hostname=row[2].value,
+            top_project=row[0].value,
+            zone=row[1].value,
+            ipaddress=row[2].value,
             port=row[3].value,
             username=row[4].value,
             password=row[5].value,
-            desc=row[6].value
+            comment=row[6].value
         )
-        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username,
-                               deleted_by_id__isnull=True).exists():
+        if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).exists():
+            # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
             summary['skip'].append(i)
             continue
         try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
+            if valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
                          False) is False:
                 summary['fail'].append(i)
                 continue
@@ -136,10 +137,10 @@ def post_import(request):
         except Exception:
             summary['error'].append(i)
             continue
-        if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
-            summary['repeat'].append(i)
-            continue
-        host = Host.objects.create(created_by=request.user, **data)
+        # if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
+        #     summary['repeat'].append(i)
+        #     continue
+        host = Host.objects.create(create_by=request.user, **data)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
         summary['success'].append(i)

@@ -5,6 +5,7 @@ from django.http.response import HttpResponse
 from django.db.models import QuerySet
 from datetime import datetime, date as datetime_date
 from decimal import Decimal
+from django.db import connection
 import string
 import random
 import json
@@ -193,3 +194,28 @@ class RequestApiAgent:
         # return self.send_request("list", kwargs).text
 
 
+host_select_args = [
+    "top_project","top_projectid","hostname","ipaddress","username","port","zone","osType","osVerion","coreVerion","cpus","cpucore","memory",
+    "status","disks","disk","serial_num","supplier","developer","opsper","service_pack","host_bug","ext_config1","env_id","comment"
+]
+host_select_cns = ['实体项目','实体项目id','主机名','IP','连接用户','端口','分组','系统','版本','内核版本','CPU数量',
+                    'cpu单U(核)','内存(G)','状态(上/下线)','挂载盘数','挂载盘','序列号','供应商','开发','运维',
+                   '安装服务','补丁服务与版本' ,'扩展配置','环境','备注']
+
+
+def get_data(sql):
+    # 创建数据库连接.
+    # connection = MySQLdb.connect(host='10.135.64.189', user='ppdb', passwd='ppdb', db='ppdb', port=3306, charset='utf8')
+    # 创建游标
+    print(sql)
+    cur = connection.cursor()
+    # 执行查询，
+    cur.execute(sql)
+    # 由于查询语句仅会返回受影响的记录条数并不会返回数据库中实际的值，所以此处需要fetchall()来获取所有内容。
+    result = cur.fetchall()
+    # 关闭游标
+    cur.close()
+    # 关闭数据库连接
+    # connection.close
+    # 返给结果给函数调用者。
+    return result

@@ -67,3 +67,4 @@ zope.interface==5.4.0
 pymysql
 django-mysql==4.0.0
 xlrd
+xlwt

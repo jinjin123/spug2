@@ -1,6 +1,9 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+import xlwt
+from django.shortcuts import HttpResponse
+from libs.utils import host_select_args,host_select_cns,get_data
 from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.host.models import Host
@@ -87,3 +90,37 @@ class ObjectView(View):
         percent = '%.1f' % (value / total * 100)
         rds_cli.lpush(token, percent)
         rds_cli.expire(token, 300)
+
+def Exceldown(request,type):
+    if type == "host":
+        if not os.path.exists('./upload/'):
+            os.makedirs('./upload/')
+        connecbase = ','
+        connecstr = connecbase.join(host_select_args)
+        response = HttpResponse()
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode('gb2312')
+        write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts", host_select_cns)
+        full_path = os.path.join('./upload/', "资产信息汇总"+ '.xls')
+        if os.path.exists(full_path):
+            response['Content-Length'] = os.path.getsize(full_path)  # 可不加
+            response['Content-Type'] = 'application/octet-stream'
+            response['Content-Disposition'] = 'attachment;filename="%s.xls"' % "资产信息汇总"
+            content = open(full_path, 'rb').read()
+            response.write(content)
+            return response
+
+
+def write_data_to_excel(fpath,name,sql,header):
+    result = get_data(sql)
+    # 实例化一个Workbook()对象(即excel文件)
+    wbk = xlwt.Workbook()
+    # 新建一个名为Sheet1的excel sheet。此处的cell_overwrite_ok =True是为了能对同一个单元格重复操作。
+    sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
+    # 遍历result中的没个元素。
+    for i in range(len(header)):
+        sheet.write(0, i, header[i])
+    for i in range(len(result)):
+        data_dict = dict(zip(header, result[i]))
+        for index, key in enumerate(header):
+            sheet.write(i + 1, index, data_dict[key])
+    wbk.save(fpath + name + '.xls')

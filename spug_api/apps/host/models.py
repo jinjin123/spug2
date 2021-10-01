@@ -45,7 +45,7 @@ class Host(models.Model, ModelMixin):
     port = models.IntegerField(null=True)
     username = models.CharField(max_length=50,null=True)
     pkey = models.TextField(null=True)
-    desc = models.CharField(max_length=255, null=True)
+    comment = models.CharField(max_length=255, null=True)
 
     created_at = models.CharField(max_length=20, default=human_datetime)
     # created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
@@ -66,6 +66,7 @@ class Host(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
         tmp['create_by'] = self.create_by.username
+        tmp['env'] = ""
         return tmp
 
     class Meta:
