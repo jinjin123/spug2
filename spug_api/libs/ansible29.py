@@ -160,4 +160,3 @@ if __name__ == '__main__' :
     ip="192.168.50.146"
     # print(stdout_dict['success']['127.0.0.1']["ansible_facts"]["ansible_mounts"])
     print(stdout_dict["success"].get(ip))
-#

@@ -142,7 +142,10 @@ def post_import(request):
         #     summary['repeat'].append(i)
         #     continue
         pwd = data.pop("password")
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2f055f6ee49fa2acb683b597a2d2ccebbfa51ead
         host = Host.objects.create(create_by=request.user, **data)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
