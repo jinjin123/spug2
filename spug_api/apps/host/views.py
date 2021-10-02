@@ -94,7 +94,14 @@ class HostView(View):
             role = Role.objects.filter(host_perms__regex=fr'[^0-9]{form.id}[^0-9]').first()
             if role:
                 return json_response(error=f'角色【{role.name}】的主机权限关联了该主机，请解除关联后再尝试删除该主机')
+            trelease = Host.objects.filter(pk=form.id,zone="待回收").exists()
+            if trelease:
+                return json_response(error=f'主机已待回收')
+            t = Host.objects.filter(pk=form.id).first()
             Host.objects.filter(pk=form.id).update(
+                zone="待回收" ,
+                ipaddress="",
+                iprelease=t.ipaddress,
                 deleted_at=human_datetime(),
                 deleted_by=request.user,
             )

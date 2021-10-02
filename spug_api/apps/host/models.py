@@ -46,11 +46,11 @@ class Host(models.Model, ModelMixin):
     username = models.CharField(max_length=50,null=True)
     pkey = models.TextField(null=True)
     comment = models.CharField(max_length=255, null=True)
-
+    iprelease = models.CharField(max_length=15, verbose_name="待回收ip", null=True)
     created_at = models.CharField(max_length=20, default=human_datetime)
     # created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
-    # deleted_at = models.CharField(max_length=20, null=True)
-    # deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+    deleted_at = models.CharField(max_length=20, null=True)
+    deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
     @property
     def private_key(self):
