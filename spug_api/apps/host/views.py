@@ -40,7 +40,7 @@ class HostView(View):
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
-            Argument('status', required=False),
+            Argument('status', handler=str.strip,required=True,help='上线/下线status状态'),
             Argument('comment', required=False),
             Argument('password', required=False),
         ).parse(request.body)
@@ -51,11 +51,12 @@ class HostView(View):
             # form.pop("created_by")
             if form.id:
                 Host.objects.filter(pk=form.pop('id')).update(**form)
-            # elif Host.objects.filter(name=form.name, deleted_by_id__isnull=True).exists():
-            #     return json_response(error=f'已存在的主机名称【{form.name}】')
+                return json_response(error=error)
+            if Host.objects.filter(ipaddress=form.ipaddress).exists():
+                return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
                 host = Host.objects.create(create_by=request.user, **form)
-                update_hostinfo.delay(form.ipaddress, form.username)
+                update_hostinfo.delay([form.ipaddress], form.username)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)
@@ -105,6 +106,7 @@ def post_import(request):
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
     summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
+    tmp = []
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -141,15 +143,14 @@ def post_import(request):
         # if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
         #     summary['repeat'].append(i)
         #     continue
-        pwd = data.pop("password")
-<<<<<<< HEAD
-
-=======
->>>>>>> 2f055f6ee49fa2acb683b597a2d2ccebbfa51ead
+        if data.port == 3389:
+            pwd = data.pop("password")
         host = Host.objects.create(create_by=request.user, **data)
+        tmp.append(data.ipaddress)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
         summary['success'].append(i)
+    update_hostinfo.delay(tmp, 'root')
     return json_response(summary)
 
 
