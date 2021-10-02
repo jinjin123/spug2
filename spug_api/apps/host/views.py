@@ -16,7 +16,7 @@ from paramiko.ssh_exception import BadAuthenticationType
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
 import socket
-
+from apps.host.tasks import  *
 
 class HostView(View):
     def get(self, request):
@@ -55,6 +55,7 @@ class HostView(View):
             #     return json_response(error=f'已存在的主机名称【{form.name}】')
             else:
                 host = Host.objects.create(create_by=request.user, **form)
+                update_hostinfo.delay(form.ipaddress, form.username)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)
@@ -141,6 +142,7 @@ def post_import(request):
         #     summary['repeat'].append(i)
         #     continue
         pwd = data.pop("password")
+
         host = Host.objects.create(create_by=request.user, **data)
         if request.user.role:
             request.user.role.add_host_perm(host.id)

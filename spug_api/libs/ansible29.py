@@ -155,6 +155,9 @@ class MyAnsiable2(object):
 
 if __name__ == '__main__' :
     ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
-    ansible3.run(hosts="127.0.0.1", module="setup", args='')
+    ansible3.run(hosts="192.168.50.146", module="setup", args='')
     stdout_dict = json.loads(ansible3.get_result())
-    print(stdout_dict)
+    ip="192.168.50.146"
+    # print(stdout_dict['success']['127.0.0.1']["ansible_facts"]["ansible_mounts"])
+    print(stdout_dict["success"].get(ip))
+#
