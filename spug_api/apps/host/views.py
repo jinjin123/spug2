@@ -124,7 +124,7 @@ def post_import(request):
             summary['skip'].append(i)
             continue
         try:
-            if valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
+            if int(data.port) != 3389 and valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
                          False) is False:
                 summary['fail'].append(i)
                 continue
@@ -140,6 +140,7 @@ def post_import(request):
         # if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
         #     summary['repeat'].append(i)
         #     continue
+        pwd = data.pop("password")
         host = Host.objects.create(create_by=request.user, **data)
         if request.user.role:
             request.user.role.add_host_perm(host.id)
