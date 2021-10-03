@@ -31,12 +31,12 @@ class ComTable extends React.Component {
 
   handleDelete = (text) => {
     Modal.confirm({
-      title: '删除确认',
-      content: `确定要删除【${text['name']}】?`,
+      title: '回收确认',
+      content: `确定要回收【${text['ipaddress']}】?`,
       onOk: () => {
         return http.delete('/api/host/', {params: {id: text.id}})
           .then(() => {
-            message.success('删除成功');
+            message.success('待回收成功');
             store.fetchRecords()
           })
       }
@@ -61,6 +61,17 @@ class ComTable extends React.Component {
         window.open(`/ssh/${info.id}`)
         this.setState({
           moreAction : [{"id": info.id,"v":"终端"}]
+        })
+        setTimeout(() => {
+          this.setState({
+            moreAction : "更多操作...."
+          })
+        },1500)
+        break;
+      case 3:
+        this.handleDelete(info)
+        this.setState({
+          moreAction : [{"id": info.id,"v":"待回收"}]
         })
         setTimeout(() => {
           this.setState({
@@ -124,6 +135,7 @@ class ComTable extends React.Component {
           <Table.Column title="补丁服务与版本" dataIndex="host_bug"/>
           <Table.Column title="扩展配置" dataIndex="ext_config1"/>
           <Table.Column title="环境" dataIndex="env"/>
+          <Table.Column title="待回收ip" dataIndex="iprelease"/>
           <Table.Column ellipsis title="备注信息" dataIndex="comment"/>
           {hasPermission('host.host.edit|host.host.del|host.host.console') && (
             <Table.Column width={100} fixed="right" title="操作" render={info => (
@@ -135,6 +147,7 @@ class ComTable extends React.Component {
               <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
               <Option value={1}>编辑</Option>
               <Option value={2}>终端</Option>
+              <Option value={3}>待回收</Option>
             </Select>
             )}/>
           )}

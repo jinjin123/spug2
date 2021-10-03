@@ -66,7 +66,13 @@ class ComTable extends React.Component {
     title: '描述信息',
     dataIndex: 'desc',
     ellipsis: true
-  }, {
+  }, 
+  {
+    title: '创建人',
+    dataIndex: 'create_by',
+    ellipsis: true
+  },
+  {
     title: '操作',
     width: 180,
     render: info => (

@@ -8,12 +8,14 @@ import Environment from './environment';
 import Service from './service';
 import RancherConf from './rancherconfmap';
 import App from './app';
+import Backup from './backup';
 import Setting from './setting';
 
 
 export default [
   makeRoute('/environment', Environment),
   makeRoute('/service', Service),
+  makeRoute('/backup', Backup),
   makeRoute('/app', App),
   makeRoute('/rancherconf', RancherConf),
   makeRoute('/setting/:type/:id', Setting),

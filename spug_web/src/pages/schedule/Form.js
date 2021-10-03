@@ -237,7 +237,7 @@ class ComForm extends React.Component {
                     <Select.Option value="local" disabled={store.targets.includes('local')}>本机</Select.Option>
                     {hostStore.records.filter(x => x.id === id || hasHostPermission(x.id)).map(item => (
                       <Select.Option key={item.id} value={item.id} disabled={store.targets.includes(item.id)}>
-                        {`${item.name}(${item['hostname']}:${item['port']})`}
+                        {`${item.ipaddress}(${item['hostname']}:${item['port']})(${item.zone})`}
                       </Select.Option>
                     ))}
                   </Select>

@@ -26,6 +26,7 @@ export default [
       {title: '服务配置', auth: 'config.src.view', path: '/config/service'},
       {title: '应用配置', auth: 'config.app.view', path: '/config/app'},
       {title: 'rancher数据卷配置', auth: 'config.rancher.view', path: '/config/rancherconf'},
+      // {title: '备份配置', auth: 'config.backup.view', path: '/config/backup'},
     ]
   },
   {icon: 'monitor', title: '监控中心', auth: 'monitor.monitor.view', path: '/monitor'},
