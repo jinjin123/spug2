@@ -58,6 +58,7 @@ class Task(models.Model, ModelMixin):
         tmp['latest_run_time'] = self.latest.run_time if self.latest else None
         tmp['latest_status_alias'] = self.latest.get_status_display() if self.latest else None
         tmp['rst_notify'] = json.loads(self.rst_notify) if self.rst_notify else {'mode': '0'}
+        tmp['create_by'] = self.created_by.nickname
         if self.trigger == 'cron':
             tmp['trigger_args'] = json.loads(self.trigger_args)
         return tmp

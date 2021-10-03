@@ -324,10 +324,11 @@ class tmp(models.Model, ModelMixin):
 #
 # class ServicesBackup(models.Model,ModelMixin):
 #     host = models.ForeignKey(CMDB,on_delete=models.PROTECT, verbose_name="所属主机备份脚本")
-#     script_name = models.CharField(max_length=128,verbose_name="脚本名")
-#     script_content = models.TextField(verbose_name="脚本内容")
+#     name = models.CharField(max_length=128,verbose_name="脚本名")
+#     content = models.TextField(verbose_name="脚本内容")
 #     crontime = models.CharField(max_length=128, verbose_name="定时周期")
 #     backupstatus = models.CharField(max_length=128, verbose_name="状态")
+#     comment = models.CharField(max_length=255, null=True)
 #     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
 #     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
 #     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')

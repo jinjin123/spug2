@@ -126,7 +126,7 @@ class HistoryView(View):
         record = History.objects.filter(pk=h_id).first()
         outputs = json.loads(record.output)
         host_ids = (x[0] for x in outputs if isinstance(x[0], int))
-        hosts_info = {x.id: x.name for x in Host.objects.filter(id__in=host_ids)}
+        hosts_info = {x.id: x.ipaddress for x in Host.objects.filter(id__in=host_ids)}
         data = {'run_time': record.run_time, 'success': 0, 'failure': 0, 'duration': 0, 'outputs': []}
         for h_id, code, duration, out in outputs:
             key = 'success' if code == 0 else 'failure'
