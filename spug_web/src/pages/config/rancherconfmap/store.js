@@ -18,7 +18,7 @@ class Store {
   @observable configMap = [];
 
   @observable f_name;
-  @observable fullmode=false;
+  @observable fullmode=[];
   @observable fullmode_flag=0;
   @observable project;
   @observable pjtips = [];
@@ -64,13 +64,13 @@ class Store {
     .then(res => this.vrecords = res)
     .finally(() => this.isFetching = false)
   }
-  showFullMode = (status = {}) => {
+  showFullMode = (index,status) => {
     if(this.fullmode_flag == 0 ){
-      this.fullmode = !status ? false : true;
+      this.fullmode[index] = true;
       this.fullmode_flag = 1;
     }else{
       this.fullmode_flag=0;
-      this.fullmode=false
+      this.fullmode[index]=false
     }
   }
   showAddForm = () => {

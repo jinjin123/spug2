@@ -41,6 +41,7 @@ import './form.css';
 import CodeMirrorWrapper from "./CodeMirrorWrapper";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import { fullicon } from 'layout'
+import index from 'pages/welcome/index';
 window.jsyaml = require('js-yaml')
 @observer
 class ComForm extends React.Component {
@@ -52,6 +53,8 @@ class ComForm extends React.Component {
       envs: this.isModify ? [store.record.env_id] : [],
       full: false,
       // configMap_v: [],
+      fullmode:[],
+      fullmode_flag: 0
     }
   }
 
@@ -105,10 +108,16 @@ class ComForm extends React.Component {
     //   confingMap_v : this.state.configMap_v[index] = value[3]
     // })
   };
+  handleFullmode = (index,status) => {
+    //  console.log(index,status)
+    store.showFullMode(index,status)
+  }
   render() {
     const info = store.record;
     const codeRead = store.codeRead;
     const { envs } = this.state;
+    // const {fullmode,fullmode_flag} = this.state;
+    // console.log(fullmode)、
     const fullmode = store.fullmode;
     const { getFieldDecorator } = this.props.form;
     const configMap = store.configMap;
@@ -131,7 +140,7 @@ class ComForm extends React.Component {
                   <Input value={item["k"]} onChange={e => item['k'] = e.target.value} placeholder="请输入" />
               </Form.Item>
               <Form.Item  required label="Value">
-                  <Button size="small" className={styles.fullscreen} onClick={() => store.showFullMode(true)}><img src={fullicon} /></Button>
+                  <Button size="small" className={styles.fullscreen} onClick={this.handleFullmode.bind(this,index,true)}><img src={fullicon} /></Button>
                   {/* {this.props.form.getFieldDecorator('configMap_v', { initialValue: item['configMap_v'] })( */}
                   <CodeMirror
                     onBeforeChange={this.handleChange.bind(this,index,value)}
@@ -152,8 +161,8 @@ class ComForm extends React.Component {
                       lint: true,
                       styleActiveLine: true,          // 选中行高亮
                       indentUnit: 4,
-                      fullScreen: fullmode,
-                      readOnly: false
+                      fullScreen: fullmode[index],
+                      readOnly: codeRead
                     }}
                   />
                   {/* )} */}
@@ -240,7 +249,7 @@ class ComForm extends React.Component {
           </Form.Item>
           {(
           <Form.Item wrapperCol={{span: 14, offset: 6}}>
-            <Button  type="dashed" block onClick={() => configMap.push({})}>
+            <Button  type="dashed" block onClick={() => {configMap.push({});fullmode.push(false)}}>
               <Icon type="plus"/>添加key:value
             </Button>
           </Form.Item>
