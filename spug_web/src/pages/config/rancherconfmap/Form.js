@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Checkbox, Row, Col, message, Button,Tooltip} from 'antd';
+import { Modal, Form, Input, Checkbox, Row, Col, message, Button,Tooltip,Icon} from 'antd';
 import http from 'libs/http';
 // import request from 'libs/request';
 import store from './store';
@@ -39,6 +39,7 @@ import styles from './form.module.css';
 import envStore from '../environment/store'
 import './form.css';
 import CodeMirrorWrapper from "./CodeMirrorWrapper";
+import { Controlled as CodeMirror } from "react-codemirror2";
 import { fullicon } from 'layout'
 window.jsyaml = require('js-yaml')
 @observer
@@ -49,12 +50,14 @@ class ComForm extends React.Component {
     this.state = {
       loading: false,
       envs: this.isModify ? [store.record.env_id] : [],
-      full: false
+      full: false,
+      // configMap_v: [],
     }
   }
 
 
   handleSubmit = () => {
+    console.log(store.configMap)
     this.setState({ loading: true });
     const formData = this.props.form.getFieldsValue();
     formData['old_id'] = store.record.id;
@@ -95,13 +98,21 @@ class ComForm extends React.Component {
   handleNsTips = e => {
     store.nstip = store.nstips.filter(item=>item.toLowerCase().includes((e.target.value).toLowerCase())).join(",")
   }
-
+  handleChange = (index,...value) => {
+    store.configMap[index]["v"] = value[3]
+    // console.log(index,value)
+    // this.setState({
+    //   confingMap_v : this.state.configMap_v[index] = value[3]
+    // })
+  };
   render() {
     const info = store.record;
     const codeRead = store.codeRead;
     const { envs } = this.state;
     const fullmode = store.fullmode;
     const { getFieldDecorator } = this.props.form;
+    const configMap = store.configMap;
+    const { value, onChange } = this.props;
     return (
       <Modal
         visible
@@ -110,25 +121,49 @@ class ComForm extends React.Component {
         wrapClassName={'modalbox'}
         maskClosable={false}
         title={store.record.id ? '更新配置' : '新增配置'}
-        onCancel={() => store.formVisible = false}
+        onCancel={() => {store.formVisible = false;store.configMap =[]}}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
-        {/* <div className={styles.ChildBox}> 
-          <div className={styles.ChildContent}>
-                <CodeMirror 
-                            options={{
-                              mode: 'shell',
-                              theme: 'monokai',
-                              lineNumbers: true
-                            }}
-                            onChange={(editor, data, value) => {
-                              console.log(editor)
-                            }}
-                          />
-          </div>
-        </div> */}
-        <Form labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
-          <Form.Item required label="Key">
+        <Form labelCol={{ span: 2 }} wrapperCol={{ span: 20 }}>
+          {configMap.map((item,index)=>(
+            <div key={index}  style={{marginBottom: 30, position: 'relative'}} >
+              <Form.Item required label={`Key${index+1}`} >
+                  <Input value={item["k"]} onChange={e => item['k'] = e.target.value} placeholder="请输入" />
+              </Form.Item>
+              <Form.Item  required label="Value">
+                  <Button size="small" className={styles.fullscreen} onClick={() => store.showFullMode(true)}><img src={fullicon} /></Button>
+                  {/* {this.props.form.getFieldDecorator('configMap_v', { initialValue: item['configMap_v'] })( */}
+                  <CodeMirror
+                    onBeforeChange={this.handleChange.bind(this,index,value)}
+                    // onChange={(editor, metadata, value) => {
+                    //   // final value, no need to setState here
+                    //   console.log(value)
+                    // }}
+                    value={item["v"]}
+                    options={{
+                      mode: 'text/yaml',
+                      theme: 'monokai',
+                      smartIndent: true,
+                      foldGutter: true,
+                      lineWrapping: true,
+                      gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+                      matchBrackets: true,
+                      lineNumbers: true,
+                      lint: true,
+                      styleActiveLine: true,          // 选中行高亮
+                      indentUnit: 4,
+                      fullScreen: fullmode,
+                      readOnly: false
+                    }}
+                  />
+                  {/* )} */}
+              </Form.Item>
+              <div className={styles.delAction} onClick={() => configMap.splice(index, 1)}>
+                <Icon type="minus-circle"/>移除
+              </div>
+            </div>
+          ))}
+          {/* <Form.Item required label="Key">
               {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })(
                 <Input disabled={this.isModify} placeholder="" />
               )}
@@ -154,7 +189,7 @@ class ComForm extends React.Component {
                 }}
               />
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item hidden={true}>
             {getFieldDecorator('configname', { initialValue: info['configname'] })(
               <Input disabled={true} placeholder="" />
@@ -203,6 +238,13 @@ class ComForm extends React.Component {
               </Row>
             ))}
           </Form.Item>
+          {(
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+            <Button  type="dashed" block onClick={() => configMap.push({})}>
+              <Icon type="plus"/>添加key:value
+            </Button>
+          </Form.Item>
+        )}
         </Form>
       </Modal>
     )

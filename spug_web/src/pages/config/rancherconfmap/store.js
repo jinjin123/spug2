@@ -15,6 +15,7 @@ class Store {
   @observable env = {};
   @observable codeRead = false;
   @observable vrecords = [];
+  @observable configMap = [];
 
   @observable f_name;
   @observable fullmode=false;
