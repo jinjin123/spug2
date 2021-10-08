@@ -7,6 +7,7 @@ from apps.account.models import User
 from apps.setting.utils import AppSetting
 from libs.ssh import SSH
 from apps.config.models import  Environment
+import ast
 
 class Host(models.Model, ModelMixin):
     STATUS_CHOOSE = (
@@ -65,6 +66,10 @@ class Host(models.Model, ModelMixin):
     #     return '<Host %r>' % self.name
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
+        tt = ""
+        for x in ast.literal_eval(self.disk):
+            tt += "类型:"+x.get("type")+",数据盘:"+x.get("name")+",挂载目录:"+x.get("mount")+",总大小:"+str(x.get("total_szie"))+"G,数据盘已使用"+str(x.get("used"))+"G,"
+        tmp["disk"] = tt
         tmp['create_by'] = self.create_by.username
         tmp['env'] = ""
         return tmp

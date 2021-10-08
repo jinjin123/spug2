@@ -99,7 +99,7 @@ def Exceldown(request,type):
         connecstr = connecbase.join(host_select_args)
         response = HttpResponse()
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode('gb2312')
-        write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts", host_select_cns)
+        write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts",host_select_args ,host_select_cns)
         full_path = os.path.join('./upload/', "资产信息汇总"+ '.xls')
         if os.path.exists(full_path):
             response['Content-Length'] = os.path.getsize(full_path)  # 可不加
@@ -110,17 +110,25 @@ def Exceldown(request,type):
             return response
 
 
-def write_data_to_excel(fpath,name,sql,header):
+def write_data_to_excel(fpath,name,sql,header,header_cns):
+    import ast
     result = get_data(sql)
     # 实例化一个Workbook()对象(即excel文件)
     wbk = xlwt.Workbook()
     # 新建一个名为Sheet1的excel sheet。此处的cell_overwrite_ok =True是为了能对同一个单元格重复操作。
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
     # 遍历result中的没个元素。
-    for i in range(len(header)):
-        sheet.write(0, i, header[i])
+    for i in range(len(header_cns)):
+        sheet.write(0, i, header_cns[i])
     for i in range(len(result)):
         data_dict = dict(zip(header, result[i]))
         for index, key in enumerate(header):
-            sheet.write(i + 1, index, data_dict[key])
+            if key =="disk":
+                tt = ""
+                for x in ast.literal_eval(data_dict[key]):
+                    tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
+                        x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"
+                sheet.write(i + 1, index, tt)
+            else:
+                sheet.write(i + 1, index, data_dict[key])
     wbk.save(fpath + name + '.xls')
