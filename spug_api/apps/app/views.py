@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 import subprocess
@@ -177,12 +177,16 @@ class DeployView(View):
 
 class RancherSvcView(View):
     def get(self,request):
-        svc = RancherDeployment.objects.all()
-        tmp = []
-        for item in svc:
-            data = item.to_dict(excludes=("create_by_id", "project_id", "namespace_id", "modify_time"))
-            tmp.append(data)
-        return json_response(tmp)
+        # svc = RancherDeployment.objects.all()
+        svc = ProjectService.objects.all()
+        pj = [x['top_project'] for x in svc.order_by('top_project').values('top_project').distinct()]
+        rj = [x['pjname'] for x in svc.order_by('pjname').values('pjname').distinct()]
+        # tmp = []
+        # for item in svc:
+            # data = item.to_dict(excludes=("create_by_id", "project_id", "namespace_id", "modify_time"))
+            # data = item.to_dict()
+            # tmp.append(data)
+        return json_response({"pj":pj,"rj":rj,"svc":[x.to_dict() for x in svc]})
 
     def post(self,request):
         form, error = JsonParser(

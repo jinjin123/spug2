@@ -1,7 +1,7 @@
 from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
-from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, RancherDeployment, RancherSvcPubStandby
+from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, RancherDeployment, RancherSvcPubStandby,ProjectService
 from apps.config.models import RancherApiConfig
 import unittest
 
@@ -182,11 +182,11 @@ class Mytest(unittest.TestCase):
         # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
         # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
         # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
-        pj = RancherApiConfig.objects.filter(env_id=1, label="GETPROJECT").first()
-        ns = RancherApiConfig.objects.filter(env_id=1, label="GETNS").first()
-        cmap = RancherApiConfig.objects.filter(env_id=1, label="GETCONFIGMAP").first()
-        svc = RancherApiConfig.objects.filter(env_id=1, label="GETSVC").first()
-        pvc = RancherApiConfig.objects.filter(env_id=1, label="GETPVC").first()
+        pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
+        ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
+        cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
+        svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+        pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
         url = pj.url
         token = pj.token
         kwargs = {
@@ -197,10 +197,12 @@ class Mytest(unittest.TestCase):
         pjdatalist = (json.loads(res.content))["data"]
         pjnew = []
         for x in pjdatalist:
-            # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj" or x["id"] == "local:p-t48wr" or x["id"] == "local:p-486kn" \
-            #         or x["id"] == "local:p-9s8fj":
-            if x["id"] == "local:p-cvfqn":
-                pjnew.append({"pjid": x["id"], "pjname": x["name"]})
+            # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj" or x["id"] == "local:p-t48wr" or x["id"] == "local:p-486kn" or x["id"] == "local:p-9s8fj":
+            if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
+            # if x["id"] == "local:p-cvfqn":
+                pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目","toppjid":"dgdataheadioc"})
+            if x["id"] == "local:p-t48wr":
+                pjnew.append({"pjid": x["id"], "pjname": x["name"], "top_project": "疫情地图项目","toppjid": "dgcovidmap"})
             # print(x["id"],x["name"])
         # print(len(pjnew))
         url = ns.url
@@ -220,9 +222,10 @@ class Mytest(unittest.TestCase):
         for x in nsnew:
             for xx in pjnew:
                 if x["pjid"] == xx["pjid"]:
-                    nspj.append({"pjid": x["pjid"], "nsid": x["nsid"], "nsname": x["nsname"], "pjname": xx["pjname"]})
+                    x.update({"pjname": xx["pjname"],"top_project":xx["top_project"],"toppjid":xx["toppjid"]})
+                    nspj.append(x)
         # print(len(nspj))
-        print(nspj)
+        # print(nspj)
         # -----------------------------------------------------------------------------
         url = svc.url
         token = svc.token
@@ -237,11 +240,13 @@ class Mytest(unittest.TestCase):
             for svcdict in svcdatalist:
                 # for xxx in nspj:
                 if svcdict["projectId"].strip() == sx["pjid"].strip() and svcdict["namespaceId"].strip() == sx["nsid"]:
-                    global img, v_name, pvcid,pubsvc
+                    global img, v_name, pubsvc, cbox_env, v_mount, volumes_v
                     img = []
                     if svcdict.get("containers"):
                         cbox = svcdict.get("containers")
                         img = [cc["image"] for cc in cbox]
+                        cbox_env = [cenv["environment"] for cenv in cbox if cenv.get("environment", "")]
+                        v_mount = [vm["volumeMounts"] for vm in cbox]
 
                     if svcdict.get("volumes"):
                         volumes_v = svcdict["volumes"]
@@ -251,23 +256,25 @@ class Mytest(unittest.TestCase):
                                 v_name = v_v["configMap"]["name"]
                             else:
                                 v_name = ""
-                            if v_v.get("persistentVolumeClaim"):
-                                tmppvcid.append(v_v.get("persistentVolumeClaim").get("persistentVolumeClaimId"))
+                            # if v_v.get("persistentVolumeClaim"):
+                            #     tmppvcid.append(v_v.get("persistentVolumeClaim").get("persistentVolumeClaimId"))
                         pvcid = ",".join(tmppvcid)
                     if svcdict.get("publicEndpoints"):
                         pp = svcdict.get("publicEndpoints")
                         pubsvc = [{"address":x["addresses"],"port":x["port"] , "svcname": x["serviceId"]} for x in pp]
                     else:
                         pubsvc = ""
-                    svcnew.append({"pjid": svcdict["projectId"], "pjname": sx["pjname"],
+                    svcnew.append({"top_project":sx["top_project"],"toppjid":sx["toppjid"],"pjid": svcdict["projectId"], "pjname": sx["pjname"],
                                     "nsid": svcdict["namespaceId"], "nsname": sx["nsname"],
                                     "dpid": svcdict["id"], "dpname": svcdict["name"],
-                                    "img": img[0], "replica": svcdict.get("scale",0),
-                                    "configName": v_name,"configId":"","configMap":"","pvcid": pvcid ,"rancher_url":"https://rancher.ioc.com/","pubsvc": pubsvc})
+                                    "img": img[0], "replica": svcdict.get("scale",0), "state":svcdict["state"] ,
+                                    # "configName": v_name,"configId":"","configMap":"","pvcid": pvcid ,"rancher_url":"https://rancher.ioc.com/","pubsvc": pubsvc})
+                                    "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount": v_mount[0],"cbox_env": cbox_env,
+                                   "rancher_url": "https://rancher.ioc.com/", "pubsvc": pubsvc,"verifyurl": "https://rancher.ioc.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"]})
                 # else:
                     # print(svcdict["projectId"],sx["pjid"])
                     # pass
-        print(len(svcnew))
+        # print(len(svcnew))
 
         url = cmap.url
         token = cmap.token
@@ -287,17 +294,24 @@ class Mytest(unittest.TestCase):
                         if xxx.get("data",None):
                             kvtmp = []
                             for k,v in dict.items(xxx["data"]):
-                                kvtmp.append({k,v})
-                                cmapnew.append({"pjid": cx["pjid"], "pjname": cx["pjname"],
+                                kvtmp.append({"k":k,"v":v})
+                                cmapnew.append(ProjectService(**{"top_project":cx["top_project"],"toppjid":cx["toppjid"],"pjid": cx["pjid"], "pjname": cx["pjname"],
                                                 "nsid": cx["nsid"], "nsname": cx["nsname"],
                                                 "dpid": cx["dpid"], "dpname": cx["dpname"],
-                                                "img": cx["img"], "replica": cx["replica"],
+                                                "img": cx["img"], "replica": cx["replica"],"state":cx["state"],
                                                 "configName": cx["configName"],"configId": xxx["id"],"configMap":kvtmp,
-                                                "pvcid": cx["pvcid"],
-                                                "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],
-                                                })
+                                                # "pvcid": cx["pvcid"],
+                                                "volumes": cx["volumes"], "v_mount": cx["v_mount"],"cbox_env": cx["cbox_env"],
+                                                "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"]
+                                                }))
             if cx["configName"].strip() =="":
-                cmapnew.append(cx)
+                cx.update({"configMap": "[]"})
+                cmapnew.append(ProjectService(**cx))
+
+        try:
+            ProjectService.objects.bulk_create(cmapnew)
+        except Exception as e:
+            print(e)
                 # print(cx["dpname"])
                     # cmapnew.append({"pjid": cx["pjid"], "pjname": cx["pjname"],
                     #                             "nsid": cx["nsid"], "nsname": cx["nsname"],
@@ -315,29 +329,231 @@ class Mytest(unittest.TestCase):
                 #                         "pvcid": cx["pvcid"],
                 #                         "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],})
                     # print(xxx["projectId"],cx["pjid"],xxx["name"],cx["configName"])
-        print(len(cmapnew))
+        # print(len(cmapnew))
 
-        url = pvc.url
-        token = pvc.token
-        pvcnew = []
-        for px in cmapnew:
+    #     url = pvc.url
+    #     token = pvc.token
+    #     pvcnew = []
+    #     for px in cmapnew:
+    #         kwargs = {
+    #             "url": url.format(px["pjid"]),
+    #             "headers": {"Authorization": token, "Content-Type": "application/json"}
+    #         }
+    #         res = RequestApiAgent().list(**kwargs)
+    #         pvdatalist = (json.loads(res.content))["data"]
+    #         for xxx in pvdatalist:
+    #             if xxx["id"].strip() == px["pvcid"].strip():
+    #                     pvcnew.append(ProjectService(**{"top_project":px["top_project"],"toppjid":px["toppjid"],"pjid": px["pjid"], "pjname": px["pjname"],
+    #                                     "nsid": px["nsid"], "nsname": px["nsname"],
+    #                                     "dpid": px["dpid"], "dpname": px["dpname"],
+    #                                     "img": px["img"], "replica": px["replica"],"state":px["state"] ,
+    #                                     "configName": px["configName"],"configId": px["configId"],"configMap":px["configMap"],
+    #                                     "pvcid": px["pvcid"],"pvcsize": xxx.get("resources").get("requests").get("storage"),
+    #                                     "rancher_url":px["rancher_url"],"pubsvc": px["pubsvc"],
+    #                                     }))
+    #             else:
+    #                pvcnew.append(ProjectService(**px))
+    #
+    #     try:
+    #         ProjectService.objects.bulk_create(pvcnew)
+    #     except Exception as e :
+    #         print(e)
+
+        # print(pvcnew[:1])
+
+    def test_fanyi(self):
+            # global img
+            # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
+            # ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
+            # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
+            # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+            # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+            pj = RancherApiConfig.objects.filter(env_id=3, label="GETPROJECT").first()
+            ns = RancherApiConfig.objects.filter(env_id=3, label="GETNS").first()
+            cmap = RancherApiConfig.objects.filter(env_id=3, label="GETCONFIGMAP").first()
+            svc = RancherApiConfig.objects.filter(env_id=3, label="GETSVC").first()
+            pvc = RancherApiConfig.objects.filter(env_id=3, label="GETPVC").first()
+            url = pj.url
+            token = pj.token
             kwargs = {
-                "url": url.format(px["pjid"]),
+                "url": url,
                 "headers": {"Authorization": token, "Content-Type": "application/json"}
             }
             res = RequestApiAgent().list(**kwargs)
-            pvdatalist = (json.loads(res.content))["data"]
-            for xxx in pvdatalist:
-                if xxx["id"].strip() == px["pvcid"].strip():
-                        pvcnew.append({"pjid": px["pjid"], "pjname": px["pjname"],
-                                        "nsid": px["nsid"], "nsname": px["nsname"],
-                                        "dpid": px["dpid"], "dpname": px["dpname"],
-                                        "img": px["img"], "replica": px["replica"],
-                                        "configName": px["configName"],"configId": px["configId"],"configMap":px["configMap"],
-                                        "pvcid": px["pvcid"],"pvcsize": xxx.get("resources").get("requests").get("storage"),
-                                        "rancher_url":px["rancher_url"],"pubsvc": px["pubsvc"],
-                                        })
-                else:
-                   pvcnew.append(px)
+            pjdatalist = (json.loads(res.content))["data"]
+            pjnew = []
+            for x in pjdatalist:
+                if x["id"] == "local:p-qzsv4":
+                    # if x["id"] == "local:p-cvfqn":
+                    pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市跨境货车司机信息管理系统项","toppjid":"dgdriverinfo"})
+                if x["id"] == "local:p-nglhq":
+                    pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市疫情动态查询+防控数据管理平台系统项目","toppjid":"dgdycovidselect"})
+                # print(x["id"],x["name"])
+            # print(len(pjnew))
+            url = ns.url
+            token = ns.token
+            kwargs = {
+                "url": url,
+                "headers": {"Authorization": token, "Content-Type": "application/json"}
+            }
+            res = RequestApiAgent().list(**kwargs)
+            nsdatalist = (json.loads(res.content))["data"]
+            nsnew = []
+            for x in nsdatalist:
+                nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
+                # print(x["projectId"],x["id"], x["name"])
+            # print(nsnew)
+            nspj = []
+            for x in nsnew:
+                for xx in pjnew:
+                    if x["pjid"] == xx["pjid"]:
+                        x.update({"pjname": xx["pjname"],"top_project":xx["top_project"],"toppjid":xx["toppjid"]})
+                        nspj.append(x)
+                        # nspj.append(
+                        #     {"pjid": x["pjid"], "nsid": x["nsid"], "nsname": x["nsname"], "pjname": xx["pjname"]})
+            # print(len(nspj))
+            # print(nspj)
+            # -----------------------------------------------------------------------------
+            url = svc.url
+            token = svc.token
+            svcnew = []
+            for sx in nspj:
+                kwargs = {
+                    "url": url.format(sx["pjid"]),
+                    "headers": {"Authorization": token, "Content-Type": "application/json"}
+                }
+                res = RequestApiAgent().list(**kwargs)
+                svcdatalist = (json.loads(res.content))["data"]
+                for svcdict in svcdatalist:
+                    # for xxx in nspj:
+                    if svcdict["projectId"].strip() == sx["pjid"].strip() and svcdict["namespaceId"].strip() == sx[
+                        "nsid"]:
+                        global img, v_name,  pubsvc,cbox_env,v_mount,volumes_v
+                        img = []
+                        if svcdict.get("containers"):
+                            cbox = svcdict.get("containers")
+                            img = [cc["image"] for cc in cbox]
+                            cbox_env = [cenv["environment"] for cenv in cbox  if cenv.get("environment","")]
+                            v_mount = [vm["volumeMounts"] for vm in cbox]
 
-        print(len(pvcnew))
+                        if svcdict.get("volumes"):
+                            volumes_v = svcdict["volumes"]
+                            # tmppvcid = []
+                            for v_v in volumes_v:
+                                if v_v.get("configMap"):
+                                    v_name = v_v["configMap"]["name"]
+                                else:
+                                    v_name = ""
+                                # if v_v.get("persistentVolumeClaim"):
+                                #     tmppvcid.append(v_v.get("persistentVolumeClaim").get("persistentVolumeClaimId"))
+                            # pvcid = ",".join(tmppvcid)
+                        if svcdict.get("publicEndpoints"):
+                            pp = svcdict.get("publicEndpoints")
+                            pubsvc = [{"address": x["addresses"], "port": x["port"], "svcname": x["serviceId"]} for x in
+                                      pp]
+                        else:
+                            pubsvc = ""
+                        svcnew.append({"top_project":sx["top_project"],"toppjid":sx["toppjid"],"pjid": svcdict["projectId"], "pjname": sx["pjname"],
+                                       "nsid": svcdict["namespaceId"], "nsname": sx["nsname"],
+                                       "dpid": svcdict["id"], "dpname": svcdict["name"],
+                                       "img": img[0], "replica": svcdict.get("scale", 0),"state":svcdict["state"],
+                                       # "configName": v_name, "configId": "", "configMap": "", "pvcid": pvcid,
+                                       "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount": v_mount[0],"cbox_env": cbox_env,
+                                       "rancher_url": "https://rancher.feiyan.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"]})
+                    # else:
+                    # print(svcdict["projectId"],sx["pjid"])
+                    # pass
+            print(len(svcnew))
+
+            url = cmap.url
+            token = cmap.token
+            cmapnew = []
+            for cx in svcnew:
+                kwargs = {
+                    "url": url.format(cx["pjid"]),
+                    "headers": {"Authorization": token, "Content-Type": "application/json"}
+                }
+                res = RequestApiAgent().list(**kwargs)
+                mpdatalist = (json.loads(res.content))["data"]
+                for xxx in mpdatalist:
+                    # print(xxx["name"])
+                    global kvtmp
+                    if cx["configName"].strip() != "":
+                        if xxx["name"].strip() == cx["configName"].strip():
+                            if xxx.get("data", None):
+                                kvtmp = []
+                                for k, v in dict.items(xxx["data"]):
+                                    kvtmp.append({"k":k,"v":v})
+                                    cmapnew.append(ProjectService(**{"top_project":cx["top_project"],"toppjid":cx["toppjid"],"pjid": cx["pjid"], "pjname": cx["pjname"],
+                                                    "nsid": cx["nsid"], "nsname": cx["nsname"],
+                                                    "dpid": cx["dpid"], "dpname": cx["dpname"],
+                                                    "img": cx["img"], "replica": cx["replica"],"state":cx["state"] ,
+                                                    "configName": cx["configName"], "configId": xxx["id"],
+                                                    "configMap": kvtmp,
+                                                    "volumes": cx["volumes"],"v_mount": cx["v_mount"],"cbox_env": cx["cbox_env"],
+                                                    # "pvcid": cx["pvcid"],
+                                                    "rancher_url": cx["rancher_url"], "pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"]
+                                                    }))
+                if cx["configName"].strip() == "":
+                    cx.update({"configMap": "[]"})
+                    cmapnew.append(ProjectService(**cx))
+                    # print(cx["dpname"])
+                    # cmapnew.append({"pjid": cx["pjid"], "pjname": cx["pjname"],
+                    #                             "nsid": cx["nsid"], "nsname": cx["nsname"],
+                    #                             "dpid": cx["dpid"], "dpname": cx["dpname"],
+                    #                             "img": cx["img"], "replica": cx["replica"],
+                    #                             "configName": cx["configName"],"configId": "","configMap":"",
+                    #                             "pvcid": cx["pvcid"],
+                    #                             "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"]})
+                    # else:
+                    #     cmapnew.append({"pjid": cx["pjid"], "pjname": cx["pjname"],
+                    #                         "nsid": cx["nsid"], "nsname": cx["nsname"],
+                    #                         "dpid": cx["dpid"], "dpname": cx["dpname"],
+                    #                         "img": cx["img"], "replica": cx["replica"],
+                    #                         "configName": cx["configName"],"configId": xxx["id"],"configMap":kvtmp,
+                    #                         "pvcid": cx["pvcid"],
+                    #                         "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],})
+                    # print(xxx["projectId"],cx["pjid"],xxx["name"],cx["configName"])
+            print(len(cmapnew))
+            try:
+                ProjectService.objects.bulk_create(cmapnew)
+            except Exception as e :
+                print(e)
+
+            # url = pvc.url
+            # token = pvc.token
+            # pvcnew = []
+            # for px in cmapnew:
+            #     kwargs = {
+            #         "url": url.format(px["pjid"]),
+            #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+            #     }
+            #     res = RequestApiAgent().list(**kwargs)
+            #     pvdatalist = (json.loads(res.content))["data"]
+            #     for xxx in pvdatalist:
+            #         if xxx["id"].strip() == px["pvcid"].strip():
+            #             pvcnew.append(ProjectService(**{"top_project":px["top_project"],"toppjid":px["toppjid"],"pjid": px["pjid"], "pjname": px["pjname"],
+            #                            "nsid": px["nsid"], "nsname": px["nsname"],
+            #                            "dpid": px["dpid"], "dpname": px["dpname"],
+            #                            "img": px["img"], "replica": px["replica"],"state":px["state"] ,
+            #                            "configName": px["configName"], "configId": px["configId"],
+            #                            "configMap": px["configMap"],
+            #                            "pvcid": px["pvcid"],
+            #                            "pvcsize": xxx.get("resources").get("requests").get("storage"),
+            #                            "rancher_url": px["rancher_url"], "pubsvc": px["pubsvc"],
+            #                            }))
+            #         else:
+            #            pvcnew.append(ProjectService(**px))
+                # if px["pvcid"] == "":
+                #     pvcnew.append(ProjectService(**px))
+
+            # print(len(pvcnew))
+                # if px["pvcid"].strip() == "":
+                #       pvcnew.append(ProjectService(**px))
+                    # else:
+                    #     pvcnew.append(ProjectService(**px))
+            # try:
+            #     ProjectService.objects.bulk_create(pvcnew)
+            # except Exception as e :
+            #     print(e)
+            # print(pvcnew[:1])

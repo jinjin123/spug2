@@ -7,6 +7,7 @@ from apps.account.models import User
 from apps.config.models import Environment
 import json
 from django_mysql.models.fields import SizedTextField
+import ast
 
 
 class App(models.Model, ModelMixin):
@@ -152,33 +153,53 @@ class DeployExtend2(models.Model, ModelMixin):
 #     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
 #     env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
 
-# class ProjectService(models.Model, ModelMixin):
-#     STATUS_CHOOSE = (
-#         ('Y', 'up'),
-#         ('N', 'down'),
-#     )
-#     top_project = models.ForeignKey(CMDB, on_delete=models.PROTECT, verbose_name="所属顶级项目")
-#     project_name = models.CharField(db_index=True, max_length=80, verbose_name='rancher项目名称唯一', null=True)
-#     project_id = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
-#     namespace = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
-#     svcname = models.CharField(max_length=80, db_index=True, verbose_name='部署服务名称(在rancher下必须唯一)', null=True)
-#     img = models.CharField(max_length=255, verbose_name='部署镜像', null=True)
-#     deployid = models.CharField(max_length=80, db_index=True, verbose_name='发布部署app唯一', null=True)
-#     replica = models.IntegerField(default=1, db_index=True, verbose_name='pod副本scale伸缩', null=True)
-#     configName = models.CharField(max_length=200, verbose_name='配置映射卷名')
-#     configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]')
-#     pvcMap = models.CharField(max_length=200, verbose_name='pvc配置映射卷名称')
-#     pvcMapSize = models.CharField(max_length=200, verbose_name='pvc配置映射卷大小')
-#     rancher_url = models.CharField(max_length=200, verbose_name="rancher前缀url", null=True)
-#     status = models.CharField(choices=STATUS_CHOOSE, default='Y', verbose_name='同步服务监控状态(关机释放下线)', null=True)
-#     env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
-#     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
-#     opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
-#     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
-#     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
-#     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
-#     pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
-#     depends_svc = models.CharField(max_length=500, verbose_name="依赖服务或组件多余注释", null=True)
+class ProjectService(models.Model, ModelMixin):
+    STATUS_CHOOSE = (
+        ('Y', 'up'),
+        ('N', 'down'),
+    )
+    top_project = models.CharField(max_length=200, verbose_name="所属顶级项目")
+    toppjid = models.CharField(max_length=200, verbose_name="所属顶级项目id")
+    pjname = models.CharField(db_index=True, max_length=80, verbose_name='rancher项目名称唯一', null=True)
+    pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    nsname = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+    nsid = models.CharField(max_length=50, verbose_name='ranchernamespaceid唯一', null=True)
+    dpname = models.CharField(max_length=80, db_index=True, verbose_name='部署服务名称(在rancher下必须唯一)', null=True)
+    dpid = models.CharField(max_length=80, db_index=True, verbose_name='发布部署app唯一', null=True)
+    img = models.CharField(max_length=255, verbose_name='部署镜像', null=True)
+    replica = models.IntegerField(default=1, db_index=True, verbose_name='pod副本scale伸缩', null=True)
+    configId = models.CharField(max_length=200, verbose_name='configId')
+    configName = models.CharField(max_length=200, verbose_name='配置映射卷名')
+    configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]', default='[]')
+    # pvcid = models.CharField(max_length=200, verbose_name='pvcid')
+    # pvcsize = models.CharField(max_length=200, verbose_name='pvc配置映射卷大小')
+    rancher_url = models.CharField(max_length=200, verbose_name="rancher前缀url", null=True)
+    state = models.CharField(max_length=50, default='Y', verbose_name='同步服务监控状态(关机释放下线)', null=True)
+    env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
+    developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
+    opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
+    v_mount = models.CharField(max_length=1500,verbose_name="挂载详情",null=True)
+    volumes = models.CharField(max_length=1500,verbose_name="卷详情",null=True)
+    cbox_env = models.CharField(max_length=1500,verbose_name="容器变量",null=True)
+    verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    # depends_svc = models.CharField(max_length=500, verbose_name="依赖服务或组件多余注释", null=True)
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        t = []
+        for x in ast.literal_eval(self.configMap):
+            t.append(x)
+
+        tmp["configMap"] = t
+        tmp['create_by'] = self.create_by.username
+        return tmp
+
+    class Meta:
+        db_table = 'rancher_service'
 
 class tmp(models.Model, ModelMixin):
     STATUS_CHOOSE = (
