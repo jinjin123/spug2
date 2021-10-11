@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Select, Button,Input,Row, Col,Checkbox,Switch } from "antd";
+import { Form, Button,Input,Row, Col,Checkbox,Switch } from "antd";
 import { hasHostPermission } from 'libs';
 import store from './store';
 import styles from './index.module.css';
@@ -34,18 +34,18 @@ class Ext2Setup2 extends React.Component {
         <Form.Item required label="发布版本命名唯一">
               <Input placeholder="发布命名写点相关的字把" onChange={e => info.app_name = e.target.value} />
         </Form.Item>
-        <Form.Item required label="所属项目">
-            {getFieldDecorator('project', {initialValue: info['project']})(
-              <Input placeholder="所属项目"disabled/>
+        <Form.Item required label="实体项目">
+            {getFieldDecorator('top_project', {initialValue: info['top_project']})(
+              <Input placeholder="实体项目"disabled/>
             )}
         </Form.Item>
-        <Form.Item required label="命名空间">
-            {getFieldDecorator('namespace', {initialValue: info['namespace']})(
-              <Input placeholder="命名空间" disabled/>
+        <Form.Item required label="rancher细分项目">
+            {getFieldDecorator('pjname', {initialValue: info['pjname']})(
+              <Input placeholder="rancher细分项目" disabled/>
             )}
         </Form.Item>
         <Form.Item required label="应用名">
-            {getFieldDecorator('deployname', {initialValue: info['deployname']})(
+            {getFieldDecorator('dpname', {initialValue: info['dpname']})(
               <Input placeholder="应用名" disabled />
             )}
         </Form.Item>

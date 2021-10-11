@@ -3,11 +3,13 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { observable, computed } from "mobx";
+import { observable } from "mobx";
 import http from 'libs/http';
 
 class Store {
   @observable records = [];
+  @observable toppj = [];
+  @observable rancherpj = [];
   @observable record = {};
   @observable deploy = {};
   @observable page = 0;
@@ -24,8 +26,12 @@ class Store {
   @observable project;
   @observable ns;
   @observable app;
+  @observable fullmode=[false];
+  @observable fullmode_flag=0;
   @observable envname;
   @observable volume;
+  @observable topproject;
+  @observable rj;
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
   // @observable loadings = [];
@@ -33,7 +39,11 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/app/deploy/svc')
-      .then(res => this.records = res)
+      .then(({pj,svc,rj})=>{
+        this.records = svc;
+        this.toppj = pj;
+        this.rancherpj = rj;
+      })
       .finally(() => this.isFetching = false)
   };
 
@@ -58,7 +68,15 @@ class Store {
       this.rancherPublish = true;
     }
   };
-
+  showFullMode = (index,status) => {
+    if(this.fullmode_flag === 0 ){
+      this.fullmode[index] = true;
+      this.fullmode_flag = 1;
+    }else{
+      this.fullmode_flag=0;
+      this.fullmode[index]=false
+    }
+  }
 }
 
 export default new Store()

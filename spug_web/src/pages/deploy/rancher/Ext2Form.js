@@ -15,7 +15,7 @@ import store from './store';
 @observer
 class Ext2From extends React.Component {
   render(){
-    const appName = store.record.deployname;
+    const appName = store.record.dpname;
     let title = `常规发布 - ${appName}`;
     return (
       <Modal
