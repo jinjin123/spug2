@@ -26,7 +26,7 @@ export default observer(function Ext2Setup1() {
   // }, [])
 
   const info = store.record;
-  console.log(info)
+  console.log(store.pbtype)
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="发布环境">
@@ -51,6 +51,16 @@ export default observer(function Ext2Setup1() {
           checked={info['is_audit']=true}
           // onChange={v => info['is_audit'] = v}
           />
+      </Form.Item>
+      <Form.Item required label="发布类型">
+        <Col span={16}>
+          <Select defaultValue={1} onChange={v => store.pbtype = v} placeholder="请选择发布类型">
+            <Select.Option  value={1} key={1}>迭代发布</Select.Option>
+            <Select.Option  value={2} key={2}>bug发布</Select.Option>
+            <Select.Option  value={3} key={3}>紧急发布</Select.Option>
+            <Select.Option  value={4} key={4}>回滚发布</Select.Option>
+          </Select>
+        </Col>
       </Form.Item>
       {/* <Form.Item label="消息通知" extra={<span>
         应用审核及发布成功或失败结果通知，

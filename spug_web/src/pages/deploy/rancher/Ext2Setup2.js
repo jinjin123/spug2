@@ -32,7 +32,7 @@ class Ext2Setup2 extends React.Component {
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item required label="发布版本命名唯一">
-              <Input placeholder="发布命名写点相关的字把" onChange={e => info.app_name = e.target.value} />
+              <Input placeholder="填写发版命名唯一方便追溯" onChange={e => info.app_name = e.target.value} />
         </Form.Item>
         <Form.Item required label="实体项目">
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(

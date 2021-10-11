@@ -32,6 +32,7 @@ class Store {
   @observable volume;
   @observable topproject;
   @observable rj;
+  @observable pbtype = 1;
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
   // @observable loadings = [];

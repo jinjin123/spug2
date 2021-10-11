@@ -79,6 +79,7 @@ class Ext2Setup3 extends React.Component {
     // info['extend'] = '2';
     // info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
     // info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
+    store.record["pbtype"] = store.pbtype
     console.log(store.record)
     // http.post('/api/deploy/request/rancher/', store.record)
     //   .then(res => {
