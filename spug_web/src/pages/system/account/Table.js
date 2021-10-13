@@ -38,6 +38,10 @@ class ComTable extends React.Component {
     title: '类型',
     dataIndex: 'type',
   }, {
+    title: '邮箱',
+    dataIndex: 'email',
+  }, 
+  {
     title: '角色',
     dataIndex: 'role_name'
   }, {

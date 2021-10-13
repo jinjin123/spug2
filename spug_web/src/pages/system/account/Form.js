@@ -73,6 +73,11 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
           )}
+          <Form.Item required label="邮箱">
+            {getFieldDecorator('email', {initialValue: info['email']})(
+              <Input placeholder="请输入email"/>
+            )}
+          </Form.Item>
           <Form.Item required label="角色">
             <Col span={18}>
               {getFieldDecorator('role_id', {initialValue: info['role_id']})(

@@ -5,28 +5,15 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Input,Select } from 'antd';
-import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
+import { Input, Select, Button } from 'antd';
+import { SearchForm, AuthCard } from 'components';
 import ComTable from './Table';
 import store from './store';
-import DeployForm from './DeployForm';
-import AddRancherSelect from './AddRancherSelect';
-import Ext2Form from './Ext2Form';
-@observer
-class Rancher extends  React.Component {
-  constructor(props){
-      super(props);
-      this.state  =  {
-        expire:undefined,
-        count:''
-      }
-  }
-  
- 
-  render(){
-    return (
-      <AuthCard auth="deploy.rancher.view">
-          <SearchForm>
+
+export default observer(function () {
+  return (
+    <AuthCard auth="system.account.view">
+      <SearchForm>
             <SearchForm.Item span={8} title="实体项目" >
               <Select allowClear placeholder="请选择" style={{left:10}} value={store.topproject} onChange={v => store.topproject = v}>
                 {store.toppj.map(item => (
@@ -42,21 +29,20 @@ class Rancher extends  React.Component {
                 ))}
               </Select>
             </SearchForm.Item>
-            <SearchForm.Item span={4} title="应用">
+            <SearchForm.Item span={8} title="应用">
               <Input allowClear value={store.app} onChange={e => store.app = (e.target.value).trim()} placeholder="请输入"/>
             </SearchForm.Item>
-            <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <AuthButton auth="deploy.rancher.edit_config" 
-                          type="primary" icon="plus" onClick={() => store.showAddForm()}>部署服务</AuthButton>
-            </SearchForm.Item>
-        </SearchForm>
-        <ComTable/>
-        {store.deployForm && <DeployForm/>}
-        {store.addRancherVisible && <AddRancherSelect />}
-        {store.ext2Visible &&  <Ext2Form />}
-      </AuthCard>
-    )
-  }
-}
-
-export default Rancher
+        <SearchForm.Item span={5} title="账户名称">
+          <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
+        </SearchForm.Item>
+        <SearchForm.Item span={8}>
+          <Button type="primary" icon="sync" onClick={store.fetchRecords}>刷新</Button>
+        </SearchForm.Item>
+      </SearchForm>
+      <div style={{marginBottom: 16}}>
+        <Button type="primary" icon="plus" onClick={() => store.showForm()}>新建</Button>
+      </div>
+      <ComTable/>
+    </AuthCard>
+  )
+})

@@ -10,6 +10,8 @@ class Store {
   @observable records = [];
   @observable toppj = [];
   @observable rancherpj = [];
+  @observable nsname = [];
+  @observable apps = [];
   @observable record = {};
   @observable deploy = {};
   @observable page = 0;
@@ -40,10 +42,12 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/app/deploy/svc')
-      .then(({pj,svc,rj})=>{
+      .then(({pj,svc,rj,ns,app})=>{
         this.records = svc;
         this.toppj = pj;
         this.rancherpj = rj;
+        this.nsname = ns;
+        this.apps = app;
       })
       .finally(() => this.isFetching = false)
   };
