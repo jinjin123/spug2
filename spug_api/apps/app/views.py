@@ -5,9 +5,10 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService,ProjectServiceApprovalNotice
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
+from apps.account.models import User
 import subprocess
 import json
 import os
@@ -175,18 +176,54 @@ class DeployView(View):
             subprocess.Popen(f'rm -rf {repo_dir} {repo_dir + "_*"}', shell=True)
         return json_response(error=error)
 
+class RancherSvcNoticeView(View):
+    def get(self,request):
+        ob = ProjectServiceApprovalNotice.objects.all()
+        pj = [x['service__top_project'] for x in ob.values('service__top_project').distinct()]
+        rj = [x['service__pjname'] for x in ob.values('service__pjname').distinct()]
+        return json_response({"pj":pj,"rj":rj,"data": [x.to_dict() for x in ob]})
+
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('tj', help='请输入实体项目'),
+            Argument('rj', help='请输入rancher项目'),
+            Argument('us', help= '请输入用户名'),
+            Argument('ns', help='请输入命名空间'),
+            Argument('app',  help='请输入应用'),
+        ).parse(request.body)
+        if error is None:
+            pj = ProjectService.objects.filter(top_project=form.tj,pjname=form.rj,nsname=form.ns,dpname=form.app).first()
+            if pj is None:
+                return json_response(error=f'应用对应不上项目，请重新查询绑定')
+            us = User.objects.filter(nickname=form.us).first()
+
+            m = ProjectServiceApprovalNotice.objects.create(service=pj,notice_user=us)
+            m.save()
+        return json_response(error=error)
+
+    def delete(self,request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            ProjectServiceApprovalNotice.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
 class RancherSvcView(View):
     def get(self,request):
         # svc = RancherDeployment.objects.all()
         svc = ProjectService.objects.all()
         pj = [x['top_project'] for x in svc.order_by('top_project').values('top_project').distinct()]
         rj = [x['pjname'] for x in svc.order_by('pjname').values('pjname').distinct()]
+        ns = [x['nsname'] for x in svc.order_by('nsname').values('nsname').distinct()]
+        app = [x['dpname'] for x in svc.order_by('dpname').values('dpname').distinct()]
         # tmp = []
         # for item in svc:
             # data = item.to_dict(excludes=("create_by_id", "project_id", "namespace_id", "modify_time"))
             # data = item.to_dict()
             # tmp.append(data)
-        return json_response({"pj":pj,"rj":rj,"svc":[x.to_dict() for x in svc]})
+        return json_response({"pj":pj,"rj":rj,"ns": ns,"app":app,"svc":[x.to_dict() for x in svc]})
 
     def post(self,request):
         form, error = JsonParser(
