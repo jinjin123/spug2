@@ -10,7 +10,7 @@ from django_redis import get_redis_connection
 from apps.config.models import RancherApiConfig
 from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace
+from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace,App
 from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
 from collections import defaultdict
@@ -51,6 +51,10 @@ class RequestView(View):
             tmp['host_ids'] = json.loads(item.host_ids)
             tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
+            tmp['type'] = item.get_type_display()
+            tmp['opshandler'] = item.opshandler
+            tmp['opsstatus_alias'] = item.get_opsstatus_display()
+            tmp['type'] = item.get_type_display()
             tmp['created_by_user'] = item.created_by_user
             tmp['pub_tag'] = item.pub_tag
             data.append(tmp)
@@ -178,6 +182,7 @@ class RancherPublishView(View):
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
+
             publish_args = (RancherSvcPubStandby.objects.filter(app_id=form.app_id).first()).to_dict()
             try:
                 logger.info(msg="#######redeploy pod start ########")
@@ -211,27 +216,40 @@ class RancherPublishView(View):
 class RequestRancherDeployView(View):
     def post(self, request):
         form, error = JsonParser(
-            Argument('deployname',  help='deployname'),
-            Argument('deployid',  help='缺少必要参数'),
-            Argument('app_name', help='请输申请应用标题'),
-            Argument('update_img', help='镜像丢失'),
-            Argument('env_id', help='环境丢失'),
-            Argument('createts', help='unix time'),
-            Argument('project_id', help='project_id'),
-            Argument('img', help='img'),
-            Argument('namespace', help='namespace'),
-            Argument('is_audit', help='is_audit'),
-            Argument('pubsvc', help='pubsvc'),
-            Argument('replica', help='replica'),
-            Argument('deploy_type', help='deploy_type'),
-            Argument('volumes', help='volumes'),
-            Argument('volumes_detail', help='volumes_detail'),
+            Argument('app_name',  help='app_name'),
+            Argument('dpname',  help='deployname',required=False),
+            Argument('dpid',  help='dpid',required=False),
+            Argument('cbox_env',  help='cbox_env',required=False),
+            Argument('configId',  help='configId',required=False),
+            Argument('configMap', help='configMap',required=False),
+            Argument('configName', help='configName',required=False),
+            # Argument('create_by', help='create_by',required=False),
+            Argument('developer', help='developer',required=False),
+            Argument('opsper', help='opsper',required=False),
+            Argument('env_id', help='env_id',required=False),
+            Argument('img', help='img',required=False),
+            Argument('nsid', help='nsid',required=False),
+            Argument('nsname', help='nsname',required=False),
+            Argument('is_audit', help='is_audit',required=False),
+            Argument('pbtype', help='pbtype',required=False),
+            Argument('pjid', help='pjid',required=False),
+            Argument('pjname', help='pjname',required=False),
+            Argument('pubsvc', help='pubsvc',required=False),
+            Argument('rancher_url', help='rancher_url',required=False),
+            Argument('replica', help='replica',required=False),
+            Argument('state', help='state',required=False),
+            Argument('top_project', help='top_project',required=False),
+            Argument('toppjid', help='toppjid',required=False),
+            Argument('update_img', help='update_img',required=False),
+            Argument('v_mount', help='v_mount',required=False),
+            Argument('verifyurl', help='verifyurl',required=False),
+            Argument('volumes', help='volumes',required=False),
         ).parse(request.body)
         if error is None:
             deploy_app = App.objects.filter(key=form.app_name).first()
             if not deploy_app:
                 App.objects.create(
-                    name=form.deployname,
+                    name=form.dpname,
                     key=form.app_name,
                     created_by=request.user
                 )
@@ -250,7 +268,7 @@ class RequestRancherDeployView(View):
             DeployRequest.objects.create(
                 created_by=request.user,
                 name=form.app_name,
-                type=1,
+                type=form.pbtype,
                 extra='[null]',
                 host_ids='[]',
                 status=0,
@@ -259,10 +277,9 @@ class RequestRancherDeployView(View):
             RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
-                project=RancherProject.objects.filter(project_id=form.pop('project_id')).first(),
-                namespace=RancherNamespace.objects.filter(namespace=form.pop('namespace')).first(),
                 **form
             )
+        #     todo:  email send
         return json_response(error=error)
 
 

@@ -4,7 +4,7 @@ import json
 from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, RancherDeployment, RancherSvcPubStandby,ProjectService,ProjectServiceApproval,ProjectServiceApprovalNotice
 from apps.config.models import RancherApiConfig
 import unittest
-
+from django.core.mail import send_mail
 
 class Mytest(unittest.TestCase):
     # def test_get_dev_project(self):
@@ -559,9 +559,20 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                ob = ProjectServiceApprovalNotice.objects.all()
-                for x in ob.values('service__top_project').distinct():
-                    print(x)
+                try:
+                    r = send_mail('易百商城邮箱验证', '易百商城邮箱验证', settings.DEFAULT_FROM_EMAIL,
+                                  ["13113252872@126.com"] )
+                    print(r)
+
+                except Exception as e :
+                    print(e)
+                from apps.app.models import App
+                # m = App.objects.create(name='aaa', key='aaaadd',created_by_id=1)
+                # m.save()
+                # print(m.id)
+                # ob = ProjectServiceApprovalNotice.objects.all()
+                # for x in ob.values('service__top_project').distinct():
+                #     print(x)
                 # m1 = ProjectServiceApproval.objects.create(
                 #     service_id=1,
                 #     pbtype=1,

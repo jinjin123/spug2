@@ -462,28 +462,50 @@ class RancherDeployment(models.Model, ModelMixin):
 
 
 class RancherSvcPubStandby(models.Model, ModelMixin):
+    PUB_TYPE = (
+       (1,'迭代发布'),
+       (2,'bug发布'),
+       (3,'紧急发布'),
+    )
+    DP_TYPE = (
+       (1,'rancher'),
+       (2,'host'),
+    )
     app = models.ForeignKey(App, on_delete=models.PROTECT)
-    createts = models.BigIntegerField(verbose_name="创建时间戳用来计算差异过去的时间回滚")
-    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
-    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
-    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
-    deploy_type = models.CharField(max_length=80, default="0", db_index=True, verbose_name='部署类型')
-    deployid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一')
-    deployname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname')
-    env = models.ForeignKey(Environment, on_delete=models.PROTECT, default=1, verbose_name='环境')
-    img = models.CharField(max_length=255, verbose_name='部署img')
-    project = models.ForeignKey(RancherProject, on_delete=models.PROTECT, verbose_name="所属项目")
-    namespace = models.ForeignKey(RancherNamespace, on_delete=models.PROTECT, verbose_name='所属命名空间')
-    update_img = models.BooleanField()
-    is_audit = models.BooleanField()
-    replica = models.IntegerField(default=1, db_index=True, verbose_name='副本scale伸缩')
-    volumes_detail = SizedTextField(size_class=3, verbose_name='配置映射卷list')
-    volumes = models.CharField(max_length=100, db_index=True, verbose_name='关联数据卷')
-    pubsvc = models.CharField(max_length=300, default="0", verbose_name='暴露端口与服务地址')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间',null=True)
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间',null=True)
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人',null=True)
+    deploy_type = models.IntegerField(choices=DP_TYPE,default=1, null=True, verbose_name='部署类型 host / rancher')
+    pbtype = models.IntegerField(choices=PUB_TYPE, default=1, verbose_name='publish类型',null=True)
+    top_project = models.CharField(max_length=200, verbose_name="所属顶级项目",null=True)
+    toppjid = models.CharField(max_length=200, verbose_name="所属顶级项目id",null=True)
+    pjname = models.CharField(db_index=True, max_length=80, verbose_name='rancher项目名称唯一', null=True)
+    pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    nsname = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+    nsid = models.CharField(max_length=50, verbose_name='ranchernamespaceid唯一', null=True)
+    dpid = models.CharField(max_length=80, db_index=True, verbose_name='部署app唯一',null=True)
+    dpname = models.CharField(max_length=80, db_index=True, verbose_name='部署appname',null=True)
+    v_mount = models.CharField(max_length=1500,verbose_name="挂载详情",null=True)
+    volumes = models.CharField(max_length=1500,verbose_name="卷详情",null=True)
+    cbox_env = models.CharField(max_length=1500,verbose_name="容器变量",null=True)
+    verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
+    configId = models.CharField(max_length=200, verbose_name='configId',null=True)
+    configName = models.CharField(max_length=200, verbose_name='配置映射卷名',null=True)
+    configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]', default='[]',null=True)
+    rancher_url = models.CharField(max_length=200, verbose_name="rancher前缀url", null=True)
+    env = models.ForeignKey(Environment, verbose_name='环境', null=True,on_delete=models.PROTECT)
+    developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
+    opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
+    pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
+    img = models.CharField(max_length=255, verbose_name='部署img',null=True)
+    update_img = models.BooleanField(verbose_name="更新镜像",null=True)
+    is_audit = models.BooleanField(verbose_name="是否审核",null=True)
+    replica = models.IntegerField(default=1, db_index=True, verbose_name='副本scale伸缩',null=True)
+    state = models.BooleanField(verbose_name="发布状态", null=True)
+    publish_time = models.DateTimeField(null=True,verbose_name="定时发布时间 未来")
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tmp['project_id'] = self.project.project_id
         return tmp
 
     class Meta:
