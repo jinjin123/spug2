@@ -60,27 +60,29 @@ class ComTable extends React.Component {
   }, {
     title: '发布环境',
     dataIndex: 'env_name',
-  }, {
-    title: '版本',
-    render: info => {
-      if (info['app_extend'] === '1') {
-        const [type, ext1, ext2] = info.extra;
-        if (type === 'branch') {
-          return <React.Fragment>
-            <Icon type="branches"/> {ext1}#{ext2.substr(0, 6)}
-          </React.Fragment>
-        } else {
-          return <React.Fragment>
-            <Icon type="tag"/> {ext1}
-          </React.Fragment>
-        }
-      } else {
-        return <React.Fragment>
-          <Icon type="build"/> {info.extra[0]}
-        </React.Fragment>
-      }
-    }
-  }, {
+  }, 
+  // {
+  //   title: '版本',
+  //   render: info => {
+  //     if (info['app_extend'] === '1') {
+  //       const [type, ext1, ext2] = info.extra;
+  //       if (type === 'branch') {
+  //         return <React.Fragment>
+  //           <Icon type="branches"/> {ext1}#{ext2.substr(0, 6)}
+  //         </React.Fragment>
+  //       } else {
+  //         return <React.Fragment>
+  //           <Icon type="tag"/> {ext1}
+  //         </React.Fragment>
+  //       }
+  //     } else {
+  //       return <React.Fragment>
+  //         <Icon type="build"/> {info.extra[0]}
+  //       </React.Fragment>
+  //     }
+  //   }
+  // }, 
+  {
     title: '状态',
     render: info => {
       if (info.status === '-1' && info.reason) {
@@ -101,7 +103,39 @@ class ComTable extends React.Component {
         return <Tag>{info['status_alias']}</Tag>
       }
     }
-  }, {
+  }, 
+  {
+    title: '发布类型',
+    dataIndex: 'type',
+  },
+  {
+    title: '运维审核状态',
+    // dataIndex: 'opsstatus',
+    render: info => {
+      if (info.opsstatus === '-1' && info.reason) {
+        return <Popover title="驳回原因:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['opsstatus_alias']}</span>
+        </Popover>
+      } else if (info.opsstatus === '1' && info.reason) {
+        return <Popover title="审核意见:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['opsstatus_alias']}</span>
+        </Popover>
+      } else if (info.opsstatus === '2') {
+        return <Tag color="blue">{info['opsstatus_alias']}</Tag>
+      } else if (info.opsstatus === '3') {
+        return <Tag color="green">{info['opsstatus_alias']}</Tag>
+      } else if (info.opsstatus === '-3') {
+        return <Tag color="red">{info['opsstatus_alias']}</Tag>
+      } else {
+        return <Tag>{info['opsstatus_alias']}</Tag>
+      }
+    }
+  },
+  {
+    title: '运维审核人',
+    dataIndex: 'opshandler',
+  },  
+  {
     title: '申请人',
     dataIndex: 'created_by_user',
   }, {
@@ -167,6 +201,14 @@ class ComTable extends React.Component {
       }
     }
   }];
+  rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    },
+    getCheckboxProps: record => ({
+      
+    }),
+  };
 
   handleRollback = (info) => {
     this.setState({loading: true});
@@ -225,6 +267,7 @@ class ComTable extends React.Component {
     return (
       <Table
         rowKey="id"
+        rowSelection={this.rowSelection}
         loading={store.isFetching}
         dataSource={data}
         pagination={{

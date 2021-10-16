@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Table,  Tag,  message,Select } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
+import noticStore from '../notice/store';
 // import { Action } from "components";
 const { Column } = Table;
 @observer
@@ -77,6 +78,9 @@ class ComTable extends React.Component {
             moreAction : "更多操作...."
           })
         },1500)
+        if ((noticStore.records).length === 0){
+          noticStore.fetchRecords()
+        }
         break;
           ;;
     }

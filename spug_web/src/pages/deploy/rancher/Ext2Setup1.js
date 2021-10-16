@@ -6,8 +6,9 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { Switch, Col, Form, Select, Button } from "antd";
+import { Switch, Col, Form, Select, Button,Input } from "antd";
 import store from './store';
+import noticeStore from '../notice/store';
 
 export default observer(function Ext2Setup1() {
   const [envs, setEnvs] = useState([]);
@@ -26,7 +27,16 @@ export default observer(function Ext2Setup1() {
   // }, [])
 
   const info = store.record;
-  console.log(store.pbtype)
+  console.log(info["dpname"])
+  let call_us = noticeStore.records
+  call_us = call_us.filter(item => item["dpname"].toLowerCase().includes(info["dpname"].toLowerCase()))
+  const call_tmp = []
+  if (call_us.length >0 ) {
+    call_us.map((item) => {
+        call_tmp.push(item["nickname"])
+    })
+  }
+  console.log(call_us)
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="发布环境">
@@ -58,7 +68,7 @@ export default observer(function Ext2Setup1() {
             <Select.Option  value={1} key={1}>迭代发布</Select.Option>
             <Select.Option  value={2} key={2}>bug发布</Select.Option>
             <Select.Option  value={3} key={3}>紧急发布</Select.Option>
-            <Select.Option  value={4} key={4}>回滚发布</Select.Option>
+            {/* <Select.Option  value={4} key={4}>回滚发布</Select.Option> */}
           </Select>
         </Col>
       </Form.Item>
@@ -82,6 +92,15 @@ export default observer(function Ext2Setup1() {
         onChange={e => info['rst_notify']['value'] = e.target.value}
         placeholder="请输入"/>
       </Form.Item> */}
+      <Form.Item  required label="审核通知对象人">
+          <Col span={16} >
+            {/* notice somebody on backend check the notice table mapping */}
+            <Input disabled value={call_tmp.length >0 ? call_tmp.join(";") :  "opsgroup"}/>
+          </Col>
+          <Col span={6} offset={2}>
+          <Link disabled={store.isReadOnly} to="/deploy/rancher/notice">新建审核通知人</Link>
+        </Col>
+      </Form.Item>
       <Form.Item wrapperCol={{span: 14, offset: 6}}>
         <Button
           type="primary"

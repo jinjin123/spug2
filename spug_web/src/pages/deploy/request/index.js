@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message } from 'antd';
+import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message,Icon,Divider } from 'antd';
 import { SearchForm, AuthFragment, AuthCard } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
@@ -103,6 +103,10 @@ class Index extends React.Component {
             </Radio.Group>
           </Col>
           <Col span={8} style={{textAlign: 'right'}}>
+            <AuthFragment auth="deploy.request.patch">
+                <Button type="primary" > <Icon type="thunderbolt" />批量发布</Button>
+              </AuthFragment>
+              <Divider type="vertical"/>
             <AuthFragment auth="deploy.request.del">
               <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
             </AuthFragment>

@@ -80,12 +80,13 @@ class Ext2Setup3 extends React.Component {
     // info['host_actions'] = info['host_actions'].filter(x => (x.title && x.data) || (x.title && (x.src || x.src_mode === '1') && x.dst));
     // info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
     store.record["pbtype"] = store.pbtype
-    console.log(store.record)
-    // http.post('/api/deploy/request/rancher/', store.record)
-    //   .then(res => {
-    //     message.success('建立发布审批单成功！');
-    //     store.ext2Visible = false;
-    //   }, () => this.setState({loading: false}))
+    store.record["state"] = null
+    // console.log(store.record)
+    http.post('/api/deploy/request/rancher/', store.record)
+      .then(res => {
+        message.success('建立发布审批单成功！');
+        store.ext2Visible = false;
+      }, () => this.setState({loading: false}))
   };
 
   render() {
