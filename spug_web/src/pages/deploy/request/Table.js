@@ -112,19 +112,19 @@ class ComTable extends React.Component {
     title: '运维审核状态',
     // dataIndex: 'opsstatus',
     render: info => {
-      if (info.opsstatus === '-1' && info.reason) {
+      if (info.opsstatus === -1 && info.reason) {
         return <Popover title="驳回原因:" content={info.reason}>
           <span style={{color: '#1890ff'}}>{info['opsstatus_alias']}</span>
         </Popover>
-      } else if (info.opsstatus === '1' && info.reason) {
+      } else if (info.opsstatus === 1 && info.reason) {
         return <Popover title="审核意见:" content={info.reason}>
           <span style={{color: '#1890ff'}}>{info['opsstatus_alias']}</span>
         </Popover>
-      } else if (info.opsstatus === '2') {
+      } else if (info.opsstatus === 2) {
         return <Tag color="blue">{info['opsstatus_alias']}</Tag>
-      } else if (info.opsstatus === '3') {
+      } else if (info.opsstatus === 3) {
         return <Tag color="green">{info['opsstatus_alias']}</Tag>
-      } else if (info.opsstatus === '-3') {
+      } else if (info.opsstatus === -3) {
         return <Tag color="red">{info['opsstatus_alias']}</Tag>
       } else {
         return <Tag>{info['opsstatus_alias']}</Tag>

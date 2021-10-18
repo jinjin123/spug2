@@ -120,11 +120,21 @@ class ComTable extends React.Component {
           <Table.Column title="系统" dataIndex="osType"/>
           <Table.Column title="版本" dataIndex="osVerion"/>
           <Table.Column title="内核版本" dataIndex="coreVerion"/>
-          <Table.Column title="cpu个数" dataIndex="cpus"/>
-          <Table.Column title="cpu单U(核)" dataIndex="cpucore"/>
+          <Table.Column title="cpu逻辑核心" dataIndex="cpus"/>
+          {/* <Table.Column title="cpu单U(核)" dataIndex="cpucore"/> */}
+          
           <Table.Column title="内存(G)" dataIndex="memory"/>
           <Table.Column title="状态" dataIndex="status"/>
           <Table.Column title="挂载盘数" dataIndex="disks"/>
+
+          <Table.Column title="运营商" dataIndex="provider"/>
+          <Table.Column title="资源类型" dataIndex="resource_type"/>
+          <Table.Column title="工作区域" dataIndex="work_zone"/>
+          <Table.Column title="外网IP" dataIndex="outter_ip"/>
+          <Table.Column title="虚拟IP" dataIndex="v_ip"/>
+          <Table.Column title="实际用途" dataIndex="use_for"/>
+
+
           {/* <Table.Column title="挂载盘" dataIndex="disk" ellipsis/> */}
           <Table.Column title="序列号" dataIndex="serial_num"/>
           <Table.Column title="供应商" dataIndex="supplier"/>

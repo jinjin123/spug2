@@ -184,7 +184,11 @@ class ComForm extends React.Component {
           <Form.Item required label="连接地址" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
-                <Input addonBefore="ssh" placeholder="用户名"/>
+                // <Input addonBefore="ssh" placeholder="用户名"/>
+                <Select defaultValue={info["username"]}  placeholder="用户">
+                  <Select.Option value={"root"} key={0}>{"root"}</Select.Option>
+                  <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option>
+              </Select>
               )}
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 'calc(40%)'}}>
@@ -198,17 +202,52 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
           </Form.Item>
+          
+            <Form.Item required label="资源类型" style={{marginBottom: 0}}>
+              <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+                {getFieldDecorator('res_t', {initialValue: info['res_t']})(
+                  // <Input addonBefore="ssh" placeholder="用户名"/>
+                  <Select defaultValue={info["res_t"]}  placeholder="资源类型">
+                    <Select.Option value={0} key={0}>{"主机"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"数据库"}</Select.Option>
+                    <Select.Option value={2} key={2}>{"redis"}</Select.Option>
+                </Select>
+                )}
+              </Form.Item>
+            </Form.Item>
+            <Form.Item required label="运营商" style={{marginBottom: 0}}>
+              <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+                {getFieldDecorator('provider', {initialValue: info['provider']})(
+                  // <Input addonBefore="ssh" placeholder="用户名"/>
+                  <Select defaultValue={info["provider"]}  placeholder="运营商">
+                    <Select.Option value={0} key={0}>{"电信"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"联通"}</Select.Option>
+                    <Select.Option value={2} key={2}>{"移动"}</Select.Option>
+                </Select>
+                )}
+              </Form.Item>
+            </Form.Item>
           <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
             <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={this.handleUpload}
                     onChange={this.handleUploadChange}>
               {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>
           </Form.Item>
-          <Form.Item label="状态">
+          {/* <Form.Item label="状态">
             {getFieldDecorator('status', {initialValue: info['status']})(
               <Input  placeholder="Y/N 上线或下线"/>
             )}
-          </Form.Item>
+          </Form.Item> */}
+          {/* <Form.Item required label="连接地址"  style={{display: 'inline-block', width: 'calc(30%)'}}>
+              {getFieldDecorator('res_t', {initialValue: info['res_t']})(
+                // <Input addonBefore="ssh" placeholder="用户名"/>
+                <Select defaultValue={info["res_t"]}  placeholder="资源类型">
+                  <Select.Option value={"host"} key={0}>{"主机"}</Select.Option>
+                  <Select.Option value={"db"} key={1}>{"数据库"}</Select.Option>
+                  <Select.Option value={"redis"} key={2}>{"redis"}</Select.Option>
+              </Select>
+              )}
+            </Form.Item> */}
           <Form.Item label="备注信息">
             {getFieldDecorator('desc', {initialValue: info['desc']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>

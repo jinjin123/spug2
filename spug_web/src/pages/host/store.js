@@ -22,12 +22,19 @@ class Store {
   @observable f_host;
   @observable f_ip;
 
+  @observable res_t;
+  @observable w_z;
+  @observable provider;
+
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/host/')
-      .then(({hosts, zones, perms}) => {
+      .then(({hosts, zones, perms, res_t,w_z,provider}) => {
         this.records = hosts;
         this.zones = zones;
+        this.res_t = res_t;
+        this.w_z = w_z;
+        this.provider = provider;
         this.permRecords = hosts.filter(item => perms.includes(item.id));
         for (let item of hosts) {
           this.idMap[item.id] = item
