@@ -10,12 +10,15 @@ from django_redis import get_redis_connection
 from apps.config.models import RancherApiConfig
 from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace,App
+from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace,App,ProjectService,ProjectServiceApprovalNotice
 from apps.deploy.utils import deploy_dispatch, Helper
+from apps.account.models import User
 from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
 from datetime import datetime
+from apps.app.tasks import send_mail_task
+
 import subprocess
 import json
 import uuid
@@ -277,9 +280,22 @@ class RequestRancherDeployView(View):
             RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
+                service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,img=form.img).first(),
                 **form
             )
-        #     todo:  email send
+        pblist = RancherSvcPubStandby.objects.filter(state=0).all()
+        for item in pblist:
+            if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
+                notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
+                to_email=[ item["notice_user__email"] for item in notice]
+                send_mail_task.delay(subject="%s%s应用发布审核申请"%(form.top_project,form.dpname), content="{}项目{}应用发布审核申请".format(form.top_project,form.dpname),
+                                     from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
+            else:
+                to_email = [item["notice_user__email"] for item in User.objects.filter(role_id=1).values("email").all()]
+                send_mail_task.delay(subject="%s%s应用发布审核申请" % (form.top_project, form.dpname),
+                                 content="{}项目{}应用发布审核申请".format(form.top_project, form.dpname),
+                                 from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+
         return json_response(error=error)
 
 
@@ -353,6 +369,8 @@ class RequestDetailView(View):
             req.approve_at = human_datetime()
             req.approve_by = request.user
             req.status = '1' if form.is_pass else '-1'
+            req.opsstatus = 1 if form.is_pass else -1
+            req.opshandler = request.user.nickname
             req.reason = form.reason
             req.save()
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()
@@ -376,3 +394,16 @@ def do_upload(request):
         return json_response(file_name)
     else:
         return HttpResponseBadRequest()
+
+
+# def create_email_message(subject, content, to_mail=None, from_mail=settings.DEFAULT_FROM_EMAIL, send=True):
+    # message = EmailRecord.objects.create(
+    #     to_email=to_mail,
+    #     from_email=from_mail,
+    #     subject=subject,
+    #     content=content,
+    # )
+    # from django.core import serializers
+    # messageobj = serializers.serialize('json', message)
+    # if send:
+    #     send_mail_task.delay()

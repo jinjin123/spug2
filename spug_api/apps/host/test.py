@@ -98,8 +98,8 @@ class Mytest(unittest.TestCase):
                         disks=len(ser["ansible_facts"]["ansible_mounts"]),
                         # memory= int(ser["ansible_facts"]["ansible_memory_mb"]["real"]["total"] / 1024 ),
                         memory=math.ceil(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ),
-                        cpus=ser["ansible_facts"]["ansible_processor_count"],
-                        cpucore=ser["ansible_facts"]["ansible_processor_cores"],
+                        cpus=int(ser["ansible_facts"]["ansible_processor_count"]) * int(ser["ansible_facts"]["ansible_processor_cores"]) ,
+                        # cpucore=ser["ansible_facts"]["ansible_processor_cores"],
                         hostname=ser["ansible_facts"]["ansible_nodename"],
                         supplier=ser["ansible_facts"]["ansible_system_vendor"],
                     )

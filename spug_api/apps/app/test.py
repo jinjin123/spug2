@@ -559,13 +559,37 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                try:
-                    r = send_mail('易百商城邮箱验证', '易百商城邮箱验证', settings.DEFAULT_FROM_EMAIL,
-                                  ["13113252872@126.com"] )
-                    print(r)
+                from apps.account.models import User
+                a = User.objects.all().values("email")
+                print(a)
+                # x = ProjectServiceApprovalNotice.objects.filter(service_id=1).values("notice_user__email").all()
+                # a = []
+                # for b in x:
+                #    a.append(b["notice_user__email"])
+                # print(",".join(a))
+                # print(ProjectServiceApprovalNotice.objects.filter(service_id=1).first())
+                # for x in a:
+                #     print(x.state)
+                #    print(x.to_dict())
 
-                except Exception as e :
-                    print(e)
+                # from apps.message.models import EmailRecord
+                # message = EmailRecord.objects.create(
+                #     to_email="13113252872@126.com",
+                #     from_email=settings.DEFAULT_FROM_EMAIL,
+                #     subject="aaa",
+                #     content="aaa",
+                # )
+                # if not isinstance(message, EmailRecord):
+                #     print("aaaa")
+                #     return
+                # print(message.to_email)
+                # try:
+                #     r = send_mail('易百商城邮箱验证', '易百商城邮箱验证', settings.DEFAULT_FROM_EMAIL,
+                #                   ["13113252872@126.com"] )
+                #     print(r)
+                #
+                # except Exception as e :
+                #     print(e)
                 from apps.app.models import App
                 # m = App.objects.create(name='aaa', key='aaaadd',created_by_id=1)
                 # m.save()

@@ -219,3 +219,8 @@ def get_data(sql):
     # connection.close
     # 返给结果给函数调用者。
     return result
+
+
+
+
+

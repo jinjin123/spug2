@@ -6,7 +6,7 @@ from django.conf import settings
 import json
 from apps.app.models import RancherNamespace,RancherConfigMap
 from django.core.mail import send_mail
-from apps.message.models import  EmailRecord
+from apps.message.models import EmailRecord
 import logging
 logger = logging.getLogger('spug_info')
 
@@ -67,17 +67,23 @@ def get_configMap():
 
 
 @app.task
-def send_mail_task(message_obj):
+def send_mail_task(subject,content,from_mail,to_email):
     """发送邮件"""
-    if not isinstance(message_obj, EmailRecord):
-        msg = 'send_mail_task_error:message_obj is not EmailRecord obj'
-        logger.error(msg)
-        return msg
+    # if not isinstance(message_obj, EmailRecord):
+    #     msg = 'send_mail_task_error:message_obj is not EmailRecord obj'
+    #     logger.error(msg)
+    #     return msg
     try:
-        r = send_mail(message_obj.subject, message_obj.content, message_obj.from_email,
-                      [message_obj.to_email], fail_silently=False)
+        r = send_mail(subject, content, from_mail,
+                      [to_email], fail_silently=False)
         if r > 0:
-            message_obj.is_pushed = True
-            message_obj.save()
+            message = EmailRecord.objects.create(
+                to_email=to_email,
+                from_email=from_mail,
+                subject=subject,
+                content=content,
+            )
+            message.is_pushed = True
+            message.save()
     except:
         logger.error('send_mail_task_error', exc_info=True)

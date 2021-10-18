@@ -11,8 +11,18 @@ import ast
 
 class Host(models.Model, ModelMixin):
     STATUS_CHOOSE = (
-        ('Y', 'up'),
-        ('N', 'down'),
+        (0, '在线'),
+        (1, '离线'),
+    )
+    PV_CHOOSE = (
+        (0, '电信'),
+        (1, '联通'),
+        (2, '移动'),
+    )
+    PT_CHOOSE = (
+        (0, '主机'),
+        (1, '数据库'),
+        (2, 'redis'),
     )
     top_project = models.CharField(max_length=128, verbose_name="顶级项目", null=True)
     top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
@@ -26,17 +36,25 @@ class Host(models.Model, ModelMixin):
     disks = models.IntegerField(verbose_name='数据盘数量', null=True)
     # disks_capacity = models.CharField(max_length=255, verbose_name="数据盘容量'',''", null=True)
     memory = models.IntegerField(verbose_name='内存GB', null=True)
-    cpus = models.IntegerField(default=0, verbose_name='cpu数量', null=True)
-    cpucore = models.IntegerField(default=0, verbose_name='cpu物理核', null=True)
-    serial_num = models.CharField(verbose_name='序列号', max_length=100, null=True)
-    status = models.CharField(max_length=15,choices=STATUS_CHOOSE, default='Y', verbose_name='同步监控状态(关机释放下线)', null=True)
+    cpus = models.IntegerField(default=0, verbose_name='cpu逻辑数量', null=True)
+    # cpucore = models.IntegerField(default=0, verbose_name='cpu物理核', null=True)
+    # serial_num = models.CharField(verbose_name='序列号', max_length=100, null=True)
+    status = models.IntegerField(choices=STATUS_CHOOSE, default=0, verbose_name='同步监控状态(关机释放下线)', null=True)
     hostname = models.CharField(max_length=100, verbose_name='主机名', null=True)
+
+    provider = models.IntegerField(choices=PV_CHOOSE,verbose_name='运营商', null=True)
+    resource_type = models.IntegerField(choices=PT_CHOOSE,verbose_name="资产类型",null=True)
+    work_zone = models.CharField(max_length=20,verbose_name="work area",null=True)
+    outter_ip = models.CharField(max_length=15, verbose_name="outerip", null=True)
+    v_ip = models.CharField(max_length=15, verbose_name="v_ip", null=True)
+    use_for =models.CharField(max_length=255,verbose_name="use for" ,null=True)
+
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
     host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
     ext_config1 = models.CharField(max_length=255, verbose_name='扩展信息', null=True)
     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
     opsper = models.CharField(max_length=200, verbose_name='运维负责人' ,null=True)
-    zone = models.CharField(max_length=50,verbose_name="分组", null=True)
+    zone = models.CharField(max_length=50,verbose_name="项目分组", null=True)
     # create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -72,6 +90,7 @@ class Host(models.Model, ModelMixin):
         tmp["disk"] = tt
         tmp['create_by'] = self.create_by.username
         tmp['env'] = ""
+        tmp['status'] =  "在线" if self.status == 0 else "离线"
         return tmp
 
     class Meta:

@@ -10,6 +10,9 @@ class EmailRecord(models.Model):
     content = models.TextField(verbose_name='邮件内容')
     is_pushed = models.BooleanField(default=False, verbose_name='是否已经发送')
 
+    def __iter__(self):
+        return self
+
     class Meta:
         db_table = 'email'
         app_label = 'message'

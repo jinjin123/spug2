@@ -28,8 +28,11 @@ class HostView(View):
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
         hosts = Host.objects.all()
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+        res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
+        w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
+        provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        return json_response({'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
     def post(self, request):
         form, error = JsonParser(
@@ -40,7 +43,7 @@ class HostView(View):
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
-            Argument('status', handler=str.strip,required=True,help='上线/下线status状态'),
+            # Argument('status', handler=str.strip,required=True,help='上线/下线status状态'),
             Argument('comment', required=False),
             Argument('password', required=False),
         ).parse(request.body)
