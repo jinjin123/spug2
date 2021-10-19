@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table, Modal, message,Select } from 'antd';
+import { Table, Modal, message,Select, Tag } from 'antd';
 import { Action } from 'components';
 import ComForm from './Form';
 import ComImport from './Import';
@@ -103,7 +103,7 @@ class ComTable extends React.Component {
           // size="middle"
           dataSource={data}
           expandedRowRender={data => <p style={{ margin: 0 }}>{data.disk}</p>}
-          scroll={{ x: '175%' }}
+          scroll={{ x: '210%' }}
           pagination={{
             showSizeChanger: true,
             showLessItems: true,
@@ -117,6 +117,7 @@ class ComTable extends React.Component {
           <Table.Column title="连接用户" dataIndex="username"/>
           <Table.Column width={100} title="端口" dataIndex="port"/>
           <Table.Column title="分组" dataIndex="zone"/>
+          <Table.Column title="系统类型" dataIndex="ostp"/>
           <Table.Column title="系统" dataIndex="osType"/>
           <Table.Column title="版本" dataIndex="osVerion"/>
           <Table.Column title="内核版本" dataIndex="coreVerion"/>
@@ -124,7 +125,18 @@ class ComTable extends React.Component {
           {/* <Table.Column title="cpu单U(核)" dataIndex="cpucore"/> */}
           
           <Table.Column title="内存(G)" dataIndex="memory"/>
-          <Table.Column title="状态" dataIndex="status"/>
+          {/* <Table.Column title="状态" dataIndex="status"/> */}
+
+          <Table.Column
+            title="状态"
+            dataIndex="status"
+            key="status"
+            render={(status) => (
+              <Tag color={status === "在线" ? "green":"volcano"} key={status}>
+              {status ==="在线" ? "在线" : "离线"}
+            </Tag>
+            )}
+          />
           <Table.Column title="挂载盘数" dataIndex="disks"/>
 
           <Table.Column title="运营商" dataIndex="provider"/>

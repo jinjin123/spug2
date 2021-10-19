@@ -15,6 +15,7 @@ class Store {
   @observable idMap = {};
   @observable isFetching = false;
   @observable formVisible = false;
+  @observable winformVisible = false;
   @observable importVisible = false;
 
   @observable f_name;
@@ -22,18 +23,23 @@ class Store {
   @observable f_host;
   @observable f_ip;
 
-  @observable res_t;
-  @observable w_z;
-  @observable provider;
+  @observable res_t= [];
+  @observable w_z =[];
+  @observable provider=[];
+  @observable ostp=[];
 
+  @observable pvd;
+  @observable otp;
+  @observable rtp;
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/host/')
-      .then(({hosts, zones, perms, res_t,w_z,provider}) => {
+      .then(({hosts, zones, perms, res_t,w_z,provider,ostp}) => {
         this.records = hosts;
         this.zones = zones;
         this.res_t = res_t;
         this.w_z = w_z;
+        this.ostp = ostp;
         this.provider = provider;
         this.permRecords = hosts.filter(item => perms.includes(item.id));
         for (let item of hosts) {

@@ -20,6 +20,36 @@ export default observer(function () {
             ))}
           </Select>
         </SearchForm.Item>
+        <SearchForm.Item span={4} title="系统类型">
+          <Select allowClear placeholder="请选择" value={store.otp} onChange={v => store.otp = v}>
+            {store.ostp.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+        </SearchForm.Item>
+        {/* <SearchForm.Item span={6} title="运营商">
+          <Select allowClear placeholder="请选择" value={store.pvd} onChange={v => store.pvd = v}>
+            {store.provider.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+        </SearchForm.Item>
+
+        <SearchForm.Item span={6} title="系统类型">
+          <Select allowClear placeholder="请选择" value={store.otp} onChange={v => store.otp = v}>
+            {store.ostp.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+        </SearchForm.Item>
+        <SearchForm.Item span={6} title="资产类型">
+          <Select allowClear placeholder="请选择" value={store.rtp} onChange={v => store.rtp = v}>
+            {store.res_t.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+        </SearchForm.Item> */}
+
         {/* <SearchForm.Item span={6} title="主机别名">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item> */}

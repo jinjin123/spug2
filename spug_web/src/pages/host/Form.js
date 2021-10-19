@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Upload, message } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
+import envStore from 'pages/config/environment/store';
 
 @observer
 class ComForm extends React.Component {
@@ -28,6 +29,9 @@ class ComForm extends React.Component {
       this.setState({
         fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
       })
+    }
+    if (envStore.records.length === 0) {
+      envStore.fetchRecords()
     }
   }
 
@@ -143,6 +147,13 @@ class ComForm extends React.Component {
       .finally(() => this.setState({uploading: false}))
     return false
   };
+  handleOsForm = (v) => {
+    console.log(v)
+    //  1  win
+    if(v===1){
+      store.winformVisible = true;
+    }
+  }
 
   render() {
     const info = store.record;
@@ -162,7 +173,7 @@ class ComForm extends React.Component {
           <Form.Item required label="主机类别">
             <Col span={14}>
               {getFieldDecorator('zone', {initialValue: info['zone']})(
-                <Select placeholder="请选择主机类别/区域/分组">
+                <Select placeholder="请选择主机项目分组">
                   {store.zones.map(item => (
                     <Select.Option value={item} key={item}>{item}</Select.Option>
                   ))}
@@ -176,6 +187,17 @@ class ComForm extends React.Component {
               <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
             </Col>
           </Form.Item>
+          <Form.Item required label="系统类型" style={{marginBottom: 0}}>
+              <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
+                {getFieldDecorator('ostp', {initialValue: info['ostp']})(
+                  // <Input addonBefore="ssh" placeholder="用户名"/>
+                  <Select  onChange={this.handleOsForm}  placeholder="系统类型">
+                    <Select.Option value={0} key={0}>{"Linux"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"Windows"}</Select.Option>
+                </Select>
+                )}
+              </Form.Item>
+            </Form.Item>
           {/* <Form.Item required label="主机名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入主机名称"/>
@@ -185,7 +207,7 @@ class ComForm extends React.Component {
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>
-                <Select defaultValue={info["username"]}  placeholder="用户">
+                <Select  placeholder="用户">
                   <Select.Option value={"root"} key={0}>{"root"}</Select.Option>
                   <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option>
               </Select>
@@ -204,10 +226,10 @@ class ComForm extends React.Component {
           </Form.Item>
           
             <Form.Item required label="资源类型" style={{marginBottom: 0}}>
-              <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+              <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
                 {getFieldDecorator('res_t', {initialValue: info['res_t']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
-                  <Select defaultValue={info["res_t"]}  placeholder="资源类型">
+                  <Select  placeholder="资源类型">
                     <Select.Option value={0} key={0}>{"主机"}</Select.Option>
                     <Select.Option value={1} key={1}>{"数据库"}</Select.Option>
                     <Select.Option value={2} key={2}>{"redis"}</Select.Option>
@@ -216,10 +238,10 @@ class ComForm extends React.Component {
               </Form.Item>
             </Form.Item>
             <Form.Item required label="运营商" style={{marginBottom: 0}}>
-              <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+              <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
                 {getFieldDecorator('provider', {initialValue: info['provider']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
-                  <Select defaultValue={info["provider"]}  placeholder="运营商">
+                  <Select  placeholder="运营商">
                     <Select.Option value={0} key={0}>{"电信"}</Select.Option>
                     <Select.Option value={1} key={1}>{"联通"}</Select.Option>
                     <Select.Option value={2} key={2}>{"移动"}</Select.Option>
@@ -227,6 +249,7 @@ class ComForm extends React.Component {
                 )}
               </Form.Item>
             </Form.Item>
+          
           <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
             <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={this.handleUpload}
                     onChange={this.handleUploadChange}>
@@ -248,8 +271,88 @@ class ComForm extends React.Component {
               </Select>
               )}
             </Form.Item> */}
+          <Form.Item required label="实体项目">
+            {getFieldDecorator('top_project', {initialValue: info['top_project']})(
+                <Select  placeholder="实体项目">
+                    <Select.Option value={0} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
+                    <Select.Option value={2} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
+                    <Select.Option value={3} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
+                    <Select.Option value={4} key={4}>{"疫情地图项目"}</Select.Option>
+                    <Select.Option value={5} key={5}>{"粤康码"}</Select.Option>
+                </Select>
+            )}
+          </Form.Item>
+          {/* <Form.Item  required label="顶级项目id">
+            {getFieldDecorator('top_projectid', {initialValue: info['top_projectid']})(
+              <Input  placeholder="顶级项目id"/>
+            )}
+          </Form.Item> */}
+          <Form.Item  required label="内网IP">
+            {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
+              <Input  placeholder="内网ip地址"/>
+            )}
+          </Form.Item>
+            <Form.Item  label="服务包">
+            {getFieldDecorator('service_pack', {initialValue: info['service_pack']})(
+              <Input  placeholder="服务包"/>
+            )}
+          </Form.Item>
+          <Form.Item   label="工作区域">
+            {getFieldDecorator('work_zone', {initialValue: info['work_zone']})(
+              <Input  placeholder="工作区域"/>
+            )}
+          </Form.Item>
+          <Form.Item   label="外网IP">
+            {getFieldDecorator('outter_ip', {initialValue: info['outter_ip']})(
+              <Input  placeholder="外网VIP"/>
+            )}
+          </Form.Item>
+            <Form.Item   label="虚拟VIP">
+            {getFieldDecorator('v_ip', {initialValue: info['v_ip']})(
+              <Input  placeholder="虚拟VIP"/>
+            )}
+          </Form.Item>
+          <Form.Item required label="环境">
+            {getFieldDecorator('env', {initialValue: info['env']})(
+                <Select placeholder="环境">
+                    <Select.Option value={0} key={0}>{"生产"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"测试"}</Select.Option>
+                </Select>
+            )}
+          </Form.Item>
+          <Form.Item  label="实际用途">
+            {getFieldDecorator('use_for', {initialValue: info['use_for']})(
+              <Input.TextArea  placeholder="实际用途"/>
+            )}
+          </Form.Item>
+          <Form.Item  label="服务版本补丁">
+            {getFieldDecorator('host_bug', {initialValue: info['host_bug']})(
+              <Input.TextArea placeholder="host_bug"/>
+            )}
+          </Form.Item>
+          <Form.Item label="扩展配置">
+            {getFieldDecorator('ext_config1', {initialValue: info['ext_config1']})(
+              <Input placeholder="扩展配置"/>
+            )}
+          </Form.Item>
+          <Form.Item label="开发负责人">
+            {getFieldDecorator('developer', {initialValue: info['developer']})(
+              <Input placeholder="developer"/>
+            )}
+          </Form.Item>
+          <Form.Item label="运维负责人">
+            {getFieldDecorator('opsper', {initialValue: info['opsper']})(
+              <Input  placeholder="opsper"/>
+            )}
+          </Form.Item>
+          {/* <Form.Item label="密钥">
+            {getFieldDecorator('pkey', {initialValue: info['pkey']})(
+                <Input.TextArea placeholder="密钥"/>
+            )}
+          </Form.Item> */}
           <Form.Item label="备注信息">
-            {getFieldDecorator('desc', {initialValue: info['desc']})(
+            {getFieldDecorator('comment', {initialValue: info['comment']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>
             )}
           </Form.Item>
