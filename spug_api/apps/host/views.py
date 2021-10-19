@@ -28,11 +28,13 @@ class HostView(View):
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
         hosts = Host.objects.all()
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+            # x.get_ostp_display()
+        ostp = ["Linux"  if x["ostp"] == 0 else "windows" for x in hosts.order_by('ostp').values('ostp').distinct() ]
         res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
         w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
         provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        return json_response({"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
     def post(self, request):
         form, error = JsonParser(
@@ -102,7 +104,7 @@ class HostView(View):
                 return json_response(error=f'主机已待回收')
             t = Host.objects.filter(pk=form.id).first()
             Host.objects.filter(pk=form.id).update(
-                zone="待回收" ,
+                zone="待回收",
                 ipaddress="",
                 iprelease=t.ipaddress,
                 deleted_at=human_datetime(),

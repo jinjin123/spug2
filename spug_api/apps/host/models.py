@@ -24,9 +24,13 @@ class Host(models.Model, ModelMixin):
         (1, '数据库'),
         (2, 'redis'),
     )
+    OS_TYPE = (
+        (0, 'Linux'),
+        (1, 'Windows'),
+    )
     top_project = models.CharField(max_length=128, verbose_name="顶级项目", null=True)
     top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
-    ipaddress = models.CharField(max_length=15, verbose_name="ip", null=True)
+    ipaddress = models.CharField(max_length=1500, verbose_name="ip", null=True)
     service_pack = models.CharField(max_length=500, verbose_name="包含哪些服务类型包'',''", null=True)
     osType = models.CharField(max_length=155,verbose_name='系统类型', null=True)
     osVerion = models.CharField(max_length=100,verbose_name='发行版本', null=True)
@@ -42,6 +46,7 @@ class Host(models.Model, ModelMixin):
     status = models.IntegerField(choices=STATUS_CHOOSE, default=0, verbose_name='同步监控状态(关机释放下线)', null=True)
     hostname = models.CharField(max_length=100, verbose_name='主机名', null=True)
 
+    ostp = models.IntegerField(choices=OS_TYPE,verbose_name="os type",null=True)
     provider = models.IntegerField(choices=PV_CHOOSE,verbose_name='运营商', null=True)
     resource_type = models.IntegerField(choices=PT_CHOOSE,verbose_name="资产类型",null=True)
     work_zone = models.CharField(max_length=20,verbose_name="work area",null=True)
@@ -91,6 +96,7 @@ class Host(models.Model, ModelMixin):
         tmp['create_by'] = self.create_by.username
         tmp['env'] = ""
         tmp['status'] =  "在线" if self.status == 0 else "离线"
+        tmp["ostp"] = "Linux" if self.ostp == 0 else "Windows"
         return tmp
 
     class Meta:

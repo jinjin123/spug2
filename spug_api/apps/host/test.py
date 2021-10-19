@@ -88,8 +88,20 @@ class Mytest(unittest.TestCase):
                                 # ttmp.append({"type":xx["fstype"],"name": xx["device"],"mount":xx["mount"], "total_szie":math.ceil(xx.get("size_total",0) / 1024 /1024/1024)})
 
 
-                    Host.objects.create(
-                        ipaddress=[ x  for x in ser["ansible_facts"]["ansible_all_ipv4_addresses"] if not x.startswith("192.168") ][0],
+                    t=[x for x in ser["ansible_facts"]["ansible_all_ipv4_addresses"]
+                       if not x.startswith(("172.17","172.17","172.18","172.19","172.20","172.21","172.23","172.22","172.27","172.24","172.26","172.27",
+                                            "172.28","172.29","172.30","192.168","10.42","10.128","10.129","10.130")) ]
+                    tip=""
+                    if len(t) >1 and ser["ansible_facts"].get("ansible_bond1"):
+                        tip =ser["ansible_facts"]["ansible_bond1"]["ipv4"]["address"]
+                    elif len(t) == 1:
+                        tip = t[0]
+                    elif len(t)> 1 and ser["ansible_facts"].get("ansible_default_ipv4"):
+                        tip = ser["ansible_facts"]["ansible_default_ipv4"]["address"]
+
+                Host.objects.create(
+                        # ipaddress=[ x  for x in ser["ansible_facts"]["ansible_all_ipv4_addresses"] if not x.startswith("192.168") ][0],
+                        ipaddress=tip,
                         osType=ser["ansible_facts"]["ansible_distribution"],
                         osVerion=ser["ansible_facts"]["ansible_distribution_version"],
                         coreVerion=ser["ansible_facts"]["ansible_kernel"],
@@ -102,6 +114,11 @@ class Mytest(unittest.TestCase):
                         # cpucore=ser["ansible_facts"]["ansible_processor_cores"],
                         hostname=ser["ansible_facts"]["ansible_nodename"],
                         supplier=ser["ansible_facts"]["ansible_system_vendor"],
+                        port=22,
+                        username="root",
+                        ostp=0,
+                        env_id=2,
+
                     )
             except Exception as e:
                 print(e,x)
