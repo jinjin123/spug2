@@ -29,7 +29,7 @@ class HostView(View):
         hosts = Host.objects.all()
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
             # x.get_ostp_display()
-        ostp = ["Linux"  if x["ostp"] == 0 else "windows" for x in hosts.order_by('ostp').values('ostp').distinct() ]
+        ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct() ]
         res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
         w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
         provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
@@ -39,7 +39,7 @@ class HostView(View):
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('zone', help='请输入主机类型'),
+            Argument('zone', help='请输入分组类型'),
             # Argument('name', help='请输主机名称'),
             Argument('username', handler=str.strip, help='请输入登录用户名'),
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
@@ -47,21 +47,47 @@ class HostView(View):
             Argument('pkey', required=False),
             # Argument('status', handler=str.strip,required=True,help='上线/下线status状态'),
             Argument('comment', required=False),
-            Argument('password', required=False),
+            Argument('password',handler=str.strip,  required=False),
+            Argument('password_expire',type=int, required=False),
+
+            Argument('ostp',type=str, required=False),
+            Argument('resource_type',type=str, required=False),
+            Argument('v_ip', required=False),
+            Argument('outter_ip', required=False),
+            Argument('provider', required=False),
+            Argument('top_project', required=False),
+            Argument('service_pack', required=False),
+            Argument('work_zone', required=False),
+            Argument('use_for', required=False),
+            Argument('developer', required=False),
+            Argument('opsper', required=False),
+            Argument('env_id', required=False),
+            Argument('ext_config1', required=False),
+
+            Argument('cpus',type=int, required=False),
+            Argument('memory', type=int, required=False),
+
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.ipaddress, form.port, form.username, password=form.pop('password'),
+            if form.ostp != "Windows":
+               if valid_ssh(form.ipaddress, form.port, form.username, password=form.pop('password'),
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
             # form.pop("created_by")
             if form.id:
-                Host.objects.filter(pk=form.pop('id')).update(**form)
+                pwd = Host.make_password(form.pop("password"))
+                Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
                 return json_response(error=error)
             if Host.objects.filter(ipaddress=form.ipaddress).exists():
                 return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
-                host = Host.objects.create(create_by=request.user, **form)
-                update_hostinfo.delay([form.ipaddress], form.username)
+                if form.ostp != "Windows":
+                    pwd = Host.make_password(form.pop("password"))
+                    host = Host.objects.create(create_by=request.user,  password_hash=pwd,**form)
+                    update_hostinfo.delay([form.ipaddress], form.username)
+                else:
+                    pwd = Host.make_password(form.pop("password"))
+                    host = Host.objects.create(create_by=request.user, password_hash=pwd, **form)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)

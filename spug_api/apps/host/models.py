@@ -8,6 +8,8 @@ from apps.setting.utils import AppSetting
 from libs.ssh import SSH
 from apps.config.models import  Environment
 import ast
+# from django.contrib.auth.hashers import make_password, check_password
+from libs.pwd import encryptPwd,decryptPwd
 
 class Host(models.Model, ModelMixin):
     STATUS_CHOOSE = (
@@ -28,7 +30,15 @@ class Host(models.Model, ModelMixin):
         (0, 'Linux'),
         (1, 'Windows'),
     )
-    top_project = models.CharField(max_length=128, verbose_name="顶级项目", null=True)
+    # TOP_PJCHOOSE  = {
+    #     (0, '东莞市政务数据大脑暨智慧城市IOC运行中心建设项目'),
+    #     (1, '东莞市疫情动态查询系统项目'),
+    #     (2, '东莞市疫情防控数据管理平台项目'),
+    #     (3, '东莞市跨境货车司机信息管理系统项目'),
+    #     (4, '疫情地图项目'),
+    #     (5, '粤康码'),
+    # }
+    top_project = models.CharField(max_length=180, verbose_name="顶级项目", null=True)
     top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
     ipaddress = models.CharField(max_length=1500, verbose_name="ip", null=True)
     service_pack = models.CharField(max_length=500, verbose_name="包含哪些服务类型包'',''", null=True)
@@ -46,13 +56,22 @@ class Host(models.Model, ModelMixin):
     status = models.IntegerField(choices=STATUS_CHOOSE, default=0, verbose_name='同步监控状态(关机释放下线)', null=True)
     hostname = models.CharField(max_length=100, verbose_name='主机名', null=True)
 
-    ostp = models.IntegerField(choices=OS_TYPE,verbose_name="os type",null=True)
-    provider = models.IntegerField(choices=PV_CHOOSE,verbose_name='运营商', null=True)
-    resource_type = models.IntegerField(choices=PT_CHOOSE,verbose_name="资产类型",null=True)
+    # ostp = models.IntegerField(choices=OS_TYPE,verbose_name="os type",null=True)
+    ostp = models.CharField(max_length=100,verbose_name="os type",null=True)
+    # provider = models.IntegerField(choices=PV_CHOOSE,verbose_name='运营商', null=True)
+    provider = models.CharField(max_length=120,verbose_name='运营商', null=True)
+    # resource_type = models.IntegerField(choices=PT_CHOOSE,verbose_name="资产类型",null=True)
+    resource_type = models.CharField(max_length=120,verbose_name="资产类型",null=True)
     work_zone = models.CharField(max_length=20,verbose_name="work area",null=True)
     outter_ip = models.CharField(max_length=15, verbose_name="outerip", null=True)
     v_ip = models.CharField(max_length=15, verbose_name="v_ip", null=True)
     use_for =models.CharField(max_length=255,verbose_name="use for" ,null=True)
+    password_hash = models.BinaryField(null=True,verbose_name="pwd")
+    password_date = models.DateTimeField(auto_now=True,null=True,verbose_name="create")
+    password_expire = models.IntegerField(null=True,verbose_name="expire ")
+    sys_disk = models.CharField(max_length=255,verbose_name="sys disk", null=True)
+    data_disk = models.TextField(verbose_name="data_disk", null=True)
+
 
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
     host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
@@ -76,6 +95,17 @@ class Host(models.Model, ModelMixin):
     deleted_at = models.CharField(max_length=20, null=True)
     deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
 
+    @staticmethod
+    def make_password(plain_password: str) -> str:
+        # return make_password(plain_password, hasher='pbkdf2_sha256')
+        return encryptPwd(plain_password)
+
+    # @staticmethod
+    # def plaxt_password(crytto):
+    #     return decryptPwd(crytto)
+
+    # def verify_password(self, plain_password: str) -> bool:
+    #     return check_password(plain_password, self.password_hash)
     @property
     def private_key(self):
         return self.pkey or AppSetting.get('private_key')
@@ -89,14 +119,19 @@ class Host(models.Model, ModelMixin):
     #     return '<Host %r>' % self.name
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
-        tt = ""
-        for x in ast.literal_eval(self.disk):
-            tt += "类型:"+x.get("type")+",数据盘:"+x.get("name")+",挂载目录:"+x.get("mount")+",总大小:"+str(x.get("total_szie"))+"G,数据盘已使用"+str(x.get("used"))+"G,"
-        tmp["disk"] = tt
-        tmp['create_by'] = self.create_by.username
-        tmp['env'] = ""
+        # tt = ""
+        # for x in ast.literal_eval(self.disk):
+        #     tt += "类型:"+x.get("type")+",数据盘:"+x.get("name")+",挂载目录:"+x.get("mount")+",总大小:"+str(x.get("total_szie"))+"G,数据盘已使用"+str(x.get("used"))+"G,"
+        # tmp["disk"] = tt
+        tmp['create_by'] = self.create_by.nickname
+        tmp['env'] = "生产" if self.env_id == 2 else "测试"
         tmp['status'] =  "在线" if self.status == 0 else "离线"
-        tmp["ostp"] = "Linux" if self.ostp == 0 else "Windows"
+        # tmp["ostp"] = "Linux" if self.ostp == 0 else "Windows"
+        # tmp['provider'] = self.get_provider_display()
+        # tmp['resource_type'] = self.get_resource_type_display()
+        # tmp['top_project'] = self.get_top_project_display()
+        # tmp['password_hash'] = self.plaxt_password(bytes(self.password_hash,encoding='utf-8'))
+        tmp['password_hash'] = decryptPwd(self.password_hash) if self.password_hash else ""
         return tmp
 
     class Meta:

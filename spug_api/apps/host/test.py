@@ -106,7 +106,7 @@ class Mytest(unittest.TestCase):
                         osVerion=ser["ansible_facts"]["ansible_distribution_version"],
                         coreVerion=ser["ansible_facts"]["ansible_kernel"],
                         # disk=[{"type": x["fstype"],"name":x["device"],"mount":x["mount"],"size": math.ceil(x.get("size_total",0) / 1024 /1024/1024) }  for x in ser["ansible_facts"]["ansible_mounts"]],
-                        disk=ttmp,
+                        # disk=ttmp,
                         disks=len(ser["ansible_facts"]["ansible_mounts"]),
                         # memory= int(ser["ansible_facts"]["ansible_memory_mb"]["real"]["total"] / 1024 ),
                         memory=math.ceil(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ),
@@ -116,7 +116,7 @@ class Mytest(unittest.TestCase):
                         supplier=ser["ansible_facts"]["ansible_system_vendor"],
                         port=22,
                         username="root",
-                        ostp=0,
+                        ostp="Linux",
                         env_id=2,
 
                     )

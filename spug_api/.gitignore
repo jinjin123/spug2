@@ -12,3 +12,4 @@ spug/settings.py
 out/
 nohup.out
 upload/*
+libs/key/*

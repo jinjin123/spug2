@@ -559,9 +559,18 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                from apps.account.models import User
-                a = User.objects.all().values("email")
-                print(a)
+                from apps.host.models import Host
+                from libs.pwd import  decryptPwd
+                a = Host.objects.filter(ostp="Windows").values("password_hash")
+                for x in a:
+                    if x["password_hash"]:
+                        print(x['password_hash'])
+                        print(decryptPwd(x['password_hash']))
+                        # print(bytes(x['password_hash'],encoding='utf8'))
+                      # print(Host.plaxt_password(x["password_hash"]))
+                # from apps.account.models import User
+                # a = User.objects.all().values("email")
+                # print(a)
                 # x = ProjectServiceApprovalNotice.objects.filter(service_id=1).values("notice_user__email").all()
                 # a = []
                 # for b in x:
