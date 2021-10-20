@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import { Table, Modal, message,Select, Tag } from 'antd';
 import { Action } from 'components';
 import ComForm from './Form';
+import FormWin from './FormWin';
 import ComImport from './Import';
 import { http, hasPermission } from 'libs';
 import store from './store';
@@ -46,7 +47,12 @@ class ComTable extends React.Component {
     switch(action){
       case 1:
         store.record = info
-        store.formVisible = true;
+        if(info["ostp"] == "Windows"){
+          store.winformVisible = true;
+
+        }else{
+          store.formVisible = true;
+        }
         this.setState({
           moreAction : [{"id": info.id,"v":"编辑"}]
         })
@@ -95,6 +101,10 @@ class ComTable extends React.Component {
     if (store.f_ip) {
       data = data.filter(item => item['ipaddress'].toLowerCase().includes(store.f_ip.toLowerCase()))
     }
+
+    if (store.otp) {
+      data = data.filter(item => item['ostp'].toLowerCase().includes(store.otp.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table
@@ -115,7 +125,7 @@ class ComTable extends React.Component {
           <Table.Column title="主机名" dataIndex="hostname" />
           <Table.Column title="IP" dataIndex="ipaddress" width={130} />
           <Table.Column title="连接用户" dataIndex="username"/>
-          <Table.Column width={100} title="端口" dataIndex="port"/>
+          {/* <Table.Column width={100} title="端口" dataIndex="port"/> */}
           <Table.Column title="分组" dataIndex="zone"/>
           <Table.Column title="系统类型" dataIndex="ostp"/>
           <Table.Column title="系统" dataIndex="osType"/>
@@ -139,7 +149,7 @@ class ComTable extends React.Component {
           />
           <Table.Column title="挂载盘数" dataIndex="disks"/>
 
-          <Table.Column title="运营商" dataIndex="provider"/>
+          <Table.Column title="运营商" dataIndex="provider" />
           <Table.Column title="资源类型" dataIndex="resource_type"/>
           <Table.Column title="工作区域" dataIndex="work_zone"/>
           <Table.Column title="外网IP" dataIndex="outter_ip"/>
@@ -156,7 +166,7 @@ class ComTable extends React.Component {
           <Table.Column title="安装服务" dataIndex="service_pack"/>
           <Table.Column title="补丁服务与版本" dataIndex="host_bug"/>
           <Table.Column title="扩展配置" dataIndex="ext_config1"/>
-          <Table.Column title="环境" dataIndex="env"/>
+          <Table.Column title="环境" dataIndex="env" />
           <Table.Column title="待回收ip" dataIndex="iprelease"/>
           <Table.Column ellipsis title="备注信息" dataIndex="comment"/>
           {hasPermission('host.host.edit|host.host.del|host.host.console') && (
@@ -175,6 +185,7 @@ class ComTable extends React.Component {
           )}
         </Table>
         {store.formVisible && <ComForm/>}
+        {store.winformVisible && <FormWin/>}
         {store.importVisible && <ComImport/>}
       </React.Fragment>
     )

@@ -5,13 +5,13 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,InputNumber } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, message,Icon,InputNumber } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 import envStore from 'pages/config/environment/store';
 
 @observer
-class ComForm extends React.Component {
+class FormWin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -39,51 +39,53 @@ class ComForm extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    const file = this.state.fileList[0];
-    if (file && file.data) formData['pkey'] = file.data;
+    console.log(formData)
+    // const file = this.state.fileList[0];
+    // if (file && file.data) formData['pkey'] = file.data;
     http.post('/api/host/', formData)
       .then(res => {
-        if (res === 'auth fail') {
-          this.setState({loading: false});
-          if (formData.pkey) {
-            message.error('独立密钥认证失败')
-          } else {
-            Modal.confirm({
-              icon: 'exclamation-circle',
-              title: '首次验证请输入密码',
-              content: this.confirmForm(formData.username),
-              onOk: () => this.handleConfirm(formData),
-            })
-          }
-        } else {
+        // if (res === 'auth fail') {
+        //   this.setState({loading: false});
+        //   if (formData.pkey) {
+        //     message.error('独立密钥认证失败')
+        //   } else {
+        //     Modal.confirm({
+        //       icon: 'exclamation-circle',
+        //       title: '首次验证请输入密码',
+        //       content: this.confirmForm(formData.username),
+        //       onOk: () => this.handleConfirm(formData),
+        //     })
+        //   }
+        // } else {
           message.success('操作成功');
+          store.winformVisible = false;
           store.formVisible = false;
           store.fetchRecords()
-        }
+        // }
       }, () => this.setState({loading: false}))
   };
 
-  handleConfirm = (formData) => {
-    if (this.state.password) {
-      formData['password'] = this.state.password;
-      return http.post('/api/host/', formData).then(res => {
-        message.success('验证成功');
-        store.formVisible = false;
-        store.fetchRecords()
-      })
-    }
-    message.error('请输入授权密码')
-  };
+  // handleConfirm = (formData) => {
+  //   if (this.state.password) {
+  //     formData['password'] = this.state.password;
+  //     return http.post('/api/host/', formData).then(res => {
+  //       message.success('验证成功');
+  //       store.formVisible = false;
+  //       store.fetchRecords()
+  //     })
+  //   }
+  //   message.error('请输入授权密码')
+  // };
 
-  confirmForm = (username) => {
-    return (
-      <Form>
-        <Form.Item required label="授权密码" help={`用户 ${username} 的密码， 该密码仅做首次验证使用，不会存储该密码。`}>
-          <Input.Password onChange={val => this.setState({password: val.target.value})}/>
-        </Form.Item>
-      </Form>
-    )
-  };
+  // confirmForm = (username) => {
+  //   return (
+  //     <Form>
+  //       <Form.Item required label="授权密码" help={`用户 ${username} 的密码， 该密码仅做首次验证使用，不会存储该密码。`}>
+  //         <Input.Password onChange={val => this.setState({password: val.target.value})}/>
+  //       </Form.Item>
+  //     </Form>
+  //   )
+  // };
 
   handleAddZone = () => {
     this.setState({zone: ''}, () => {
@@ -169,8 +171,8 @@ class ComForm extends React.Component {
         width={800}
         maskClosable={false}
         title={store.record.id ? '编辑主机' : '新建主机'}
-        okText="验证"
-        onCancel={() => store.formVisible = false}
+        okText="提交"
+        onCancel={() => store.winformVisible = false}
         confirmLoading={loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
@@ -212,19 +214,18 @@ class ComForm extends React.Component {
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>
                 <Select  placeholder="用户">
-                  <Select.Option value={"root"} key={0}>{"root"}</Select.Option>
-                  <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option>
+                  <Select.Option value={"Administrator"} key={0}>{"Administrator"}</Select.Option>
               </Select>
               )}
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 'calc(40%)'}}>
               {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
-                <Input addonBefore="@" placeholder="IP" allowClear/>
+                <Input addonBefore="@" placeholder="IP"/>
               )}
             </Form.Item>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('port', {initialValue: info['port']})(
-                <Input allowClear addonBefore="-p" placeholder="端口"/>
+                <Input placeholder="端口3389"/>
               )}
             </Form.Item>
           </Form.Item>
@@ -241,14 +242,13 @@ class ComForm extends React.Component {
             </Form.Item>
             <Form.Item required label="密码过期天数" >
                 {getFieldDecorator('password_expire', {rules: [{required: true, message: '密码过期天数'}]})(
-                      <InputNumber />
+                      <InputNumber/>
                   )}
                 
             </Form.Item>
-
             <Form.Item required label="资源类型" style={{marginBottom: 0}}>
               <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
-                {getFieldDecorator('resource_type', {initialValue: info['res_t']})(
+                {getFieldDecorator('resource_type', {initialValue: info['resource_type']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
                   <Select  placeholder="资源类型">
                     <Select.Option value={"主机"} key={0}>{"主机"}</Select.Option>
@@ -263,7 +263,7 @@ class ComForm extends React.Component {
                 {getFieldDecorator('provider', {initialValue: info['provider']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
                   <Select  placeholder="运营商">
-                    <Select.Option value={"电信"} key={0}>{"电信"}</Select.Option>
+                  <Select.Option value={"电信"} key={0}>{"电信"}</Select.Option>
                     <Select.Option value={"联通"} key={1}>{"联通"}</Select.Option>
                     <Select.Option value={"移动"} key={2}>{"移动"}</Select.Option>
                 </Select>
@@ -271,12 +271,12 @@ class ComForm extends React.Component {
               </Form.Item>
             </Form.Item>
           
-          <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
+          {/* <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
             <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}} beforeUpload={this.handleUpload}
                     onChange={this.handleUploadChange}>
               {fileList.length === 0 ? <Button loading={uploading} icon="upload">点击上传</Button> : null}
             </Upload>
-          </Form.Item>
+          </Form.Item> */}
           {/* <Form.Item label="状态">
             {getFieldDecorator('status', {initialValue: info['status']})(
               <Input  placeholder="Y/N 上线或下线"/>
@@ -295,12 +295,12 @@ class ComForm extends React.Component {
           <Form.Item required label="实体项目">
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(
                 <Select  placeholder="实体项目">
-                    <Select.Option value={0} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
-                    <Select.Option value={1} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
-                    <Select.Option value={2} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
-                    <Select.Option value={3} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
-                    <Select.Option value={4} key={4}>{"疫情地图项目"}</Select.Option>
-                    <Select.Option value={5} key={5}>{"粤康码"}</Select.Option>
+                    <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
+                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
+                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
+                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option>
                 </Select>
             )}
           </Form.Item>
@@ -319,9 +319,9 @@ class ComForm extends React.Component {
               <Input  placeholder="服务包"/>
             )}
           </Form.Item>
-          <Form.Item   label="工作区域">
+          <Form.Item   label="区域">
             {getFieldDecorator('work_zone', {initialValue: info['work_zone']})(
-              <Input  placeholder="工作区域"/>
+              <Input  placeholder="区域"/>
             )}
           </Form.Item>
           <Form.Item   label="外网IP">
@@ -334,10 +334,20 @@ class ComForm extends React.Component {
               <Input  placeholder="虚拟VIP"/>
             )}
           </Form.Item>
+          <Form.Item   label="cpu逻辑核">
+            {getFieldDecorator('cpus', {initialValue: info['cpus']})(
+              <Input  placeholder="cpu逻辑核"/>
+            )}
+          </Form.Item>
+          <Form.Item   label="内存GB">
+            {getFieldDecorator('memory', {initialValue: info['memory']})(
+              <Input  placeholder="内存GB"/>
+            )}
+          </Form.Item>
           <Form.Item required label="环境">
-            {getFieldDecorator('env', {initialValue: info['env']})(
+            {getFieldDecorator('env_id', {initialValue: info['env_id']})(
                 <Select placeholder="环境">
-                    <Select.Option value={0} key={0}>{"生产"}</Select.Option>
+                    <Select.Option value={2} key={0}>{"生产"}</Select.Option>
                     <Select.Option value={1} key={1}>{"测试"}</Select.Option>
                 </Select>
             )}
@@ -377,13 +387,13 @@ class ComForm extends React.Component {
               <Input.TextArea placeholder="请输入主机备注信息"/>
             )}
           </Form.Item>
-          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+          {/* <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <span role="img" aria-label="notice">⚠️ 首次验证时需要输入登录用户名对应的密码，但不会存储该密码。</span>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Modal>
     )
   }
 }
 
-export default Form.create()(ComForm)
+export default Form.create()(FormWin)
