@@ -27,17 +27,20 @@ class Store {
   @observable w_z =[];
   @observable provider=[];
   @observable ostp=[];
-
+  @observable tpj=[];
   @observable pvd;
   @observable otp;
   @observable rtp;
+
+  @observable tpjj;
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/host/')
-      .then(({hosts, zones, perms, res_t,w_z,provider,ostp}) => {
+      .then(({hosts, zones, perms, res_t,w_z,provider,ostp,tp}) => {
         this.records = hosts;
         this.zones = zones;
         this.res_t = res_t;
+        this.tpj = tp;
         this.w_z = w_z;
         this.ostp = ostp;
         this.provider = provider;

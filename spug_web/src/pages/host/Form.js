@@ -240,7 +240,7 @@ class ComForm extends React.Component {
               )}
             </Form.Item>
             <Form.Item required label="密码过期天数" >
-                {getFieldDecorator('password_expire', {rules: [{required: true, message: '密码过期天数'}]})(
+                {getFieldDecorator('password_expire', {initialValue: info['password_expire'],rules: [{required: true, message: '密码过期天数'}]})(
                       <InputNumber />
                   )}
                 
@@ -248,7 +248,7 @@ class ComForm extends React.Component {
 
             <Form.Item required label="资源类型" style={{marginBottom: 0}}>
               <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
-                {getFieldDecorator('resource_type', {initialValue: info['res_t']})(
+                {getFieldDecorator('resource_type', {initialValue: info['resource_type']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
                   <Select  placeholder="资源类型">
                     <Select.Option value={"主机"} key={0}>{"主机"}</Select.Option>
@@ -295,12 +295,12 @@ class ComForm extends React.Component {
           <Form.Item required label="实体项目">
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(
                 <Select  placeholder="实体项目">
-                    <Select.Option value={0} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
-                    <Select.Option value={1} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
-                    <Select.Option value={2} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
-                    <Select.Option value={3} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
-                    <Select.Option value={4} key={4}>{"疫情地图项目"}</Select.Option>
-                    <Select.Option value={5} key={5}>{"粤康码"}</Select.Option>
+                    <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
+                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
+                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
+                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option>
                 </Select>
             )}
           </Form.Item>

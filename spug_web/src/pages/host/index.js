@@ -13,7 +13,15 @@ export default observer(function () {
   return (
     <AuthCard auth="host.host.view">
       <SearchForm>
-        <SearchForm.Item span={6} title="分组">
+      <SearchForm.Item span={6} title="实体项目">
+          <Select allowClear placeholder="请选择" value={store.tpjj} onChange={v => store.tpjj = v}>
+            {store.tpj.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+        </SearchForm.Item>
+
+        <SearchForm.Item span={6} title="项目分组">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
             {store.zones.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
@@ -23,6 +31,13 @@ export default observer(function () {
         <SearchForm.Item span={4} title="系统类型">
           <Select allowClear placeholder="请选择" value={store.otp} onChange={v => store.otp = v}>
             {store.ostp.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+          </SearchForm.Item>
+          <SearchForm.Item span={4} title="运营商">
+          <Select allowClear placeholder="请选择" value={store.pvd} onChange={v => store.pvd = v}>
+            {store.provider.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>
             ))}
           </Select>

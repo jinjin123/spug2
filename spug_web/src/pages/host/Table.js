@@ -105,6 +105,12 @@ class ComTable extends React.Component {
     if (store.otp) {
       data = data.filter(item => item['ostp'].toLowerCase().includes(store.otp.toLowerCase()))
     }
+    if (store.tpjj) {
+      data = data.filter(item => item['top_project'].toLowerCase().includes(store.tpjj.toLowerCase()))
+    }
+    if (store.pvd) {
+      data = data.filter(item => item['provider'].toLowerCase().includes(store.pvd.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table
@@ -123,7 +129,9 @@ class ComTable extends React.Component {
           }}>
           <Table.Column title="实体项目" dataIndex="top_project"/>
           <Table.Column title="主机名" dataIndex="hostname" />
-          <Table.Column title="IP" dataIndex="ipaddress" width={130} />
+          <Table.Column title="外网IP" dataIndex="outter_ip"/>
+          <Table.Column title="虚拟IP" dataIndex="v_ip"/>
+          <Table.Column title="业务IP" dataIndex="ipaddress" width={130} />
           <Table.Column title="连接用户" dataIndex="username"/>
           {/* <Table.Column width={100} title="端口" dataIndex="port"/> */}
           <Table.Column title="分组" dataIndex="zone"/>
@@ -147,18 +155,16 @@ class ComTable extends React.Component {
             </Tag>
             )}
           />
-          <Table.Column title="挂载盘数" dataIndex="disks"/>
+          <Table.Column title="系统盘" dataIndex="sys_disk"/>
 
           <Table.Column title="运营商" dataIndex="provider" />
           <Table.Column title="资源类型" dataIndex="resource_type"/>
-          <Table.Column title="工作区域" dataIndex="work_zone"/>
-          <Table.Column title="外网IP" dataIndex="outter_ip"/>
-          <Table.Column title="虚拟IP" dataIndex="v_ip"/>
+          <Table.Column title="所属区域" dataIndex="work_zone"/>
           <Table.Column title="实际用途" dataIndex="use_for"/>
 
 
           {/* <Table.Column title="挂载盘" dataIndex="disk" ellipsis/> */}
-          <Table.Column title="序列号" dataIndex="serial_num"/>
+          {/* <Table.Column title="序列号" dataIndex="serial_num"/> */}
           <Table.Column title="供应商" dataIndex="supplier"/>
           <Table.Column title="开发" dataIndex="developer"/>
           <Table.Column title="运维" dataIndex="opsper"/>
