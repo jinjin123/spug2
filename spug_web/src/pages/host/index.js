@@ -35,6 +35,14 @@ export default observer(function () {
             ))}
           </Select>
           </SearchForm.Item>
+
+          <SearchForm.Item span={4} title="主机类型">
+          <Select allowClear placeholder="请选择" value={store.otp} onChange={v => store.rtp = v}>
+            {store.res_t.map(item => (
+              <Select.Option value={item} key={item}>{item}</Select.Option>
+            ))}
+          </Select>
+          </SearchForm.Item>
           <SearchForm.Item span={4} title="运营商">
           <Select allowClear placeholder="请选择" value={store.pvd} onChange={v => store.pvd = v}>
             {store.provider.map(item => (

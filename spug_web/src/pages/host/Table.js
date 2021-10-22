@@ -111,6 +111,9 @@ class ComTable extends React.Component {
     if (store.pvd) {
       data = data.filter(item => item['provider'].toLowerCase().includes(store.pvd.toLowerCase()))
     }
+    if (store.rtp) {
+      data = data.filter(item => item['resource_type'].toLowerCase().includes(store.rtp.toLowerCase()))
+    }
     return (
       <React.Fragment>
         <Table
