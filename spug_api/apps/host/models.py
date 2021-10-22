@@ -49,7 +49,7 @@ class Host(models.Model, ModelMixin):
     disk = models.TextField(verbose_name="disk arguments",null=True)
     disks = models.IntegerField(verbose_name='数据盘数量', null=True)
     # disks_capacity = models.CharField(max_length=255, verbose_name="数据盘容量'',''", null=True)
-    memory = models.IntegerField(verbose_name='内存GB', null=True)
+    memory = models.FloatField(verbose_name='内存GB', null=True)
     cpus = models.IntegerField(default=0, verbose_name='cpu逻辑数量', null=True)
     # cpucore = models.IntegerField(default=0, verbose_name='cpu物理核', null=True)
     # serial_num = models.CharField(verbose_name='序列号', max_length=100, null=True)
@@ -106,6 +106,27 @@ class Host(models.Model, ModelMixin):
 
     # def verify_password(self, plain_password: str) -> bool:
     #     return check_password(plain_password, self.password_hash)
+    @staticmethod
+    def conver_disk(disk):
+        tt = ""
+        if disk != "[]"  and  disk != "" and disk is not None and not isinstance(disk,list):
+            for x in ast.literal_eval(disk):
+                tt += "数据盘:"+x.get("name")+",容量:"+str(x.get("size"))+"G,"
+            return tt
+        else:
+            return ""
+
+    @staticmethod
+    def tosys_disk(disk):
+        tt = ""
+        if disk != "[]"  and  disk != "" and disk is not None and not isinstance(disk,list):
+            for x in ast.literal_eval(disk):
+                tt += x.get("name")
+            return tt
+        else:
+            return ""
+
+
     @property
     def private_key(self):
         return self.pkey or AppSetting.get('private_key')
@@ -122,7 +143,8 @@ class Host(models.Model, ModelMixin):
         # tt = ""
         # for x in ast.literal_eval(self.disk):
         #     tt += "类型:"+x.get("type")+",数据盘:"+x.get("name")+",挂载目录:"+x.get("mount")+",总大小:"+str(x.get("total_szie"))+"G,数据盘已使用"+str(x.get("used"))+"G,"
-        # tmp["disk"] = tt
+        tmp["disk"] = self.conver_disk(self.data_disk)
+        tmp["sys_disk"] = self.tosys_disk(self.sys_disk)
         tmp['create_by'] = self.create_by.nickname
         tmp['env'] = "生产" if self.env_id == 2 else "测试"
         tmp['status'] =  "在线" if self.status == 0 else "离线"
@@ -137,3 +159,12 @@ class Host(models.Model, ModelMixin):
     class Meta:
         db_table = 'hosts'
         ordering = ('-id',)
+
+
+class Datadisk(models.Model, ModelMixin):
+    disk = models.TextField(null=True,verbose_name="disk")
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+         db_table = "host_disk"

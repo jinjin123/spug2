@@ -28,13 +28,13 @@ class HostView(View):
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
         hosts = Host.objects.all()
         zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
-            # x.get_ostp_display()
+        tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
         ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct() ]
         res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
         w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
         provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        return json_response({"tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
     def post(self, request):
         form, error = JsonParser(
@@ -55,7 +55,7 @@ class HostView(View):
             Argument('v_ip', required=False),
             Argument('outter_ip', required=False),
             Argument('provider', required=False),
-            Argument('top_project', required=False),
+            Argument('top_project', type=str,required=False),
             Argument('service_pack', required=False),
             Argument('work_zone', required=False),
             Argument('use_for', required=False),
@@ -69,24 +69,37 @@ class HostView(View):
 
         ).parse(request.body)
         if error is None:
-            if form.ostp != "Windows":
-               if valid_ssh(form.ipaddress, form.port, form.username, password=form.pop('password'),
+            if form.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
+                form.update({"top_projectid" : "dgdataheadioc"})
+            elif form.top_project == "东莞市疫情动态查询系统项目":
+                form.update({"top_projectid" : "dgdycovidselect"})
+            elif form.top_project == "东莞市疫情防控数据管理平台项目":
+                form.update({"top_projectid" : "dgcoviddatamanager"})
+            elif form.top_project == "东莞市跨境货车司机信息管理系统项目":
+                form.update({"top_projectid" : "dgdriverinfo"})
+            elif form.top_project == "疫情地图项目":
+                form.update({"top_projectid": "dgcovidmap"})
+            elif form.top_project == "粤康码":
+                form.update({"top_projectid" : "dghealthqr"})
+            ppwd = form.pop('password')
+            if form.ostp != "Windows" and form.resource_type == "主机" :
+               if valid_ssh(form.ipaddress, form.port, form.username, password=ppwd,
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
             # form.pop("created_by")
             if form.id:
-                pwd = Host.make_password(form.pop("password"))
+                pwd = Host.make_password(ppwd)
                 Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
                 return json_response(error=error)
             if Host.objects.filter(ipaddress=form.ipaddress).exists():
                 return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
-                if form.ostp != "Windows":
-                    pwd = Host.make_password(form.pop("password"))
+                if form.ostp != "Windows" and form.resource_type == "主机" :
+                    pwd = Host.make_password(ppwd)
                     host = Host.objects.create(create_by=request.user,  password_hash=pwd,**form)
                     update_hostinfo.delay([form.ipaddress], form.username)
                 else:
-                    pwd = Host.make_password(form.pop("password"))
+                    pwd = Host.make_password(ppwd)
                     host = Host.objects.create(create_by=request.user, password_hash=pwd, **form)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
@@ -144,28 +157,48 @@ def post_import(request):
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
     summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
-    tmp = []
+    ioctmp = []
+    roottmp = []
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
-        if not all([row[x].value for x in range(5)]):
-            summary['invalid'].append(i)
-            continue
+        # if not all([row[x].value for x in range(5)]):
+        #     summary['invalid'].append(i)
+        #     continue
         data = AttrDict(
             top_project=row[0].value,
-            zone=row[1].value,
-            ipaddress=row[2].value,
-            port=row[3].value,
+            v_ip=row[1].value,
+            outter_ip=row[2].value,
+            ipaddress=row[3].value,
             username=row[4].value,
-            password=row[5].value,
-            comment=row[6].value
+            port=row[5].value,
+            password=row[6].value,
+            password_expire=row[7].value,
+            zone=row[8].value,
+            ostp=row[9].value,
+            provider=row[10].value,
+            resource_type=row[11].value,
+            work_zone=row[12].value,
+            use_for=row[13].value,
+            developer=row[14].value,
+            opsper=row[15].value,
+            service_pack=row[16].value,
+            host_bug=row[17].value,
+            ext_config1=row[18].value,
+            env_id=row[19].value,
+            comment=row[20].value
         )
         if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).exists():
             # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
             summary['skip'].append(i)
             continue
         try:
-            if int(data.port) != 3389 and valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
+            if  data.ostp == "" or data.resource_type == "" or data.top_project == "" or data.ipaddress == "" or data.zone == "" \
+                    or data.provider == "":
+                summary['fail'].append(i)
+                continue
+            pwd = data.password
+            if data.ostp == 'Linux' and data.resource_type =='主机' and valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
                          False) is False:
                 summary['fail'].append(i)
                 continue
@@ -181,14 +214,35 @@ def post_import(request):
         # if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
         #     summary['repeat'].append(i)
         #     continue
-        if data.port == 3389:
-            pwd = data.pop("password")
+
+        # if data.ostp == 'Windows':
+        #     pwd = data.pop("password")
+        data["password_hash"] = Host.make_password(pwd)
+        data["env_id"] =  2 if data.env_id == "生产" else 1
+        if data.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
+            data.update({"top_projectid": "dgdataheadioc"})
+        elif data.top_project == "东莞市疫情动态查询系统项目":
+            data.update({"top_projectid": "dgdycovidselect"})
+        elif data.top_project == "东莞市疫情防控数据管理平台项目":
+            data.update({"top_projectid": "dgcoviddatamanager"})
+        elif data.top_project == "东莞市跨境货车司机信息管理系统项目":
+            data.update({"top_projectid": "dgdriverinfo"})
+        elif data.top_project == "疫情地图项目":
+            data.update({"top_projectid": "dgcovidmap"})
+        elif data.top_project == "粤康码":
+            data.update({"top_projectid": "dghealthqr"})
         host = Host.objects.create(create_by=request.user, **data)
-        tmp.append(data.ipaddress)
+        if data.username == "root":
+            roottmp.append(data.ipaddress)
+        elif data.username == "ioc":
+            ioctmp.append(data.ipaddress)
+        # tmp.append(data.ipaddress)
+        # update_hostinfo.delay(tmp, 'root')
         if request.user.role:
             request.user.role.add_host_perm(host.id)
         summary['success'].append(i)
-    update_hostinfo.delay(tmp, 'root')
+    update_hostinfo.delay(roottmp, 'root')
+    update_hostinfo.delay(ioctmp, 'ioc')
     return json_response(summary)
 
 

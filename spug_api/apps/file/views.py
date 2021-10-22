@@ -11,7 +11,7 @@ from apps.file.utils import FileResponseAfter, parse_sftp_attr
 from libs import json_response, JsonParser, Argument
 from functools import partial
 import os
-
+from libs.pwd import encryptPwd,decryptPwd
 
 class FileView(View):
     def get(self, request):
@@ -123,12 +123,37 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
     for i in range(len(result)):
         data_dict = dict(zip(header, result[i]))
         for index, key in enumerate(header):
-            if key =="disk":
+            if key =="data_disk":
                 tt = ""
-                for x in ast.literal_eval(data_dict[key]):
-                    tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
-                        x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"
+                if data_dict[key] != "[]":
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt += "数据盘:" + x.get("name") + ",容量:" + str(x.get("size")) + "G,"
+                # for x in ast.literal_eval(data_dict[key]):
+                    # tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
+                    #     x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"
                 sheet.write(i + 1, index, tt)
+            elif key == "sys_disk":
+                tt = ""
+                if data_dict[key] != "[]":
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt = x["name"]
+                # for x in ast.literal_eval(data_dict[key]):
+                    # tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
+                    #     x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"
+                sheet.write(i + 1, index, tt)
+            elif key == "status":
+                if data_dict[key] == 0:
+                    sheet.write(i + 1, index, "在线")
+                else:
+                    sheet.write(i + 1, index, "离线")
+            elif key == "env_id":
+                if data_dict[key] == 2:
+                    sheet.write(i + 1, index, "生产")
+                else:
+                    sheet.write(i + 1, index, "测试")
+            elif key == "password_hash":
+                if data_dict[key]:
+                    sheet.write(i + 1, index,decryptPwd(data_dict[key]))
             else:
                 sheet.write(i + 1, index, data_dict[key])
     wbk.save(fpath + name + '.xls')

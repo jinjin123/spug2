@@ -559,13 +559,28 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                from apps.host.models import Host
-                from libs.pwd import  decryptPwd
-                a = Host.objects.filter(ostp="Windows").values("password_hash")
-                for x in a:
-                    if x["password_hash"]:
-                        print(x['password_hash'])
-                        print(decryptPwd(x['password_hash']))
+                import subprocess
+                subp = subprocess.Popen("ls /home/jin/下载/bag/ioc", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                        encoding="utf-8")
+                a =subp.communicate()
+                b = list(a)[0]
+                c = b.split("\n")
+                print(c)
+                # for x in c:
+                #     print(x)
+                # print(c)
+                # print(b)
+                # c = ",".join(b)
+                # print(c)
+                # for x in a.readlines():
+                #     print(x)
+                # from apps.host.models import Host
+                # from libs.pwd import  decryptPwd
+                # a = Host.objects.filter(ostp="Windows").values("password_hash")
+                # for x in a:
+                #     if x["password_hash"]:
+                #         print(x['password_hash'])
+                #         print(decryptPwd(x['password_hash']))
                         # print(bytes(x['password_hash'],encoding='utf8'))
                       # print(Host.plaxt_password(x["password_hash"]))
                 # from apps.account.models import User
