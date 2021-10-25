@@ -10,6 +10,7 @@ DATABASES = {
         'USER': 'spug',
         'PASSWORD': 'spug.dev',
         'HOST': '127.0.0.1',
+        # 'HOST': '192.168.1.107',
         'PORT': '3306',
         # 'OPTIONS': {
         #     'unix_socket': '/var/lib/mysql/mysql.sock',

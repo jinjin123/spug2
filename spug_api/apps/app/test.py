@@ -559,13 +559,30 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                import subprocess
-                subp = subprocess.Popen("ls /home/jin/下载/bag/ioc", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                        encoding="utf-8")
-                a =subp.communicate()
-                b = list(a)[0]
-                c = b.split("\n")
-                print(c)
+                from apps.host.models import Host
+                u = Host.objects.get(ipaddress='192.168.1.107')
+                # ioc = []
+                # u = Host.objects.get(id=243)
+                # u.status = 1
+                # ioc.append(u)
+                # ioc.append(Host(id=243,status=1))
+                # Host.objects.bulk_update(ioc,['status'])
+                # h = Host.objects.values("ipaddress","username","id").all()
+                print(u.id)
+                # ipioc=[]
+                # iproot = []
+                # for x in h:
+                #     if x['username'] == 'ioc':
+                #         ipioc.append(x['ipaddress'])
+                #     if x['username'] == 'root':
+                #         iproot.append(x['ipaddress'])
+                # import subprocess
+                # subp = subprocess.Popen("ls /home/jin/下载/bag/ioc", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                #                         encoding="utf-8")
+                # a =subp.communicate()
+                # b = list(a)[0]
+                # c = b.split("\n")
+                # print(c)
                 # for x in c:
                 #     print(x)
                 # print(c)

@@ -64,8 +64,8 @@ class HostView(View):
             Argument('env_id', required=False),
             Argument('ext_config1', required=False),
 
-            Argument('cpus',type=int, required=False),
-            Argument('memory', type=int, required=False),
+            # Argument('cpus',type=int, required=False),
+            # Argument('memory', type=int, required=False),
 
         ).parse(request.body)
         if error is None:

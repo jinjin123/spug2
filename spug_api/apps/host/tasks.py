@@ -77,3 +77,34 @@ def update_hostinfo(ip,user='root'):
         else:
             print('no')
             logger.error("host %s connect failed" , xip)
+
+
+@app.task
+def update_hoststatus():
+    h = Host.objects.values("ipaddress", "username").all()
+    ipioc = []
+    iproot = []
+    for x in h:
+        if x['username'] == 'ioc':
+            ipioc.append(x['ipaddress'])
+        if x['username'] == 'root':
+            iproot.append(x['ipaddress'])
+
+    ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart', remote_user='ioc')
+    ansible3.run(hosts=ipioc, module="ping", args='')
+    stdout_dict = json.loads(ansible3.get_result())
+    ioc_batch =[]
+    root_batch =[]
+    for xx in ipioc:
+        if not stdout_dict['success'].get(xx):
+            ioc_batch.append(Host(id=(Host.objects.get(ipaddress=xx)).id,status=1))
+
+    Host.objects.bulk_update(ioc_batch,['status'])
+    ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart', remote_user='root')
+    ansible3.run(hosts=iproot, module="ping", args='')
+    stdout_dict = json.loads(ansible3.get_result())
+
+    for xxx in iproot:
+        if not stdout_dict['success'].get(xxx):
+            root_batch.append(Host(id=(Host.objects.get(ipaddress=xxx)).id, status=1))
+    Host.objects.bulk_update(root_batch,['status'])

@@ -40,7 +40,7 @@ class Host(models.Model, ModelMixin):
     # }
     top_project = models.CharField(max_length=180, verbose_name="顶级项目", null=True)
     top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
-    ipaddress = models.CharField(max_length=1500, verbose_name="ip", null=True)
+    ipaddress = models.CharField(max_length=15, verbose_name="ip", null=True)
     service_pack = models.CharField(max_length=500, verbose_name="包含哪些服务类型包'',''", null=True)
     osType = models.CharField(max_length=155,verbose_name='系统类型', null=True)
     osVerion = models.CharField(max_length=100,verbose_name='发行版本', null=True)
