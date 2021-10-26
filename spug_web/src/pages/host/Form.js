@@ -8,7 +8,18 @@ import { observer } from 'mobx-react';
 import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,InputNumber } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
+import { Link } from 'react-router-dom';
 import envStore from 'pages/config/environment/store';
+
+// import csStore from 'pages/config/cluster/store';
+// import poStore from 'pages/config/portlist/store';
+// import pjStore from 'pages/config/project/store';
+// import svStore from 'pages/config/servicebag/store';
+// import wzStore from 'pages/config/workzone/store';
+// import zzStore from 'pages/config/zone/store';
+// import dvStore from 'pages/config/devicepostion/store';
+// import cuStore from 'pages/config/cuser/store';
+// import resStore from 'pages/config/resourcet/store';
 
 @observer
 class ComForm extends React.Component {
@@ -30,9 +41,36 @@ class ComForm extends React.Component {
         fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
       })
     }
-    if (envStore.records.length === 0) {
-      envStore.fetchRecords()
-    }
+    // if (envStore.records.length === 0) {
+    //   envStore.fetchRecords()
+    // }
+    // if (csStore.records.length === 0) {
+    //   csStore.fetchRecords()
+    // }
+    // if (poStore.records.length === 0) {
+    //   poStore.fetchRecords()
+    // }
+    // if (pjStore.records.length === 0) {
+    //   pjStore.fetchRecords()
+    // }
+    // if (svStore.records.length === 0) {
+    //   svStore.fetchRecords()
+    // }
+    // if (wzStore.records.length === 0) {
+    //   wzStore.fetchRecords()
+    // }
+    // if (zzStore.records.length === 0) {
+    //   zzStore.fetchRecords()
+    // }
+    // if (dvStore.records.length === 0) {
+    //   dvStore.fetchRecords()
+    // }
+    // if (cuStore.records.length === 0) {
+    //   cuStore.fetchRecords()
+    // }
+    // if (resStore.records.length === 0) {
+    //   resStore.fetchRecords()
+    // }
   }
 
   handleSubmit = () => {
@@ -41,6 +79,7 @@ class ComForm extends React.Component {
     formData['id'] = store.record.id;
     const file = this.state.fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
+    console.log(formData)
     http.post('/api/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
@@ -148,7 +187,7 @@ class ComForm extends React.Component {
     return false
   };
   handleOsForm = (v) => {
-    console.log(v)
+    // console.log(v)
     //  1  win
     if(v==="Windows"){
       store.winformVisible = true;
@@ -168,30 +207,169 @@ class ComForm extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑主机' : '新建主机'}
+        title={store.record.id ? '编辑Linux主机' : '新建Linux主机'}
         okText="验证"
         onCancel={() => store.formVisible = false}
         confirmLoading={loading}
         onOk={this.handleSubmit}>
-        <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-          <Form.Item required label="主机类别">
-            <Col span={14}>
+        <Form labelCol={{span: 5}} wrapperCol={{span: 17}}>
+          {/* <Form.Item   style={{marginBottom: 0}}> */}
+                {/* <Form.Item required label="系统类型" style={{ width: 'calc(30%)'}}>
+                  {getFieldDecorator('ostp', {initialValue: info['ostp']})(
+                    // <Input addonBefore="ssh" placeholder="用户名"/>
+                    <Select  onChange={this.handleOsForm}  placeholder="系统类型">
+                      <Select.Option value={"Linux"} key={0}>{"Linux"}</Select.Option>
+                      <Select.Option value={"Windows"} key={1}>{"Windows"}</Select.Option>
+                  </Select>
+                  )}
+                </Form.Item> */}
+                {/* <Form.Item required label="资源类型"  style={{ width: 'calc(30%)'}}>
+                  {getFieldDecorator('resource_type', {initialValue: info['resource_type']})(
+                    // <Input addonBefore="ssh" placeholder="用户名"/>
+                    <Select  placeholder="资源类型">
+                      <Select.Option value={"主机"} key={0}>{"主机"}</Select.Option>
+                      <Select.Option value={"数据库"} key={1}>{"数据库"}</Select.Option>
+                      <Select.Option value={"redis"} key={2}>{"redis"}</Select.Option>
+                  </Select>
+                  )}
+              </Form.Item> */}
+            {/* </Form.Item> */}
+          <Form.Item required label="系统类型" style={{marginBottom: 0}}>
+                {getFieldDecorator('ostp', {initialValue: info['ostp']})(
+                  // <Input addonBefore="ssh" placeholder="用户名"/>
+                  <Select  onChange={this.handleOsForm}  placeholder="系统类型">
+                    <Select.Option value={"Linux"} key={0}>{"Linux"}</Select.Option>
+                    <Select.Option value={"Windows"} key={1}>{"Windows"}</Select.Option>
+                </Select>
+                )}
+            </Form.Item>
+
+          <Form.Item required label="资源类型" style={{marginBottom: 0}}>
+          <Col span={17}>
+
+                {getFieldDecorator('resource_type', {initialValue: info['resource_type']})(
+                  // <Input addonBefore="ssh" placeholder="用户名"/>
+                  <Select  placeholder="资源类型">
+                    {/* <Select.Option value={"主机"} key={0}>{"主机"}</Select.Option> */}
+                    {/* <Select.Option value={"数据库"} key={1}>{"数据库"}</Select.Option> */}
+                    {/* <Select.Option value={"redis"} key={2}>{"redis"}</Select.Option> */}
+                    {store.rset.map(item => (
+                  // item.tag === "项目子类" ? 
+                  // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  // : null
+                      item.name === "主机" ?
+                      <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                      : null
+                  ))}
+                </Select>
+                )}
+                </Col>
+                <Col span={5} offset={2}>
+              <Link to="/config/resouret">新建资源类型</Link>
+            </Col>
+            </Form.Item>
+
+          <Form.Item required label="实体项目">
+            <Col span={19}>
+            {getFieldDecorator('top_project', {initialValue: info['top_project']})(
+                <Select  placeholder="实体项目"  mode="multiple">
+                  {store.pj.map(item => (
+                    item.tag === "实体项目" ? 
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                    : null
+                  ))}
+
+                    {/* <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
+                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
+                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
+                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option> */}
+                </Select>
+            )}
+            </Col>
+            <Col span={3} offset={2}>
+              <Link to="/config/project">新建项目</Link>
+            </Col>
+          </Form.Item>
+          <Form.Item required label="实体子项目">
+          <Col span={17}>
+
+            {getFieldDecorator('child_project',{initialValue: info['child_project']})(
+                <Select  placeholder="实体子项目"  mode="multiple">
+                  {store.pj.map(item => (
+                    item.tag === "项目子类" ? 
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                    : null
+                  ))}
+
+                    {/* <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
+                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
+                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
+                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
+                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option> */}
+                </Select>
+            )}
+            </Col>
+            <Col span={5} offset={2}>
+              <Link to="/config/project">新建子项目</Link>
+            </Col>
+          </Form.Item>
+
+          <Form.Item required label="资源类别">
+          <Col span={16}>
+
+            {/* <Col span={14}> */}
               {getFieldDecorator('zone', {initialValue: info['zone']})(
-                <Select placeholder="请选择主机项目分组">
-                  {store.zones.map(item => (
-                    <Select.Option value={item} key={item}>{item}</Select.Option>
+                <Select placeholder="资源类别"  mode="multiple" >
+                  {store.zz.map(item => (
+                  // item.tag === "项目子类" ? 
+                  // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  // : null
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                   ))}
                 </Select>
               )}
-            </Col>
-            <Col span={4} offset={1}>
+              </Col>
+            {/* </Col> */}
+            {/* <Col span={4} offset={1}>
               <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
             </Col>
             <Col span={4} offset={1}>
               <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
+            </Col> */}
+            <Col span={6} offset={2}>
+              <Link to="/config/zone">新建资源类别</Link>
             </Col>
           </Form.Item>
-          <Form.Item required label="系统类型" style={{marginBottom: 0}}>
+          <Form.Item required label="所属集群">
+          <Col span={19}>
+
+            {/* <Col span={14}> */}
+              {getFieldDecorator('cluster', {initialValue: info['cluster']})(
+                <Select placeholder="资源类别"  mode="multiple" >
+                  {store.cs.map(item => (
+                  // item.tag === "项目子类" ? 
+                  // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  // : null
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  ))}
+                </Select>
+              )}
+              </Col>
+            {/* </Col> */}
+            {/* <Col span={4} offset={1}>
+              <Button type="link" onClick={this.handleAddZone}>添加类别</Button>
+            </Col>
+            <Col span={4} offset={1}>
+              <Button type="link" onClick={this.handleEditZone}>编辑类别</Button>
+            </Col> */}
+              <Col span={3} offset={2}>
+              <Link to="/config/cluster">新建集群</Link>
+            </Col>
+          </Form.Item>
+          {/* <Form.Item required label="系统类型" style={{marginBottom: 0}}>
               <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
                 {getFieldDecorator('ostp', {initialValue: info['ostp']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
@@ -201,7 +379,7 @@ class ComForm extends React.Component {
                 </Select>
                 )}
               </Form.Item>
-            </Form.Item>
+            </Form.Item> */}
           {/* <Form.Item required label="主机名称">
             {getFieldDecorator('name', {initialValue: info['name']})(
               <Input placeholder="请输入主机名称"/>
@@ -212,8 +390,14 @@ class ComForm extends React.Component {
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>
                 <Select  placeholder="用户">
-                  <Select.Option value={"root"} key={0}>{"root"}</Select.Option>
-                  <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option>
+                  {/* <Select.Option value={"root"} key={0}>{"root"}</Select.Option> */}
+                  {/* <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option> */}
+                  {store.cuser.map(item => (
+                  // item.tag === "项目子类" ? 
+                  // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  // : null
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                  ))}
               </Select>
               )}
             </Form.Item>
@@ -239,13 +423,13 @@ class ComForm extends React.Component {
                   prefix={<Icon type="lock" />}/>
               )}
             </Form.Item>
-            <Form.Item required label="密码过期天数" >
+            {/* <Form.Item required label="密码过期天数" >
                 {getFieldDecorator('password_expire', {initialValue: info['password_expire'],rules: [{required: true, message: '密码过期天数'}]})(
                       <InputNumber />
                   )}
                 
-            </Form.Item>
-
+            </Form.Item> */}
+{/* 
             <Form.Item required label="资源类型" style={{marginBottom: 0}}>
               <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
                 {getFieldDecorator('resource_type', {initialValue: info['resource_type']})(
@@ -257,18 +441,27 @@ class ComForm extends React.Component {
                 </Select>
                 )}
               </Form.Item>
-            </Form.Item>
-            <Form.Item required label="运营商" style={{marginBottom: 0}}>
-              <Form.Item style={{display: 'block', width: 'calc(30%)'}}>
+            </Form.Item> */}
+            <Form.Item required label="设备位置" style={{marginBottom: 0}}>
+              <Col span={17}>
+
+              {/* <Form.Item style={{display: 'block', width: 'calc(30%)'}}> */}
                 {getFieldDecorator('provider', {initialValue: info['provider']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
-                  <Select  placeholder="运营商">
-                    <Select.Option value={"电信"} key={0}>{"电信"}</Select.Option>
+                  <Select  placeholder="设备位置">
+                    {store.dvpo.map(item => (
+                      <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                    ))}
+                    {/* <Select.Option value={"电信"} key={0}>{"电信"}</Select.Option>
                     <Select.Option value={"联通"} key={1}>{"联通"}</Select.Option>
-                    <Select.Option value={"移动"} key={2}>{"移动"}</Select.Option>
+                    <Select.Option value={"移动"} key={2}>{"移动"}</Select.Option> */}
                 </Select>
                 )}
-              </Form.Item>
+                </Col>
+                <Col span={5} offset={2}>
+                <Link to="/config/device">新建设备位置</Link>
+              </Col>
+              {/* </Form.Item> */}
             </Form.Item>
           
           <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
@@ -292,7 +485,7 @@ class ComForm extends React.Component {
               </Select>
               )}
             </Form.Item> */}
-          <Form.Item required label="实体项目">
+          {/* <Form.Item required label="实体项目">
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(
                 <Select  placeholder="实体项目">
                     <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
@@ -303,26 +496,49 @@ class ComForm extends React.Component {
                     <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option>
                 </Select>
             )}
-          </Form.Item>
+          </Form.Item> */}
           {/* <Form.Item  required label="顶级项目id">
             {getFieldDecorator('top_projectid', {initialValue: info['top_projectid']})(
               <Input  placeholder="顶级项目id"/>
             )}
           </Form.Item> */}
-          <Form.Item  required label="内网IP">
+          <Form.Item  required label="业务IP">
             {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
               <Input  placeholder="内网ip地址"/>
             )}
           </Form.Item>
             <Form.Item  label="服务包">
+            <Col span={17}>
+
             {getFieldDecorator('service_pack', {initialValue: info['service_pack']})(
-              <Input  placeholder="服务包"/>
+              // <Input  placeholder="服务包"/>
+              <Select  placeholder="服务包"  mode="multiple">
+                {store.svbag.map(item => (
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                ))}
+              </Select>
+              
             )}
+            </Col>
+            <Col span={5} offset={2}>
+                <Link to="/config/servicebag">新建服务包</Link>
+              </Col>
           </Form.Item>
-          <Form.Item   label="工作区域">
+          <Form.Item  required label="所属区域">
+          <Col span={17}>
+
             {getFieldDecorator('work_zone', {initialValue: info['work_zone']})(
-              <Input  placeholder="工作区域"/>
+              // <Input  placeholder="工作区域"/>
+              <Select  placeholder="所属区域">
+                {store.wz.map(item => (
+                  <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                ))}
+              </Select>
             )}
+            </Col>
+              <Col span={5} offset={2}>
+                <Link to="/config/workzone">新建所属区域</Link>
+              </Col>
           </Form.Item>
           <Form.Item   label="外网IP">
             {getFieldDecorator('outter_ip', {initialValue: info['outter_ip']})(
@@ -335,23 +551,32 @@ class ComForm extends React.Component {
             )}
           </Form.Item>
           <Form.Item required label="环境">
-            {getFieldDecorator('env', {initialValue: info['env']})(
+          <Col span={17}>
+
+            {getFieldDecorator('env_id', {initialValue: info['env_id']})(
                 <Select placeholder="环境">
-                    <Select.Option value={0} key={0}>{"生产"}</Select.Option>
-                    <Select.Option value={1} key={1}>{"测试"}</Select.Option>
+                    {store.envs.map(item => (
+                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                    ))}
+                    {/* <Select.Option value={0} key={0}>{"生产"}</Select.Option>
+                    <Select.Option value={1} key={1}>{"测试"}</Select.Option> */}
                 </Select>
             )}
+            </Col>
+            <Col span={5} offset={2}>
+                <Link to="/config/environment">新建环境</Link>
+              </Col>
           </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(
               <Input.TextArea  placeholder="实际用途"/>
             )}
           </Form.Item>
-          <Form.Item  label="服务版本补丁">
+          {/* <Form.Item  label="服务版本补丁">
             {getFieldDecorator('host_bug', {initialValue: info['host_bug']})(
               <Input.TextArea placeholder="host_bug"/>
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="扩展配置">
             {getFieldDecorator('ext_config1', {initialValue: info['ext_config1']})(
               <Input placeholder="扩展配置"/>

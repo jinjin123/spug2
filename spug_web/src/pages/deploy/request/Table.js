@@ -10,6 +10,7 @@ import { http, hasPermission } from 'libs';
 import { Action } from "components";
 import store from './store';
 
+
 @observer
 class ComTable extends React.Component {
   constructor(props) {

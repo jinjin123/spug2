@@ -31,12 +31,25 @@ class Store {
   @observable pvd;
   @observable otp;
   @observable rtp;
-
   @observable tpjj;
+
+  @observable cs=[];
+  @observable wz=[];
+  @observable zz=[];
+  @observable svbag=[];
+  @observable polist=[];
+  @observable dvpo=[];
+  @observable cuser=[];
+  @observable rset=[];
+  @observable pj=[];
+  @observable envs=[];
+
+
+
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/host/')
-      .then(({hosts, zones, perms, res_t,w_z,provider,ostp,tp}) => {
+      .then(({hosts, zones, perms, res_t,w_z,provider,ostp,tp,cs, wz, zz, svbag,polist,dvpo,cuser,rset,pj,envs}) => {
         this.records = hosts;
         this.zones = zones;
         this.res_t = res_t;
@@ -44,6 +57,17 @@ class Store {
         this.w_z = w_z;
         this.ostp = ostp;
         this.provider = provider;
+
+        this.cs = cs;
+        this.wz = wz;
+        this.zz = zz;
+        this.svbag = svbag;
+        this.polist = polist;
+        this.dvpo = dvpo;
+        this.cuser = cuser;
+        this.rset = rset;
+        this.pj = pj;
+        this.envs = envs;
         this.permRecords = hosts.filter(item => perms.includes(item.id));
         for (let item of hosts) {
           this.idMap[item.id] = item
@@ -51,6 +75,26 @@ class Store {
       })
       .finally(() => this.isFetching = false)
   };
+  // fetchAllConfig  = () => {
+  //   this.isFetching = true;
+  //   return http.get('/api/config/hostall/')
+  //     .then(({cs, wz, zz, svbag,polist,dvpo,cuser,rset,pj,envs}) => {
+  //       this.cs = cs;
+  //       this.wz = wz;
+  //       this.zz = zz;
+  //       this.svbag = svbag;
+  //       this.polist = polist;
+  //       this.dvpo = dvpo;
+  //       this.cuser = cuser;
+  //       this.rset = rset;
+  //       this.pj = pj;
+  //       this.envs = envs;
+
+  //     })
+  //     .finally(
+  //       () => this.isFetching = false
+  //     )
+  // }
 
   showForm = (info = {}) => {
     this.formVisible = true;

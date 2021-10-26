@@ -36,7 +36,7 @@ export default observer(function () {
           </Select>
           </SearchForm.Item>
 
-          <SearchForm.Item span={4} title="主机类型">
+          <SearchForm.Item span={4} title="资源类型">
           <Select allowClear placeholder="请选择" value={store.otp} onChange={v => store.rtp = v}>
             {store.res_t.map(item => (
               <Select.Option value={item} key={item}>{item}</Select.Option>

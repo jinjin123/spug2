@@ -12,6 +12,17 @@ import FormWin from './FormWin';
 import ComImport from './Import';
 import { http, hasPermission } from 'libs';
 import store from './store';
+import envStore from 'pages/config/environment/store';
+
+// import csStore from 'pages/config/cluster/store';
+// import poStore from 'pages/config/portlist/store';
+// import pjStore from 'pages/config/project/store';
+// import svStore from 'pages/config/servicebag/store';
+// import wzStore from 'pages/config/workzone/store';
+// import zzStore from 'pages/config/zone/store';
+// import dvStore from 'pages/config/devicepostion/store';
+// import cuStore from 'pages/config/cuser/store';
+// import resStore from 'pages/config/resourcet/store';
 
 @observer
 class ComTable extends React.Component {
@@ -24,6 +35,38 @@ class ComTable extends React.Component {
   }
   componentDidMount() {
     store.fetchRecords()
+    // store.fetchAllConfig()
+
+    // if (envStore.records.length === 0) {
+    //   envStore.fetchRecords()
+    // }
+    // if (csStore.records.length === 0) {
+    //   csStore.fetchRecords()
+    // }
+    // if (poStore.records.length === 0) {
+    //   poStore.fetchRecords()
+    // }
+    // if (pjStore.records.length === 0) {
+    //   pjStore.fetchRecords()
+    // }
+    // if (svStore.records.length === 0) {
+    //   svStore.fetchRecords()
+    // }
+    // if (wzStore.records.length === 0) {
+    //   wzStore.fetchRecords()
+    // }
+    // if (zzStore.records.length === 0) {
+    //   zzStore.fetchRecords()
+    // }
+    // if (dvStore.records.length === 0) {
+    //   dvStore.fetchRecords()
+    // }
+    // if (cuStore.records.length === 0) {
+    //   cuStore.fetchRecords()
+    // }
+    // if (resStore.records.length === 0) {
+    //   resStore.fetchRecords()
+    // }
   }
 
   handleConsole = (info) => {
@@ -88,9 +131,259 @@ class ComTable extends React.Component {
     }
 
   };
+  columns = [
+    {
+      title: '实体项目',
+      dataIndex: 'top_project',
+      render: info => {
+        let tinfo = [];
+        let data = store.pj
+        // console.log(data)
+        info.map(ditem => { 
+            let newArr = data.filter(item => item.id === ditem)
+            newArr.map(dd => {
+                tinfo.push(dd.name)
+            })
+        })
+        return <span>{tinfo.join(";")}</span>
+      },
+    },
+    {
+      title: '项目子类',
+      dataIndex: 'child_project',
+      render: info => {
+        let tinfo = [];
+        let data = store.pj
+        // console.log(data)
+        info.map(ditem => { 
+            let newArr = data.filter(item => item.id === ditem)
+            newArr.map(dd => {
+                tinfo.push(dd.name)
+            })
+        })
+        return <span>{tinfo.join(";")}</span>
+      },
+    },
+    {
+      title: '所属集群',
+      dataIndex: 'cluster',
+      render: info =>{
+        let tinfo =[];
+        let data = store.cs
+        // console.log(cuStore.records)
+            info.map(ditem => { 
+              let newArr = data.filter(item => item.id === ditem)
+              newArr.map(dd => {
+                  tinfo.push(dd.name)
+              })
+          })
+          return <span>{tinfo.join(";")}</span>
+
+
+      },
+    },
+    {
+      title: '主机名',
+      dataIndex: 'outter_ip',
+    },
+    {
+      title: '外网IP',
+      dataIndex: 'hostname',
+    },
+    {
+      title: '虚拟IP',
+      dataIndex: 'v_ip',
+    },
+    {
+      title: '业务IP',
+      dataIndex: 'ipaddress',
+    },
+    {
+      title: '连接用户',
+      dataIndex: 'username',
+      render: info =>{
+        let tinfo = "";
+        let data = store.cuser
+        // console.log(cuStore.records)
+        // info.map(ditem => { 
+            let newArr = data.filter(item => item.id === info)
+            newArr.map(dd => {
+                // tinfo.push(dd.name)
+                tinfo = dd.name
+            })
+        // })
+        return <span>{tinfo}</span>
+      },
+    },
+    {
+      title: '资源类别',
+      dataIndex: 'zone',
+      render: info => {
+        let tinfo = [];
+        let data = store.zz
+        // console.log(data)
+          info.map(ditem => { 
+            let newArr = data.filter(item => item.id === ditem)
+            newArr.map(dd => {
+                tinfo.push(dd.name)
+            })
+        })
+        return <span>{tinfo.join(";")}</span>
+      
+      },
+    },
+    {
+      title: '系统类型',
+      dataIndex: 'ostp',
+    },
+    {
+      title: '资源类型',
+      dataIndex: 'resource_type',
+      render: info =>{
+        let tinfo = "";
+        let data = store.rset
+        // console.log(cuStore.records)
+        // info.map(ditem => { 
+            let newArr = data.filter(item => item.id === info)
+            newArr.map(dd => {
+                // tinfo.push(dd.name)
+                tinfo = dd.name
+            })
+        // })
+        return <span>{tinfo}</span>
+      },
+    },
+    {
+      title: '系统',
+      dataIndex: 'osType',
+    },
+    {
+      title: '版本',
+      dataIndex: 'osVerion',
+    },
+    {
+      title: '内核版本',
+      dataIndex: 'coreVerion',
+    },
+    {
+      title: 'cpu逻辑核心',
+      dataIndex: 'cpus',
+    },
+    {
+      title: '内存(G)',
+      dataIndex: 'memory',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      render: status => {
+          return      <Tag color={status === "在线" ? "green":"volcano"} key={status}>
+          {status ==="在线" ? "在线" : "离线"}
+        </Tag>
+      },
+    },
+    {
+      title: '系统盘',
+      dataIndex: 'sys_disk',
+    },
+    {
+      title: '设备位置',
+      dataIndex: 'provider',
+      render: info =>{
+        let tinfo = "";
+        let data = store.dvpo
+        // console.log(cuStore.records)
+        // info.map(ditem => { 
+            let newArr = data.filter(item => item.id === info)
+            newArr.map(dd => {
+                // tinfo.push(dd.name)
+                tinfo = dd.name
+            })
+        // })
+        return <span>{tinfo}</span>
+      },
+    },
+    {
+      title: '实际用途',
+      dataIndex: 'use_for',
+    },
+    {
+      title: '供应商',
+      dataIndex: 'supplier',
+    },
+    {
+      title: '开发',
+      dataIndex: 'developer',
+    },
+    {
+      title: '运维',
+      dataIndex: 'opsper',
+    },
+    {
+      title: '录入人',
+      dataIndex: 'create_by',
+    },
+    {
+      title: '安装服务',
+      dataIndex: 'service_pack',
+      render: info => {
+        let tinfo = [];
+        let data = store.svbag
+        // console.log(data)
+        info.map(ditem => { 
+            let newArr = data.filter(item => item.id === ditem)
+            newArr.map(dd => {
+                tinfo.push(dd.name)
+            })
+        })
+        return <span>{tinfo.join(";")}</span>
+      },
+    },
+    // {
+    //   title: '补丁服务与版本',
+    //   dataIndex: 'host_bug',
+    // },
+    {
+      title: '扩展配置',
+      dataIndex: 'ext_config1',
+    },
+    {
+      title: '环境',
+      dataIndex: 'env_id',
+      render: info => {
+        let tinfo = "";
+        let data = store.envs
+        let newArr = data.filter(item => item.id === info)
+        newArr.map(dd => {
+            // tinfo.push(dd.name)
+            tinfo = dd.name
+        })
+        return  <span>{tinfo}</span>
+      },
+    },
+    {
+      title: '待回收ip',
+      dataIndex: 'iprelease',
+    },
+    {
+      title: '备注信息',
+      dataIndex: 'comment',
+    },
+    {
+      title: '操作',
+      render: info => {
+        return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+          <Select.Option value={1}>编辑</Select.Option>
+          <Select.Option value={2}>终端</Select.Option>
+          <Select.Option value={3}>待回收</Select.Option>
+        </Select>
+      }
+    },
+  ]
 
   render() {
     let data = store.permRecords;
+    // console.log(cuStore.records)
     const {Option } = Select
     if (store.f_name) {
       data = data.filter(item => item['name'].toLowerCase().includes(store.f_name.toLowerCase()))
@@ -121,6 +414,7 @@ class ComTable extends React.Component {
           loading={store.isFetching}
           // size="middle"
           dataSource={data}
+          columns={this.columns}
           expandedRowRender={data => <p style={{ margin: 0 }}>{data.disk}</p>}
           scroll={{ x: '210%' }}
           pagination={{
@@ -130,24 +424,19 @@ class ComTable extends React.Component {
             showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}>
-          <Table.Column title="实体项目" dataIndex="top_project"/>
+          {/* <Table.Column title="实体项目" dataIndex="top_project"/>
           <Table.Column title="主机名" dataIndex="hostname" />
           <Table.Column title="外网IP" dataIndex="outter_ip"/>
           <Table.Column title="虚拟IP" dataIndex="v_ip"/>
           <Table.Column title="业务IP" dataIndex="ipaddress" width={130} />
           <Table.Column title="连接用户" dataIndex="username"/>
-          {/* <Table.Column width={100} title="端口" dataIndex="port"/> */}
           <Table.Column title="分组" dataIndex="zone"/>
           <Table.Column title="系统类型" dataIndex="ostp"/>
           <Table.Column title="系统" dataIndex="osType"/>
           <Table.Column title="版本" dataIndex="osVerion"/>
           <Table.Column title="内核版本" dataIndex="coreVerion"/>
           <Table.Column title="cpu逻辑核心" dataIndex="cpus"/>
-          {/* <Table.Column title="cpu单U(核)" dataIndex="cpucore"/> */}
-          
           <Table.Column title="内存(G)" dataIndex="memory"/>
-          {/* <Table.Column title="状态" dataIndex="status"/> */}
-
           <Table.Column
             title="状态"
             dataIndex="status"
@@ -166,8 +455,6 @@ class ComTable extends React.Component {
           <Table.Column title="实际用途" dataIndex="use_for"/>
 
 
-          {/* <Table.Column title="挂载盘" dataIndex="disk" ellipsis/> */}
-          {/* <Table.Column title="序列号" dataIndex="serial_num"/> */}
           <Table.Column title="供应商" dataIndex="supplier"/>
           <Table.Column title="开发" dataIndex="developer"/>
           <Table.Column title="运维" dataIndex="opsper"/>
@@ -180,18 +467,14 @@ class ComTable extends React.Component {
           <Table.Column ellipsis title="备注信息" dataIndex="comment"/>
           {hasPermission('host.host.edit|host.host.del|host.host.console') && (
             <Table.Column width={100} fixed="right" title="操作" render={info => (
-              // <Action>
-              //   <Action.Button auth="host.host.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-              //   <Action.Button auth="host.host.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
-              //   <Action.Button auth="host.host.console" onClick={() => this.handleConsole(info)}>Console</Action.Button>
-              // </Action>
               <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
               <Option value={1}>编辑</Option>
               <Option value={2}>终端</Option>
               <Option value={3}>待回收</Option>
             </Select>
             )}/>
-          )}
+          )} */}
+          
         </Table>
         {store.formVisible && <ComForm/>}
         {store.winformVisible && <FormWin/>}

@@ -5,6 +5,16 @@
  */
 import { makeRoute } from 'libs/router';
 import Environment from './environment';
+import Project from './project';
+import Cluster from './cluster';
+import Portlist from './portlist';
+import ServiceBag from './servicebag';
+import Workzone from './workzone';
+import Cuser from './cuser';
+import Resource from './resourcet';
+
+import Zone from './zone';
+import Device from './devicepostion';
 import Service from './service';
 import RancherConf from './rancherconfmap';
 import App from './app';
@@ -14,6 +24,17 @@ import Setting from './setting';
 
 export default [
   makeRoute('/environment', Environment),
+  makeRoute('/cuser', Cuser),
+  makeRoute('/resouret', Resource),
+
+  makeRoute('/project', Project),
+  makeRoute('/cluster', Cluster),
+  makeRoute('/portlist', Portlist),
+  makeRoute('/servicebag', ServiceBag),
+  makeRoute('/workzone', Workzone),
+  makeRoute('/zone',Zone ),
+  makeRoute('/device', Device),
+
   makeRoute('/service', Service),
   makeRoute('/backup', Backup),
   makeRoute('/app', App),

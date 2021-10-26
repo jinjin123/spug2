@@ -5,7 +5,25 @@
  */
 export default [
   {icon: 'desktop', title: '工作台', auth: 'home.home.view', path: '/home'},
-  {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
+  {
+    icon: 'cloud-server', title: '资产管理', auth: 'exec.task.do|exec.template.view', child: [
+      // {title: '', auth: 'exec.task.do', path: '/exec/task'},
+      {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
+      {icon: 'cloud-server', title: '数据库管理', auth: 'host.host.view', path: '/dbserver'},
+      {icon: 'cloud-server', title: '服务包管理', auth: 'host.host.view', path: '/config/servicebag'},
+      {icon: 'cloud-server', title: '端口管理', auth: 'host.host.view', path: '/config/portlist'},
+      {icon: 'cloud-server', title: '集群管理', auth: 'host.host.view', path: '/config/cluster'},
+      {icon: 'cloud-server', title: '项目管理', auth: 'host.host.view', path: '/config/project'},
+      {icon: 'cloud-server', title: '所属区域管理', auth: 'host.host.view', path: '/config/workzone'},
+      {icon: 'cloud-server', title: '类别管理', auth: 'host.host.view', path: '/config/zone'},
+      {icon: 'cloud-server', title: '设备位置管理', auth: 'host.host.view', path: '/config/device'},
+      {icon: 'cloud-server', title: '连接用户管理', auth: 'host.host.view', path: '/config/cuser'},
+
+      {icon: 'cloud-server', title: '资源类型管理', auth: 'host.host.view', path: '/config/resouret'},
+
+    ]
+  },
+  // {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
   {
     icon: 'code', title: '批量执行', auth: 'exec.task.do|exec.template.view', child: [
       {title: '执行任务', auth: 'exec.task.do', path: '/exec/task'},
