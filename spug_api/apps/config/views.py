@@ -8,6 +8,7 @@ from django.db.models import F
 from libs import json_response, JsonParser, Argument,RequestApiAgent
 from apps.app.models import Deploy,RancherConfigMap,RancherNamespace,RancherConfigMapVersion,RancherProject
 from apps.config.models import *
+from apps.host.models import  *
 import json
 from django.conf import settings
 import logging
@@ -35,8 +36,6 @@ class RancherAggMap(View):
             data = item.to_dict(excludes=("create_by_id","namespace_id","modify_time"))
             tmp.append(data)
         return json_response(tmp)
-
-
 
 class EnvironmentView(View):
     def get(self, request):
@@ -77,7 +76,6 @@ class EnvironmentView(View):
                 return json_response(error='该环境已关联了发布配置，请删除相关发布配置后再尝试删除')
             Environment.objects.filter(pk=form.id).delete()
         return json_response(error=error)
-
 
 class ServiceView(View):
     def get(self, request):
@@ -421,3 +419,330 @@ def _filter_value(value):
     else:
         value = json.dumps(value)
     return value
+
+
+class ProjectView(View):
+    def get(self, request):
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = ProjectConfig.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入环境名称'),
+            Argument('tag', help='请输入项目分类'),
+            Argument('comment', required=False)
+        ).parse(request.body)
+        if error is None:
+            env = ProjectConfig.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                ProjectConfig.objects.filter(pk=form.id).update(**form)
+            else:
+                env = ProjectConfig.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            ProjectConfig.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+class Cluster(View):
+    def get(self, request):
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = ClusterConfig.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入集群名称'),
+            Argument('comment', help='请输入集群描述',required=False),
+        ).parse(request.body)
+        if error is None:
+            env = ClusterConfig.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                ClusterConfig.objects.filter(pk=form.id).update(**form)
+            else:
+                env = ClusterConfig.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            ClusterConfig.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+class Work_Zone(View):
+    def get(self, request):
+        envs = WorkZone.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入所属区域'),
+            Argument('comment', help='请输入备注',required=False),
+        ).parse(request.body)
+        if error is None:
+            env = WorkZone.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                WorkZone.objects.filter(pk=form.id).update(**form)
+            else:
+                env = WorkZone.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            WorkZone.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+class ZoneConfig(View):
+    def get(self, request):
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = Zone.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入分类名称'),
+            Argument('comment', help='请输入备注',required=False),
+        ).parse(request.body)
+        if error is None:
+            env = Zone.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                Zone.objects.filter(pk=form.id).update(**form)
+            else:
+                env = Zone.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            Zone.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+class ServicebagConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = Servicebag.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入包名称'),
+            Argument('comment', help='请输入备注',required=False)
+        ).parse(request.body)
+        if error is None:
+            env = Servicebag.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                Servicebag.objects.filter(pk=form.id).update(**form)
+            else:
+                env = Servicebag.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            Servicebag.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+class PortlistConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = Portlist.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('ipaddress', help='请输入ip'),
+            Argument('port', help='请输入端口'),
+            Argument('comment', required=False)
+        ).parse(request.body)
+        if error is None:
+            env = Portlist.objects.filter(ipaddress=form.ipaddress).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.ipaddress} 已存在，请更改后重试')
+            if form.id:
+                Portlist.objects.filter(pk=form.id).update(**form)
+            else:
+                env = Portlist.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            Portlist.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+class DevicePoConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = DevicePositon.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入包名称'),
+            Argument('comment', help='请输入备注',required=False)
+        ).parse(request.body)
+        if error is None:
+            env = DevicePositon.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                DevicePositon.objects.filter(pk=form.id).update(**form)
+            else:
+                env = DevicePositon.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            DevicePositon.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+class ConnctUserConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = ConnctUser.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入连接用户'),
+            Argument('comment', help='请输入备注',required=False)
+        ).parse(request.body)
+        if error is None:
+            env = ConnctUser.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                ConnctUser.objects.filter(pk=form.id).update(**form)
+            else:
+                env = ConnctUser.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            ConnctUser.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+class ResourceTConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = ResourceType.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('name', help='请输入资源类型'),
+            Argument('comment', help='请输入备注',required=False)
+        ).parse(request.body)
+        if error is None:
+            env = ResourceType.objects.filter(name=form.name).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
+            if form.id:
+                ResourceType.objects.filter(pk=form.id).update(**form)
+            else:
+                env = ResourceType.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            ResourceType.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
+
+class HostallConfig(View):
+    def get(self,request):
+        cluster = ClusterConfig.objects.all()
+        wz = WorkZone.objects.all()
+        zz = Zone.objects.all()
+        svbag = Servicebag.objects.all()
+        polist = Portlist.objects.all()
+        dvpo  = DevicePositon.objects.all()
+        cuser = ConnctUser.objects.all()
+        rest = ResourceType.objects.all()
+        pj = ProjectConfig.objects.all()
+        env = Environment.objects.all()
+        return json_response({"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
+                              "zz":[ x.to_dict() for x in zz],"svbag":[ x.to_dict() for x in svbag],
+                              "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
+                              "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env]})
+

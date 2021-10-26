@@ -15,6 +15,9 @@ from libs.ssh import SSH, AuthenticationException
 from paramiko.ssh_exception import BadAuthenticationType
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
+from apps.config.models import *
+from apps.host.models import  *
+
 import socket
 from apps.host.tasks import  *
 
@@ -34,14 +37,28 @@ class HostView(View):
         w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
         provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({"tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        cluster = ClusterConfig.objects.all()
+        wz = WorkZone.objects.all()
+        zz = Zone.objects.all()
+        svbag = Servicebag.objects.all()
+        polist = Portlist.objects.all()
+        dvpo  = DevicePositon.objects.all()
+        cuser = ConnctUser.objects.all()
+        rest = ResourceType.objects.all()
+        pj = ProjectConfig.objects.all()
+        env = Environment.objects.all()
+        return json_response({"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
+                              "zz":[ x.to_dict() for x in zz],"svbag":[ x.to_dict() for x in svbag],
+                              "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
+                              "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
+                              "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('zone', help='请输入分组类型'),
+            Argument('zone', type=list, help='请输入分组类型'),
             # Argument('name', help='请输主机名称'),
-            Argument('username', handler=str.strip, help='请输入登录用户名'),
+            Argument('username', type=int, help='请输入登录用户名'),
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
             Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
@@ -51,36 +68,39 @@ class HostView(View):
             Argument('password_expire',type=int, required=False),
 
             Argument('ostp',type=str, required=False),
-            Argument('resource_type',type=str, required=False),
+            Argument('resource_type',type=int, required=False),
             Argument('v_ip', required=False),
             Argument('outter_ip', required=False),
-            Argument('provider', required=False),
-            Argument('top_project', type=str,required=False),
-            Argument('service_pack', required=False),
-            Argument('work_zone', required=False),
+            Argument('provider',type=int, required=False),
+            Argument('top_project', type=list,required=False),
+            Argument('child_project', type=list,required=False),
+            Argument('service_pack',type=list ,required=False),
+            Argument('work_zone',type=int, required=False),
             Argument('use_for', required=False),
             Argument('developer', required=False),
             Argument('opsper', required=False),
-            Argument('env_id', required=False),
+            Argument('env_id', type=int, required=False),
             Argument('ext_config1', required=False),
+            Argument('cluster',type=list, required=False),
 
             # Argument('cpus',type=int, required=False),
             # Argument('memory', type=int, required=False),
 
         ).parse(request.body)
         if error is None:
-            if form.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
-                form.update({"top_projectid" : "dgdataheadioc"})
-            elif form.top_project == "东莞市疫情动态查询系统项目":
-                form.update({"top_projectid" : "dgdycovidselect"})
-            elif form.top_project == "东莞市疫情防控数据管理平台项目":
-                form.update({"top_projectid" : "dgcoviddatamanager"})
-            elif form.top_project == "东莞市跨境货车司机信息管理系统项目":
-                form.update({"top_projectid" : "dgdriverinfo"})
-            elif form.top_project == "疫情地图项目":
-                form.update({"top_projectid": "dgcovidmap"})
-            elif form.top_project == "粤康码":
-                form.update({"top_projectid" : "dghealthqr"})
+            # if form.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
+            #     form.update({"top_projectid" : "dgdataheadioc"})
+            # elif form.top_project == "东莞市疫情动态查询系统项目":
+            #     form.update({"top_projectid" : "dgdycovidselect"})
+            # elif form.top_project == "东莞市疫情防控数据管理平台项目":
+            #     form.update({"top_projectid" : "dgcoviddatamanager"})
+            # elif form.top_project == "东莞市跨境货车司机信息管理系统项目":
+            #     form.update({"top_projectid" : "dgdriverinfo"})
+            # elif form.top_project == "疫情地图项目":
+            #     form.update({"top_projectid": "dgcovidmap"})
+            # elif form.top_project == "粤康码":
+            #     form.update({"top_projectid" : "dghealthqr"})
+            print(form)
             ppwd = form.pop('password')
             if form.ostp != "Windows" and form.resource_type == "主机" :
                if valid_ssh(form.ipaddress, form.port, form.username, password=ppwd,
@@ -219,18 +239,18 @@ def post_import(request):
         #     pwd = data.pop("password")
         data["password_hash"] = Host.make_password(pwd)
         data["env_id"] =  2 if data.env_id == "生产" else 1
-        if data.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
-            data.update({"top_projectid": "dgdataheadioc"})
-        elif data.top_project == "东莞市疫情动态查询系统项目":
-            data.update({"top_projectid": "dgdycovidselect"})
-        elif data.top_project == "东莞市疫情防控数据管理平台项目":
-            data.update({"top_projectid": "dgcoviddatamanager"})
-        elif data.top_project == "东莞市跨境货车司机信息管理系统项目":
-            data.update({"top_projectid": "dgdriverinfo"})
-        elif data.top_project == "疫情地图项目":
-            data.update({"top_projectid": "dgcovidmap"})
-        elif data.top_project == "粤康码":
-            data.update({"top_projectid": "dghealthqr"})
+        # if data.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
+        #     data.update({"top_projectid": "dgdataheadioc"})
+        # elif data.top_project == "东莞市疫情动态查询系统项目":
+        #     data.update({"top_projectid": "dgdycovidselect"})
+        # elif data.top_project == "东莞市疫情防控数据管理平台项目":
+        #     data.update({"top_projectid": "dgcoviddatamanager"})
+        # elif data.top_project == "东莞市跨境货车司机信息管理系统项目":
+        #     data.update({"top_projectid": "dgdriverinfo"})
+        # elif data.top_project == "疫情地图项目":
+        #     data.update({"top_projectid": "dgcovidmap"})
+        # elif data.top_project == "粤康码":
+        #     data.update({"top_projectid": "dghealthqr"})
         host = Host.objects.create(create_by=request.user, **data)
         if data.username == "root":
             roottmp.append(data.ipaddress)

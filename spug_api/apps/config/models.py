@@ -20,6 +20,22 @@ class Environment(models.Model, ModelMixin):
         db_table = 'environments'
         ordering = ('-id',)
 
+class ProjectConfig(models.Model, ModelMixin):
+    name = models.CharField(max_length=50)
+    tag = models.CharField(max_length=255,null=True,verbose_name='pj tag')
+    comment = models.CharField(max_length=255, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __repr__(self):
+        return f'<project {self.name!r}>'
+
+    class Meta:
+        db_table = 'config_project'
+        ordering = ('-id',)
+
+
 class RancherApiConfig(models.Model,ModelMixin):
     url = models.CharField(max_length=255,verbose_name="API url")
     env = models.ForeignKey(Environment, on_delete=models.PROTECT,db_index=True,verbose_name="dev/prod")

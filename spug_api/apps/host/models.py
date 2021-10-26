@@ -39,7 +39,8 @@ class Host(models.Model, ModelMixin):
     #     (5, '粤康码'),
     # }
     top_project = models.CharField(max_length=180, verbose_name="顶级项目", null=True)
-    top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
+    child_project = models.CharField(max_length=180, verbose_name="子项目", null=True)
+    # top_projectid = models.CharField(max_length=100, verbose_name="顶级项目id", null=True)
     ipaddress = models.CharField(max_length=15, verbose_name="ip", null=True)
     service_pack = models.CharField(max_length=500, verbose_name="包含哪些服务类型包'',''", null=True)
     osType = models.CharField(max_length=155,verbose_name='系统类型', null=True)
@@ -56,12 +57,13 @@ class Host(models.Model, ModelMixin):
     status = models.IntegerField(choices=STATUS_CHOOSE, default=0, verbose_name='同步监控状态(关机释放下线)', null=True)
     hostname = models.CharField(max_length=100, verbose_name='主机名', null=True)
 
+    cluster = models.CharField(max_length=100,verbose_name="cluster",null=True)
     # ostp = models.IntegerField(choices=OS_TYPE,verbose_name="os type",null=True)
     ostp = models.CharField(max_length=100,verbose_name="os type",null=True)
     # provider = models.IntegerField(choices=PV_CHOOSE,verbose_name='运营商', null=True)
-    provider = models.CharField(max_length=120,verbose_name='运营商', null=True)
+    provider = models.IntegerField(verbose_name='运营商', null=True)
     # resource_type = models.IntegerField(choices=PT_CHOOSE,verbose_name="资产类型",null=True)
-    resource_type = models.CharField(max_length=120,verbose_name="资产类型",null=True)
+    resource_type = models.CharField(max_length=50,verbose_name="资产类型",null=True)
     work_zone = models.CharField(max_length=20,verbose_name="work area",null=True)
     outter_ip = models.CharField(max_length=15, verbose_name="outerip", null=True)
     v_ip = models.CharField(max_length=15, verbose_name="v_ip", null=True)
@@ -74,11 +76,11 @@ class Host(models.Model, ModelMixin):
 
 
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
-    host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
+    # host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
     ext_config1 = models.CharField(max_length=255, verbose_name='扩展信息', null=True)
     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
     opsper = models.CharField(max_length=200, verbose_name='运维负责人' ,null=True)
-    zone = models.CharField(max_length=50,verbose_name="项目分组", null=True)
+    zone = models.CharField(max_length=255,verbose_name="项目分组", null=True)
     # create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -126,6 +128,18 @@ class Host(models.Model, ModelMixin):
         else:
             return ""
 
+    @staticmethod
+    def convert_str_list(data):
+        tt = []
+        if data != "[]" and data != "" and data is not None and not isinstance(data,list):
+            tt = ast.literal_eval(data)
+            return tt
+        else:
+            return tt
+
+
+
+
 
     @property
     def private_key(self):
@@ -146,8 +160,16 @@ class Host(models.Model, ModelMixin):
         tmp["disk"] = self.conver_disk(self.data_disk)
         tmp["sys_disk"] = self.tosys_disk(self.sys_disk)
         tmp['create_by'] = self.create_by.nickname
-        tmp['env'] = "生产" if self.env_id == 2 else "测试"
+        # tmp['env'] = "生产" if self.env_id == 2 else "测试"
         tmp['status'] =  "在线" if self.status == 0 else "离线"
+        tmp["zone"] = self.convert_str_list(self.zone)
+        tmp["username"] = self.convert_str_list(self.username)
+        tmp["resource_type"] = self.convert_str_list(self.resource_type)
+        tmp["cluster"] = self.convert_str_list(self.cluster)
+        tmp["service_pack"] = self.convert_str_list(self.service_pack)
+        tmp["work_zone"] = self.convert_str_list(self.work_zone)
+        tmp["top_project"] = self.convert_str_list(self.top_project)
+        tmp["child_project"] = self.convert_str_list(self.child_project)
         # tmp["ostp"] = "Linux" if self.ostp == 0 else "Windows"
         # tmp['provider'] = self.get_provider_display()
         # tmp['resource_type'] = self.get_resource_type_display()
@@ -168,3 +190,89 @@ class Datadisk(models.Model, ModelMixin):
 
     class Meta:
          db_table = "host_disk"
+
+
+class ClusterConfig(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+         db_table = "cluster_config"
+
+
+class WorkZone(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "work_zone"
+
+class Zone(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "zone"
+
+
+class Servicebag(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "servicebag"
+
+class Portlist(models.Model,ModelMixin):
+    # name = models.CharField(max_length=50)
+    ipaddress = models.CharField(max_length=15)
+    port = models.CharField(max_length=255)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "portlist"
+
+
+class DevicePositon(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "device_position"
+
+class ConnctUser(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "connect_user"
+
+class ResourceType(models.Model,ModelMixin):
+    name = models.CharField(max_length=50)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "resource_type"
