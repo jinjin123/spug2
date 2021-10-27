@@ -560,7 +560,14 @@ class Mytest(unittest.TestCase):
 
             def test_pb_approval(self):
                 from apps.host.models import Host
-                u = Host.objects.get(ipaddress='192.168.1.107')
+                from openpyxl import load_workbook
+                ws = load_workbook("/home/jin/文档/root.xlsx", read_only=True)['Sheet1']
+                for i, row in enumerate(ws.rows):
+                    Host.objects.filter(ipaddress=row[0].value).update(password_hash=Host.make_password(row[1].value))
+                    # print(row[0].value,row[1].value)
+                # from apps.host.models import ConnctUser
+                # u = Host.objects.get(ipaddress='192.168.1.107')
+                # print((ConnctUser.objects.get(name='ioc')).id)
                 # ioc = []
                 # u = Host.objects.get(id=243)
                 # u.status = 1
@@ -568,7 +575,7 @@ class Mytest(unittest.TestCase):
                 # ioc.append(Host(id=243,status=1))
                 # Host.objects.bulk_update(ioc,['status'])
                 # h = Host.objects.values("ipaddress","username","id").all()
-                print(u.id)
+                # print(u.name)
                 # ipioc=[]
                 # iproot = []
                 # for x in h:

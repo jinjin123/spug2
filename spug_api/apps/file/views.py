@@ -6,7 +6,8 @@ from django.shortcuts import HttpResponse
 from libs.utils import host_select_args,host_select_cns,get_data
 from django.views.generic import View
 from django_redis import get_redis_connection
-from apps.host.models import Host
+from apps.host.models import *
+from apps.config.models import *
 from apps.file.utils import FileResponseAfter, parse_sftp_attr
 from libs import json_response, JsonParser, Argument
 from functools import partial
@@ -125,16 +126,16 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
         for index, key in enumerate(header):
             if key =="data_disk":
                 tt = ""
-                if data_dict[key] != "[]":
+                if data_dict[key] != "[]" and  data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt += "数据盘:" + x.get("name") + ",容量:" + str(x.get("size")) + "G,"
+                        tt += "数据盘:" + x.get("name") + ";容量:" + str(x.get("size")) + "G;"
                 # for x in ast.literal_eval(data_dict[key]):
                     # tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
                     #     x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"
                 sheet.write(i + 1, index, tt)
             elif key == "sys_disk":
                 tt = ""
-                if data_dict[key] != "[]":
+                if data_dict[key] != "[]" and  data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
                         tt = x["name"]
                 # for x in ast.literal_eval(data_dict[key]):
@@ -154,6 +155,66 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
             elif key == "password_hash":
                 if data_dict[key]:
                     sheet.write(i + 1, index,decryptPwd(data_dict[key]))
+            elif key == "top_project":
+                tt = []
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt.append((ProjectConfig.objects.get(pk=x)).name)
+                    ttt = ";".join(tt)
+                sheet.write(i + 1, index, ttt)
+            elif key == "child_project":
+                tt = []
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt.append((ProjectConfig.objects.get(pk=x)).name)
+                    ttt = ";".join(tt)
+                sheet.write(i + 1, index, ttt)
+            elif key == "cluster":
+                tt = []
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt.append((ClusterConfig.objects.get(pk=x)).name)
+                    ttt = ";".join(tt)
+                sheet.write(i + 1, index, ttt)
+            elif key == "zone":
+                tt = []
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt.append((Zone.objects.get(pk=x)).name)
+                    ttt = ";".join(tt)
+                sheet.write(i + 1, index, ttt)
+            elif key == "service_pack":
+                tt = []
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    for x in ast.literal_eval(data_dict[key]):
+                        tt.append((Servicebag.objects.get(pk=x)).name)
+                    ttt = ";".join(tt)
+                sheet.write(i + 1, index, ttt)
+            elif key == "provider":
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    ttt = (DevicePositon.objects.get(pk=data_dict[key]).name)
+                sheet.write(i + 1, index, ttt)
+            elif key == "resource_type":
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    ttt = (ResourceType.objects.get(pk=data_dict[key]).name)
+                sheet.write(i + 1, index, ttt)
+            elif key == "username":
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    ttt = (ConnctUser.objects.get(pk=data_dict[key]).name)
+                sheet.write(i + 1, index, ttt)
+            elif key == "work_zone":
+                ttt = ""
+                if data_dict[key] != "[]" and data_dict[key] is not None:
+                    ttt = (WorkZone.objects.get(pk=data_dict[key]).name)
+                sheet.write(i + 1, index, ttt)
             else:
                 sheet.write(i + 1, index, data_dict[key])
     wbk.save(fpath + name + '.xls')

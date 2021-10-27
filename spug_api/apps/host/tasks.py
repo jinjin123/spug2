@@ -1,6 +1,6 @@
 from spug.celery import app
 from libs.ansible29 import *
-from apps.host.models import Host,Datadisk
+from apps.host.models import *
 import ast
 import math
 import logging
@@ -62,15 +62,16 @@ def update_hostinfo(ip,user='root'):
 
                     hostname=stdout_dict['success'][xip]["ansible_facts"]["ansible_nodename"],
                     supplier=stdout_dict['success'][xip]["ansible_facts"]["ansible_system_vendor"],
-                    username=user,
-                    port=22,
-                    ostp="Linux",
-                    env_id=2,
-                    resource_type="主机",
+                    username=(ConnctUser.objects.get(name=user)).id,
+                    # port=22,
+                    # ostp="Linux",
+                    # env_id=2,
+                    # resource_type="主机",
                     sys_disk=sysdisk,
                     data_disk=datadisk,
                 )
-                Host.objects.update_or_create(defaults=data,ipaddress=xip,status=0)
+                Host.objects.update_or_create(defaults=data,ipaddress=xip)
+                # Host.objects.filter(ipaddress=xip).update(**data)
             except Exception as e:
                 print(e)
                 logger.error("update host %s error :%s",(xip,e))

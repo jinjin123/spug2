@@ -22,38 +22,56 @@ import socket
 from apps.host.tasks import  *
 
 class HostView(View):
-    def get(self, request):
+    def get(self, request,tag):
         host_id = request.GET.get('id')
         if host_id:
             if not request.user.has_host_perm(host_id):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
-        hosts = Host.objects.all()
-        zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
-        tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
-        ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct() ]
-        res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
-        w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
-        provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
-        perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
         cluster = ClusterConfig.objects.all()
         wz = WorkZone.objects.all()
         zz = Zone.objects.all()
         svbag = Servicebag.objects.all()
         polist = Portlist.objects.all()
-        dvpo  = DevicePositon.objects.all()
+        dvpo = DevicePositon.objects.all()
         cuser = ConnctUser.objects.all()
         rest = ResourceType.objects.all()
         pj = ProjectConfig.objects.all()
         env = Environment.objects.all()
-        return json_response({"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
-                              "zz":[ x.to_dict() for x in zz],"svbag":[ x.to_dict() for x in svbag],
-                              "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
-                              "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
-                              "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        if tag =="host":
+            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='主机')).id).all()
+            zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+            tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
+            ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct() ]
+            res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
+            w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
+            provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
+            perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
+            return json_response({"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
+                                  "zz":[ x.to_dict() for x in zz],"svbag":[ x.to_dict() for x in svbag],
+                                  "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
+                                  "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
+                                  "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+        else:
+            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all()
+            zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+            tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
+            ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct()]
+            res_t = [x['resource_type'] for x in hosts.order_by('resource_type').values('resource_type').distinct()]
+            w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
+            provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
+            perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
+            return json_response({"cs": [x.to_dict() for x in cluster], "wz": [x.to_dict() for x in wz],
+                                  "zz": [x.to_dict() for x in zz], "svbag": [x.to_dict() for x in svbag],
+                                  "polist": [x.to_dict() for x in polist], "dvpo": [x.to_dict() for x in dvpo],
+                                  "cuser": [x.to_dict() for x in cuser], "rset": [x.to_dict() for x in rest],
+                                  "pj": [x.to_dict() for x in pj], "envs": [x.to_dict() for x in env],
+                                  "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
+                                  'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
-    def post(self, request):
+
+    def post(self, request,tag):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('zone', type=list, help='请输入分组类型'),
@@ -80,30 +98,19 @@ class HostView(View):
             Argument('developer', required=False),
             Argument('opsper', required=False),
             Argument('env_id', type=int, required=False),
-            Argument('ext_config1', required=False),
+            # Argument('ext_config1', required=False),
             Argument('cluster',type=list, required=False),
 
             # Argument('cpus',type=int, required=False),
             # Argument('memory', type=int, required=False),
+            Argument('osType',handler=str.strip, required=False),
+            Argument('osVerion', handler=str.strip, required=False),
 
         ).parse(request.body)
         if error is None:
-            # if form.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
-            #     form.update({"top_projectid" : "dgdataheadioc"})
-            # elif form.top_project == "东莞市疫情动态查询系统项目":
-            #     form.update({"top_projectid" : "dgdycovidselect"})
-            # elif form.top_project == "东莞市疫情防控数据管理平台项目":
-            #     form.update({"top_projectid" : "dgcoviddatamanager"})
-            # elif form.top_project == "东莞市跨境货车司机信息管理系统项目":
-            #     form.update({"top_projectid" : "dgdriverinfo"})
-            # elif form.top_project == "疫情地图项目":
-            #     form.update({"top_projectid": "dgcovidmap"})
-            # elif form.top_project == "粤康码":
-            #     form.update({"top_projectid" : "dghealthqr"})
-            print(form)
             ppwd = form.pop('password')
-            if form.ostp != "Windows" and form.resource_type == "主机" :
-               if valid_ssh(form.ipaddress, form.port, form.username, password=ppwd,
+            if form.ostp == "Linux" and (ResourceType.objects.get(pk=form.resource_type)).name == "主机":
+               if valid_ssh(form.ipaddress, form.port,(ConnctUser.objects.get(pk=form.username)).name, password=ppwd,
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
             # form.pop("created_by")
@@ -114,10 +121,10 @@ class HostView(View):
             if Host.objects.filter(ipaddress=form.ipaddress).exists():
                 return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
-                if form.ostp != "Windows" and form.resource_type == "主机" :
+                if form.ostp == "Linux" and (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
                     pwd = Host.make_password(ppwd)
                     host = Host.objects.create(create_by=request.user,  password_hash=pwd,**form)
-                    update_hostinfo.delay([form.ipaddress], form.username)
+                    update_hostinfo.delay([form.ipaddress], (ConnctUser.objects.get(pk=form.username)).name)
                 else:
                     pwd = Host.make_password(ppwd)
                     host = Host.objects.create(create_by=request.user, password_hash=pwd, **form)
@@ -187,39 +194,52 @@ def post_import(request):
         #     continue
         data = AttrDict(
             top_project=row[0].value,
-            v_ip=row[1].value,
-            outter_ip=row[2].value,
-            ipaddress=row[3].value,
-            username=row[4].value,
-            port=row[5].value,
-            password=row[6].value,
-            password_expire=row[7].value,
-            zone=row[8].value,
-            ostp=row[9].value,
-            provider=row[10].value,
-            resource_type=row[11].value,
-            work_zone=row[12].value,
-            use_for=row[13].value,
-            developer=row[14].value,
-            opsper=row[15].value,
-            service_pack=row[16].value,
-            host_bug=row[17].value,
-            ext_config1=row[18].value,
-            env_id=row[19].value,
-            comment=row[20].value
+            child_project=row[1].value,
+            cluster=row[2].value,
+            hostname=row[3].value,
+            v_ip=row[4].value,
+            outter_ip=row[5].value,
+            ipaddress=row[6].value,
+            username=row[7].value,
+            port=row[8].value,
+            password=row[9].value,
+            # password_expire=row[7].value,
+            zone=row[10].value,
+            osType=row[11].value,
+            osVerion=row[12].value,
+            coreVerion=row[13].value,
+            cpus=row[14].value,
+            memory=row[15].value,
+            ostp=row[16].value,
+            provider=row[17].value,
+            resource_type=row[18].value,
+            sys_disk=row[19].value,
+            data_disk=row[20].value,
+            work_zone=row[21].value,
+            use_for=row[22].value,
+            status=row[23].value,
+            supplier=row[24].value,
+            developer=row[25].value,
+            opsper=row[26].value,
+            service_pack=row[27].value,
+            # host_bug=row[17].value,
+            # ext_config1=row[18].value,
+            env_id=row[28].value,
+            iprelease=row[29].value,
+            comment=row[30].value
         )
-        if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).exists():
+        if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=(ConnctUser.objects.get(name=data.username)).id).exists():
+        # if Host.objects.filter(ipaddress=row[i].value, port=row[i].value, username=ConnctUser.objects.get w  ).exists():
             # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
             summary['skip'].append(i)
             continue
         try:
-            if  data.ostp == "" or data.resource_type == "" or data.top_project == "" or data.ipaddress == "" or data.zone == "" \
+            if data.ostp == "" or data.resource_type == "" or data.top_project == "" or data.ipaddress == "" or data.zone == "" \
                     or data.provider == "":
                 summary['fail'].append(i)
                 continue
-            pwd = data.password
-            if data.ostp == 'Linux' and data.resource_type =='主机' and valid_ssh(data.ipaddress, data.port, data.username, data.pop('password') or password, None,
-                         False) is False:
+            pwd = data.pop('password')
+            if data.ostp == 'Linux' and (data.resource_type).strip() == "主机" and valid_ssh(data.ipaddress, data.port, data.username, pwd ) is False:
                 summary['fail'].append(i)
                 continue
         except AuthenticationException:
@@ -238,31 +258,72 @@ def post_import(request):
         # if data.ostp == 'Windows':
         #     pwd = data.pop("password")
         data["password_hash"] = Host.make_password(pwd)
-        data["env_id"] =  2 if data.env_id == "生产" else 1
-        # if data.top_project == "东莞市政务数据大脑暨智慧城市IOC运行中心建设项目":
-        #     data.update({"top_projectid": "dgdataheadioc"})
-        # elif data.top_project == "东莞市疫情动态查询系统项目":
-        #     data.update({"top_projectid": "dgdycovidselect"})
-        # elif data.top_project == "东莞市疫情防控数据管理平台项目":
-        #     data.update({"top_projectid": "dgcoviddatamanager"})
-        # elif data.top_project == "东莞市跨境货车司机信息管理系统项目":
-        #     data.update({"top_projectid": "dgdriverinfo"})
-        # elif data.top_project == "疫情地图项目":
-        #     data.update({"top_projectid": "dgcovidmap"})
-        # elif data.top_project == "粤康码":
-        #     data.update({"top_projectid": "dghealthqr"})
+        data["env_id"] = (Environment.objects.get(name=data.env_id)).id
+        tp =[]
+        for x in (data.top_project).split(";"):
+            tp.append((ProjectConfig.objects.get(name=x)).id)
+        data["top_project"] = tp
+        cp = []
+        for x in (data.child_project).split(";"):
+            cp.append((ProjectConfig.objects.get(name=x)).id)
+        data["child_project"] = cp
+
+        cst = []
+        for x in (data.cluster).split(";"):
+            cst.append((ClusterConfig.objects.get(name=x)).id)
+        data["cluster"] = cst
+
+        us = data.username
+        data["username"] = (ConnctUser.objects.get(name=data.username)).id
+        zz = []
+        for x in (data.zone).split(";"):
+            zz.append((Zone.objects.get(name=x)).id)
+        data["zone"] = zz
+        data["provider"] = (DevicePositon.objects.get(name=data.provider)).id
+        data["resource_type"] = (ResourceType.objects.get(name=data.resource_type)).id
+        data["work_zone"] = (WorkZone.objects.get(name=data.work_zone)).id
+        sv = []
+        for x in (data.service_pack).split(";"):
+            sv.append((Servicebag.objects.get(name=x)).id)
+        data["service_pack"] = sv
+        data["status"] = 0
+
+        if data.ostp =="Windows":
+
+            dd = (data.data_disk).split(";")
+            del dd[-1]
+            one = []
+            two = []
+            for x in dd:
+                if x.find("数据盘:") == 0:
+                    one.append(x.split("数据盘:")[1])
+
+                if x.find("容量:") == 0:
+                    two.append(x.split("容量:")[1])
+            e = []
+            for k, v in dict(zip(one, two)).items():
+                e.append({"type": "windata", "name": k, "size": v})
+
+            data["data_disk"] = e
+
+            data["sys_disk"] = [{"type":"nfds","name":data.sys_disk,"mount":"/"}]
+
+
+
         host = Host.objects.create(create_by=request.user, **data)
-        if data.username == "root":
+        if us == "root":
             roottmp.append(data.ipaddress)
-        elif data.username == "ioc":
+        elif us == "ioc":
             ioctmp.append(data.ipaddress)
         # tmp.append(data.ipaddress)
         # update_hostinfo.delay(tmp, 'root')
         if request.user.role:
             request.user.role.add_host_perm(host.id)
         summary['success'].append(i)
-    update_hostinfo.delay(roottmp, 'root')
-    update_hostinfo.delay(ioctmp, 'ioc')
+    if len(roottmp) > 0:
+        update_hostinfo.delay(roottmp, 'root')
+    if len(ioctmp) > 0:
+        update_hostinfo.delay(ioctmp, 'ioc')
     return json_response(summary)
 
 

@@ -41,7 +41,7 @@ class Mytest(unittest.TestCase):
         from apps.host.models import Host
         import math
         import subprocess
-        subp = subprocess.Popen("ls /home/jin/cmdbv3/spug/spug_api/out/ioc", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        subp = subprocess.Popen("ls /home/jin/cmdbv3/spug/spug_api/out/root", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 encoding="utf-8")
         a = subp.communicate()
         b = list(a)[0]
@@ -57,7 +57,7 @@ class Mytest(unittest.TestCase):
         for x in iplist:
             if  x != "":
                 try:
-                    with open("/home/jin/cmdbv3/spug/spug_api/out/ioc/"+x.strip()) as f:
+                    with open("/home/jin/cmdbv3/spug/spug_api/out/root/"+x.strip()) as f:
                     # with open("/home/jin/cmdbv3/spug/spug_api/out/" + "19.104.51.129") as f:
                         a = f.read()
                         ser = json.loads(a)
@@ -112,10 +112,10 @@ class Mytest(unittest.TestCase):
                             hostname=ser["ansible_facts"]["ansible_nodename"],
                             supplier=ser["ansible_facts"]["ansible_system_vendor"],
                             port=22,
-                            username="ioc",
+                            username="1",
                             ostp="Linux",
                             env_id=2,
-                            resource_type="主机",
+                            resource_type="2",
                             sys_disk= sysdisk,
                             data_disk= datadisk,
                             # data_disk=set(list(tag)),

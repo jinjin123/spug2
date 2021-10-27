@@ -77,10 +77,10 @@ class Host(models.Model, ModelMixin):
 
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
     # host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
-    ext_config1 = models.CharField(max_length=255, verbose_name='扩展信息', null=True)
+    # ext_config1 = models.CharField(max_length=255, verbose_name='扩展信息', null=True)
     developer = models.CharField(max_length=200, verbose_name='开发负责人',null=True)
     opsper = models.CharField(max_length=200, verbose_name='运维负责人' ,null=True)
-    zone = models.CharField(max_length=255,verbose_name="项目分组", null=True)
+    zone = models.CharField(max_length=255,verbose_name="资源类别", null=True)
     # create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
@@ -113,7 +113,7 @@ class Host(models.Model, ModelMixin):
         tt = ""
         if disk != "[]"  and  disk != "" and disk is not None and not isinstance(disk,list):
             for x in ast.literal_eval(disk):
-                tt += "数据盘:"+x.get("name")+",容量:"+str(x.get("size"))+"G,"
+                tt += "数据盘:"+x.get("name")+";容量:"+str(x.get("size"))+"G;"
             return tt
         else:
             return ""
@@ -136,10 +136,6 @@ class Host(models.Model, ModelMixin):
             return tt
         else:
             return tt
-
-
-
-
 
     @property
     def private_key(self):

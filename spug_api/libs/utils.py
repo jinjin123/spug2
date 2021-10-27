@@ -195,7 +195,7 @@ class RequestApiAgent:
 
 
 host_select_args = [
-    "top_project","hostname",
+    "top_project",'child_project','cluster',"hostname",
 
     "v_ip","outter_ip",
     # "ipaddress","username","port","zone","osType","osVerion","coreVerion","cpus","cpucore","memory",
@@ -204,15 +204,18 @@ host_select_args = [
     "ostp","provider","resource_type","sys_disk","data_disk","work_zone","use_for",
 
     # "status","disks","disk","serial_num","supplier","developer","opsper","service_pack","host_bug","ext_config1","env_id","comment"
-    "status", "supplier", "developer", "opsper", "service_pack", "host_bug", "ext_config1", "env_id", "comment"
+    # "status", "supplier", "developer", "opsper", "service_pack", "host_bug", "ext_config1", "env_id", "comment"
+                                                                                                      "status",
+    "supplier", "developer", "opsper", "service_pack",  "env_id", 'iprelease',"comment"
 ]
-host_select_cns = ['实体项目','主机名',
+host_select_cns = ['实体项目','项目子类','所属集群','主机名',
                    '虚拟IP','外网IP',
                    # '业务IP','连接用户','端口','分组','系统','版本','内核版本','CPU数量','cpu单U(核)','内存(G)',
-                   '业务IP','连接用户','端口','密码','分组','系统','版本','内核版本','CPU逻辑核心','内存(G)',
-                   '系统类型','运营商','资源类型','系统盘','数据盘','所属区域','实际用途',
+                   '业务IP','连接用户','端口','密码','资源类别','系统','版本','内核版本','CPU逻辑核心','内存(G)',
+                   '系统类型','设备位置','资源类型','系统盘','数据盘','所属区域','实际用途',
                    # '状态(上/下线)','挂载盘数','挂载盘','序列号','供应商','开发','运维','安装服务','补丁服务与版本' ,'扩展配置','环境','备注']
-                    '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '补丁服务与版本', '扩展配置', '环境', '备注']
+                   #  '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '补丁服务与版本', '扩展配置', '环境', '备注']
+        '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '环境','待回收ip' ,'备注']
 
 def get_data(sql):
     # 创建数据库连接.
