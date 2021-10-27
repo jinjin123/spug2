@@ -71,6 +71,7 @@ class HostView(View):
                                   'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
 
 
+
     def post(self, request,tag):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
