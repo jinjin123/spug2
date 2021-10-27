@@ -151,10 +151,10 @@ class ComTable extends React.Component {
 
       },
     },
-    {
-      title: '主机名',
-      dataIndex: 'hostname',
-    },
+    // {
+    //   title: '主机名',
+    //   dataIndex: 'hostname',
+    // },
     {
       title: '外网IP',
       dataIndex: 'outter_ip',
@@ -183,6 +183,10 @@ class ComTable extends React.Component {
         // })
         return <span>{tinfo}</span>
       },
+    },
+    {
+      title: '端口',
+      dataIndex: 'port',
     },
     {
       title: '资源类别',
@@ -230,18 +234,18 @@ class ComTable extends React.Component {
       title: '版本',
       dataIndex: 'osVerion',
     },
-    {
-      title: '内核版本',
-      dataIndex: 'coreVerion',
-    },
-    {
-      title: 'cpu逻辑核心',
-      dataIndex: 'cpus',
-    },
-    {
-      title: '内存(G)',
-      dataIndex: 'memory',
-    },
+    // {
+    //   title: '内核版本',
+    //   dataIndex: 'coreVerion',
+    // },
+    // {
+    //   title: 'cpu逻辑核心',
+    //   dataIndex: 'cpus',
+    // },
+    // {
+    //   title: '内存(G)',
+    //   dataIndex: 'memory',
+    // },
     {
       title: '状态',
       dataIndex: 'status',
@@ -251,10 +255,10 @@ class ComTable extends React.Component {
         </Tag>
       },
     },
-    {
-      title: '系统盘',
-      dataIndex: 'sys_disk',
-    },
+    // {
+    //   title: '系统盘',
+    //   dataIndex: 'sys_disk',
+    // },
     {
       title: '设备位置',
       dataIndex: 'provider',
@@ -276,10 +280,10 @@ class ComTable extends React.Component {
       title: '实际用途',
       dataIndex: 'use_for',
     },
-    {
-      title: '供应商',
-      dataIndex: 'supplier',
-    },
+    // {
+    //   title: '供应商',
+    //   dataIndex: 'supplier',
+    // },
     {
       title: '开发',
       dataIndex: 'developer',
@@ -292,22 +296,22 @@ class ComTable extends React.Component {
       title: '录入人',
       dataIndex: 'create_by',
     },
-    {
-      title: '安装服务',
-      dataIndex: 'service_pack',
-      render: info => {
-        let tinfo = [];
-        let data = store.svbag
-        // console.log(data)
-        info.map(ditem => { 
-            let newArr = data.filter(item => item.id === ditem)
-            newArr.map(dd => {
-                tinfo.push(dd.name)
-            })
-        })
-        return <span>{tinfo.join(";")}</span>
-      },
-    },
+    // {
+    //   title: '安装服务',
+    //   dataIndex: 'service_pack',
+    //   render: info => {
+    //     let tinfo = [];
+    //     let data = store.svbag
+    //     // console.log(data)
+    //     info.map(ditem => { 
+    //         let newArr = data.filter(item => item.id === ditem)
+    //         newArr.map(dd => {
+    //             tinfo.push(dd.name)
+    //         })
+    //     })
+    //     return <span>{tinfo.join(";")}</span>
+    //   },
+    // },
     // {
     //   title: '补丁服务与版本',
     //   dataIndex: 'host_bug',
@@ -343,7 +347,7 @@ class ComTable extends React.Component {
       render: info => {
         return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
           <Select.Option value={1}>编辑</Select.Option>
-          <Select.Option value={2}>终端</Select.Option>
+          {/* <Select.Option value={2}>终端</Select.Option> */}
           <Select.Option value={3}>待回收</Select.Option>
         </Select>
       }

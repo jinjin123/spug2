@@ -11,15 +11,6 @@ import store from './store';
 import { Link } from 'react-router-dom';
 import envStore from 'pages/config/environment/store';
 
-// import csStore from 'pages/config/cluster/store';
-// import poStore from 'pages/config/portlist/store';
-// import pjStore from 'pages/config/project/store';
-// import svStore from 'pages/config/servicebag/store';
-// import wzStore from 'pages/config/workzone/store';
-// import zzStore from 'pages/config/zone/store';
-// import dvStore from 'pages/config/devicepostion/store';
-// import cuStore from 'pages/config/cuser/store';
-// import resStore from 'pages/config/resourcet/store';
 
 @observer
 class FormWin extends React.Component {
@@ -50,7 +41,7 @@ class FormWin extends React.Component {
     const file = this.state.fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
     console.log(formData)
-    http.post('/api/host/resource/host/', formData)
+    http.post('/api/host/', formData)
       .then(res => {
           message.success('操作成功');
           store.winformVisible = false;
@@ -61,7 +52,7 @@ class FormWin extends React.Component {
   handleConfirm = (formData) => {
     if (this.state.password) {
       formData['password'] = this.state.password;
-      return http.post('/api/host/resource/host/', formData).then(res => {
+      return http.post('/api/host/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
         store.fetchRecords()
@@ -523,16 +514,6 @@ class FormWin extends React.Component {
                 <Link to="/config/environment">新建环境</Link>
               </Col>
           </Form.Item>
-          <Form.Item  required label="系统">
-            {getFieldDecorator('osType', {initialValue: info['osType']})(
-              <Input   placeholder="系统"/>
-            )}
-          </Form.Item>
-          <Form.Item  required label="版本">
-            {getFieldDecorator('osVerion', {initialValue: info['osVerion']})(
-              <Input   placeholder="版本"/>
-            )}
-          </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(
               <Input.TextArea  placeholder="实际用途"/>
@@ -568,9 +549,9 @@ class FormWin extends React.Component {
               <Input.TextArea placeholder="请输入主机备注信息"/>
             )}
           </Form.Item>
-          {/* <Form.Item wrapperCol={{span: 14, offset: 6}}>
+          <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <span role="img" aria-label="notice">⚠️ 首次验证时需要输入登录用户名对应的密码，但不会存储该密码。</span>
-          </Form.Item> */}
+          </Form.Item>
         </Form>
       </Modal>
     )

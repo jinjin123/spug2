@@ -36,7 +36,9 @@ export default observer(function () {
         <SearchForm.Item span={6} title="资源类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v} mode="multiple">
             {store.zz.map(item => (
+               (item.name).includes("数据库")?
               <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+              :null
             ))}
           </Select>
         </SearchForm.Item>
@@ -49,11 +51,11 @@ export default observer(function () {
           </SearchForm.Item>
 
           {/* <SearchForm.Item span={4} title="资源类型">
-            <Select allowClear placeholder="请选择" value={store.rtp} onChange={v => store.rtp = v} >
-              {store.rset.map(item => (
-                <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
-              ))}
-            </Select>
+          <Select allowClear placeholder="请选择" value={store.rtp} onChange={v => store.rtp = v} >
+            {store.rset.map(item => (
+              <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+            ))}
+          </Select>
           </SearchForm.Item> */}
         <SearchForm.Item span={4} title="设备位置">
           <Select allowClear placeholder="请选择" value={store.pvd} onChange={v => store.pvd = v}>

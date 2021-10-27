@@ -80,7 +80,7 @@ class ComForm extends React.Component {
     const file = this.state.fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
     console.log(formData)
-    http.post('/api/host/', formData)
+    http.post('/api/host/resource/host/', formData)
       .then(res => {
         if (res === 'auth fail') {
           this.setState({loading: false});
@@ -105,7 +105,7 @@ class ComForm extends React.Component {
   handleConfirm = (formData) => {
     if (this.state.password) {
       formData['password'] = this.state.password;
-      return http.post('/api/host/', formData).then(res => {
+      return http.post('/api/host/resource/host/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
         store.fetchRecords()
@@ -294,23 +294,15 @@ class ComForm extends React.Component {
           </Form.Item>
           <Form.Item required label="实体子项目">
           <Col span={17}>
-
-            {getFieldDecorator('child_project',{initialValue: info['child_project']})(
-                <Select  placeholder="实体子项目"  mode="multiple">
-                  {store.pj.map(item => (
-                    item.tag === "项目子类" ? 
-                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
-                    : null
-                  ))}
-
-                    {/* <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
-                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
-                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
-                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option> */}
-                </Select>
-            )}
+              {getFieldDecorator('child_project',{initialValue: info['child_project']})(
+                  <Select  placeholder="实体子项目"  mode="multiple">
+                    {store.pj.map(item => (
+                      item.tag === "项目子类" ? 
+                      <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                      : null
+                    ))}
+                  </Select>
+              )}
             </Col>
             <Col span={5} offset={2}>
               <Link to="/config/project">新建子项目</Link>
@@ -577,11 +569,11 @@ class ComForm extends React.Component {
               <Input.TextArea placeholder="host_bug"/>
             )}
           </Form.Item> */}
-          <Form.Item label="扩展配置">
+          {/* <Form.Item label="扩展配置">
             {getFieldDecorator('ext_config1', {initialValue: info['ext_config1']})(
               <Input placeholder="扩展配置"/>
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="开发负责人">
             {getFieldDecorator('developer', {initialValue: info['developer']})(
               <Input placeholder="developer"/>
@@ -597,14 +589,24 @@ class ComForm extends React.Component {
                 <Input.TextArea placeholder="密钥"/>
             )}
           </Form.Item> */}
+          <Form.Item  required label="系统">
+            {getFieldDecorator('osType', {initialValue: info['osType']})(
+              <Input  disabled placeholder="系统"/>
+            )}
+          </Form.Item>
+          <Form.Item  required label="版本">
+            {getFieldDecorator('osVerion', {initialValue: info['osVerion']})(
+              <Input  disabled placeholder="版本"/>
+            )}
+          </Form.Item>
           <Form.Item label="备注信息">
             {getFieldDecorator('comment', {initialValue: info['comment']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>
             )}
           </Form.Item>
-          <Form.Item wrapperCol={{span: 14, offset: 6}}>
+          {/* <Form.Item wrapperCol={{span: 14, offset: 6}}>
             <span role="img" aria-label="notice">⚠️ 首次验证时需要输入登录用户名对应的密码，但不会存储该密码。</span>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Modal>
     )

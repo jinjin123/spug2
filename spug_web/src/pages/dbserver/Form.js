@@ -22,7 +22,7 @@ import envStore from 'pages/config/environment/store';
 // import resStore from 'pages/config/resourcet/store';
 
 @observer
-class FormWin extends React.Component {
+class ComForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,6 +41,7 @@ class FormWin extends React.Component {
         fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
       })
     }
+
   }
 
   handleSubmit = () => {
@@ -50,10 +51,10 @@ class FormWin extends React.Component {
     const file = this.state.fileList[0];
     if (file && file.data) formData['pkey'] = file.data;
     console.log(formData)
-    http.post('/api/host/resource/host/', formData)
+    http.post('/api/host/resource/db/', formData)
       .then(res => {
           message.success('操作成功');
-          store.winformVisible = false;
+          store.formVisible = false;
           store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
@@ -61,7 +62,7 @@ class FormWin extends React.Component {
   handleConfirm = (formData) => {
     if (this.state.password) {
       formData['password'] = this.state.password;
-      return http.post('/api/host/resource/host/', formData).then(res => {
+      return http.post('/api/host/resource/db/', formData).then(res => {
         message.success('验证成功');
         store.formVisible = false;
         store.fetchRecords()
@@ -163,9 +164,9 @@ class FormWin extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑Windows主机' : '新建Windows主机'}
+        title={store.record.id ? '编辑数据库' : '新建数据库'}
         okText="提交"
-        onCancel={() => store.winformVisible = false}
+        onCancel={() => store.formVisible = false}
         confirmLoading={loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 5}} wrapperCol={{span: 17}}>
@@ -213,7 +214,7 @@ class FormWin extends React.Component {
                   // item.tag === "项目子类" ? 
                   // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                   // : null
-                      item.name === "主机" ?
+                      item.name === "数据库" ?
                       <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                       : null
                   ))}
@@ -250,23 +251,15 @@ class FormWin extends React.Component {
           </Form.Item>
           <Form.Item required label="实体子项目">
           <Col span={17}>
-
-            {getFieldDecorator('child_project',{initialValue: info['child_project']})(
-                <Select  placeholder="实体子项目"  mode="multiple">
-                  {store.pj.map(item => (
-                    item.tag === "项目子类" ? 
-                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
-                    : null
-                  ))}
-
-                    {/* <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
-                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
-                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
-                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option> */}
-                </Select>
-            )}
+              {getFieldDecorator('child_project',{initialValue: info['child_project']})(
+                  <Select  placeholder="实体子项目"  mode="multiple">
+                    {store.pj.map(item => (
+                      item.tag === "项目子类" ? 
+                      <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                      : null
+                    ))}
+                  </Select>
+              )}
             </Col>
             <Col span={5} offset={2}>
               <Link to="/config/project">新建子项目</Link>
@@ -283,7 +276,9 @@ class FormWin extends React.Component {
                   // item.tag === "项目子类" ? 
                   // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                   // : null
+                    (item.name).includes("数据库")?
                     <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                    : null
                   ))}
                 </Select>
               )}
@@ -441,29 +436,13 @@ class FormWin extends React.Component {
               </Select>
               )}
             </Form.Item> */}
-          {/* <Form.Item required label="实体项目">
-            {getFieldDecorator('top_project', {initialValue: info['top_project']})(
-                <Select  placeholder="实体项目">
-                    <Select.Option value={"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"} key={0}>{"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情动态查询系统项目"} key={1}>{"东莞市疫情动态查询系统项目"}</Select.Option>
-                    <Select.Option value={"东莞市疫情防控数据管理平台项目"} key={2}>{"东莞市疫情防控数据管理平台项目"}</Select.Option>
-                    <Select.Option value={"东莞市跨境货车司机信息管理系统项目"} key={3}>{"东莞市跨境货车司机信息管理系统项目"}</Select.Option>
-                    <Select.Option value={"疫情地图项目"} key={4}>{"疫情地图项目"}</Select.Option>
-                    <Select.Option value={"粤康码"} key={5}>{"粤康码"}</Select.Option>
-                </Select>
-            )}
-          </Form.Item> */}
-          {/* <Form.Item  required label="顶级项目id">
-            {getFieldDecorator('top_projectid', {initialValue: info['top_projectid']})(
-              <Input  placeholder="顶级项目id"/>
-            )}
-          </Form.Item> */}
+
           <Form.Item  required label="业务IP">
             {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
               <Input  placeholder="内网ip地址"/>
             )}
           </Form.Item>
-            <Form.Item  label="服务包">
+          {/* <Form.Item  label="服务包">
             <Col span={17}>
 
             {getFieldDecorator('service_pack', {initialValue: info['service_pack']})(
@@ -479,7 +458,7 @@ class FormWin extends React.Component {
             <Col span={5} offset={2}>
                 <Link to="/config/servicebag">新建服务包</Link>
               </Col>
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item  required label="所属区域">
           <Col span={17}>
 
@@ -506,32 +485,32 @@ class FormWin extends React.Component {
               <Input  placeholder="虚拟VIP"/>
             )}
           </Form.Item>
-          <Form.Item required label="环境">
-          <Col span={17}>
-
-            {getFieldDecorator('env_id', {initialValue: info['env_id']})(
-                <Select placeholder="环境">
-                    {store.envs.map(item => (
-                    <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
-                    ))}
-                    {/* <Select.Option value={0} key={0}>{"生产"}</Select.Option>
-                    <Select.Option value={1} key={1}>{"测试"}</Select.Option> */}
-                </Select>
-            )}
-            </Col>
-            <Col span={5} offset={2}>
-                <Link to="/config/environment">新建环境</Link>
-              </Col>
-          </Form.Item>
           <Form.Item  required label="系统">
             {getFieldDecorator('osType', {initialValue: info['osType']})(
-              <Input   placeholder="系统"/>
+              <Input  placeholder="系统"/>
             )}
           </Form.Item>
           <Form.Item  required label="版本">
             {getFieldDecorator('osVerion', {initialValue: info['osVerion']})(
-              <Input   placeholder="版本"/>
+              <Input  placeholder="版本"/>
             )}
+          </Form.Item>
+          <Form.Item required label="环境">
+            <Col span={17}>
+
+              {getFieldDecorator('env_id', {initialValue: info['env_id']})(
+                  <Select placeholder="环境">
+                      {store.envs.map(item => (
+                      <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                      ))}
+                      {/* <Select.Option value={0} key={0}>{"生产"}</Select.Option>
+                      <Select.Option value={1} key={1}>{"测试"}</Select.Option> */}
+                  </Select>
+              )}
+              </Col>
+              <Col span={5} offset={2}>
+                  <Link to="/config/environment">新建环境</Link>
+              </Col>
           </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(
@@ -577,4 +556,4 @@ class FormWin extends React.Component {
   }
 }
 
-export default Form.create()(FormWin)
+export default Form.create()(ComForm)
