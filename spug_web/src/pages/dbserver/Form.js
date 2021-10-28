@@ -11,15 +11,6 @@ import store from './store';
 import { Link } from 'react-router-dom';
 import envStore from 'pages/config/environment/store';
 
-// import csStore from 'pages/config/cluster/store';
-// import poStore from 'pages/config/portlist/store';
-// import pjStore from 'pages/config/project/store';
-// import svStore from 'pages/config/servicebag/store';
-// import wzStore from 'pages/config/workzone/store';
-// import zzStore from 'pages/config/zone/store';
-// import dvStore from 'pages/config/devicepostion/store';
-// import cuStore from 'pages/config/cuser/store';
-// import resStore from 'pages/config/resourcet/store';
 
 @observer
 class ComForm extends React.Component {
@@ -164,7 +155,7 @@ class ComForm extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑数据库' : '新建数据库'}
+        title={store.record.id ? '编辑Linux类型数据库' : '新建Linux类型数据库'}
         okText="提交"
         onCancel={() => store.formVisible = false}
         confirmLoading={loading}
@@ -336,7 +327,7 @@ class ComForm extends React.Component {
               <Input placeholder="请输入主机名称"/>
             )}
           </Form.Item> */}
-          <Form.Item required label="连接地址" style={{marginBottom: 0}}>
+          <Form.Item required label="管理员用户" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>

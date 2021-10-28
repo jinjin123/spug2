@@ -47,7 +47,7 @@ class Store {
   @observable pj=[];
   @observable envs=[];
 
-
+  @observable tmpExcel=[];
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -104,8 +104,38 @@ class Store {
     this.record = info
   }
   downExcel = () => {
-    return http.get(
-        '/api/file/excel/host',
+    // console.log(this.tpjj,this.chjj,this.f_zone,this.otp,this.pvd,this.csst,
+    //   this.wzz,this.f_ip) 
+      let formData={}
+      // if(this.tpjj){
+      //   formData["top_project"] = this.tpjj
+      // }
+      // if(this.chjj){
+      //   formData["child_project"] = this.chjj
+      // }
+      // if(this.f_zone){
+      //   formData["zone"] = this.f_zone
+      // }
+      // if(this.otp){
+      //   formData["otp"] = this.otp
+      // }
+      // if(this.pvd){
+      //   formData["provider"] = this.pvd
+      // }
+      // if(this.csst){
+      //   formData["cluster"] = this.csst
+      // }
+      // if(this.wzz){
+      //   formData["work_zone"] = this.wzz
+      // }
+      // if(this.f_ip){
+      //   formData["f_ip"] = this.f_ip
+      // }
+      // console.log(this.tmpExcel)
+      formData["data"] = this.tmpExcel
+      // return http.post('/api/file/excel/host',formData)
+    return http.post(
+        '/api/file/excel/host',formData,
         {responseType:'blob'},)
     .then(res => {
       if(res){
@@ -113,7 +143,7 @@ class Store {
         let link = document.createElement("a");
         link.style.display = "none";
         link.href = url;
-        link.setAttribute("download", "资产信息汇总.xlsx");
+        link.setAttribute("download", "主机信息汇总.xlsx");
         link.click();
         message.success('下载成功');
       }

@@ -114,9 +114,9 @@ export default observer(function () {
         <Button  style={{marginLeft: 20}} type="primary" onClick={()=> store.downExcel()}icon="download" >导出</Button>
         <Button style={{marginLeft: 20}} type="primary" icon="import"
                 onClick={() => store.importVisible = true}>批量导入</Button>
-{/* 
-        <Button style={{marginLeft: 20}} type="primary" icon="lock"
-                        >批量改密</Button> */}
+
+        <Button style={{marginLeft: 20}} type="danger" icon="lock"
+                        >批量改密</Button>
       </AuthDiv>
       <ComTable/>
     </AuthCard>

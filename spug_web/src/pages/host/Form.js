@@ -11,16 +11,6 @@ import store from './store';
 import { Link } from 'react-router-dom';
 import envStore from 'pages/config/environment/store';
 
-// import csStore from 'pages/config/cluster/store';
-// import poStore from 'pages/config/portlist/store';
-// import pjStore from 'pages/config/project/store';
-// import svStore from 'pages/config/servicebag/store';
-// import wzStore from 'pages/config/workzone/store';
-// import zzStore from 'pages/config/zone/store';
-// import dvStore from 'pages/config/devicepostion/store';
-// import cuStore from 'pages/config/cuser/store';
-// import resStore from 'pages/config/resourcet/store';
-
 @observer
 class ComForm extends React.Component {
   constructor(props) {
@@ -41,36 +31,6 @@ class ComForm extends React.Component {
         fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
       })
     }
-    // if (envStore.records.length === 0) {
-    //   envStore.fetchRecords()
-    // }
-    // if (csStore.records.length === 0) {
-    //   csStore.fetchRecords()
-    // }
-    // if (poStore.records.length === 0) {
-    //   poStore.fetchRecords()
-    // }
-    // if (pjStore.records.length === 0) {
-    //   pjStore.fetchRecords()
-    // }
-    // if (svStore.records.length === 0) {
-    //   svStore.fetchRecords()
-    // }
-    // if (wzStore.records.length === 0) {
-    //   wzStore.fetchRecords()
-    // }
-    // if (zzStore.records.length === 0) {
-    //   zzStore.fetchRecords()
-    // }
-    // if (dvStore.records.length === 0) {
-    //   dvStore.fetchRecords()
-    // }
-    // if (cuStore.records.length === 0) {
-    //   cuStore.fetchRecords()
-    // }
-    // if (resStore.records.length === 0) {
-    //   resStore.fetchRecords()
-    // }
   }
 
   handleSubmit = () => {
@@ -377,7 +337,7 @@ class ComForm extends React.Component {
               <Input placeholder="请输入主机名称"/>
             )}
           </Form.Item> */}
-          <Form.Item required label="连接地址" style={{marginBottom: 0}}>
+          <Form.Item required label="管理员用户" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>
@@ -519,7 +479,7 @@ class ComForm extends React.Component {
           <Form.Item  required label="所属区域">
           <Col span={17}>
 
-            {getFieldDecorator('work_zone', {initialValue: info['work_zone']})(
+            {getFieldDecorator('work_zone', {initialValue: info['work_zone'],rules: [{required: true, message: '请输入区域'}]})(
               // <Input  placeholder="工作区域"/>
               <Select  placeholder="所属区域">
                 {store.wz.map(item => (
@@ -589,6 +549,16 @@ class ComForm extends React.Component {
                 <Input.TextArea placeholder="密钥"/>
             )}
           </Form.Item> */}
+          <Form.Item  required label="cpus逻辑核">
+            {getFieldDecorator('cpus', {initialValue: info['cpus']})(
+              <Input  disabled placeholder="cpus逻辑核"/>
+            )}
+          </Form.Item>
+          <Form.Item  required label="memory">
+            {getFieldDecorator('memory', {initialValue: info['memory']})(
+              <Input  disabled placeholder="memory"/>
+            )}
+          </Form.Item>
           <Form.Item  required label="系统">
             {getFieldDecorator('osType', {initialValue: info['osType']})(
               <Input  disabled placeholder="系统"/>
@@ -597,6 +567,11 @@ class ComForm extends React.Component {
           <Form.Item  required label="版本">
             {getFieldDecorator('osVerion', {initialValue: info['osVerion']})(
               <Input  disabled placeholder="版本"/>
+            )}
+          </Form.Item>
+          <Form.Item  required label="内核版本">
+            {getFieldDecorator('coreVerion', {initialValue: info['coreVerion']})(
+              <Input  disabled placeholder="内核版本"/>
             )}
           </Form.Item>
           <Form.Item label="备注信息">

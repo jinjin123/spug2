@@ -48,6 +48,7 @@ class Store {
   @observable envs=[];
 
 
+  @observable tmpExcel=[];
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -104,8 +105,11 @@ class Store {
     this.record = info
   }
   downExcel = () => {
-    return http.get(
-        '/api/file/excel/host',
+    let formData={}
+    formData["data"] = this.tmpExcel
+
+    return http.post(
+        '/api/file/excel/host', formData,
         {responseType:'blob'},)
     .then(res => {
       if(res){
@@ -113,7 +117,7 @@ class Store {
         let link = document.createElement("a");
         link.style.display = "none";
         link.href = url;
-        link.setAttribute("download", "资产信息汇总.xlsx");
+        link.setAttribute("download", "数据库信息汇总.xlsx");
         link.click();
         message.success('下载成功');
       }

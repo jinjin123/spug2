@@ -14,15 +14,6 @@ import { http, hasPermission } from 'libs';
 import store from './store';
 import envStore from 'pages/config/environment/store';
 
-// import csStore from 'pages/config/cluster/store';
-// import poStore from 'pages/config/portlist/store';
-// import pjStore from 'pages/config/project/store';
-// import svStore from 'pages/config/servicebag/store';
-// import wzStore from 'pages/config/workzone/store';
-// import zzStore from 'pages/config/zone/store';
-// import dvStore from 'pages/config/devicepostion/store';
-// import cuStore from 'pages/config/cuser/store';
-// import resStore from 'pages/config/resourcet/store';
 
 @observer
 class ComTable extends React.Component {
@@ -47,7 +38,7 @@ class ComTable extends React.Component {
       title: '回收确认',
       content: `确定要回收【${text['ipaddress']}】?`,
       onOk: () => {
-        return http.delete('/api/host/', {params: {id: text.id}})
+        return http.delete('/api/host/resource/host/', {params: {id: text.id}})
           .then(() => {
             message.success('待回收成功');
             store.fetchRecords()
@@ -398,6 +389,7 @@ class ComTable extends React.Component {
     if (store.wzz) {
       data = data.filter(item => item['work_zone'] ===store.wzz)
     }
+    store.tmpExcel = data;
     return (
       <React.Fragment>
         <Table

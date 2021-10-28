@@ -80,7 +80,7 @@ class ComImport extends React.Component {
                description="导入或输入的密码仅作首次验证使用，并不会存储密码。"/>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
           <Form.Item label="模板下载" help="请下载使用该模板填充数据后导入">
-            <a href="/resource/主机导入模板.xlsx">主机导入模板.xlsx</a>
+            <a href="/resource/数据库导入模板.xlsx">数据库导入模板.xlsx</a>
           </Form.Item>
           <Form.Item label="默认密码" help="如果excel中密码为空则使用该密码">
             <Input
