@@ -8,6 +8,6 @@ from .views import *
 urlpatterns = [
     path('', FileView.as_view()),
     path('object/', ObjectView.as_view()),
-    path('excel/<str:type>', Exceldown),
+    path('excel/<str:type>', Exceldown.as_view()),
 
 ]

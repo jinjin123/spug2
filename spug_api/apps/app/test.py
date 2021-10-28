@@ -560,10 +560,17 @@ class Mytest(unittest.TestCase):
 
             def test_pb_approval(self):
                 from apps.host.models import Host
-                from openpyxl import load_workbook
-                ws = load_workbook("/home/jin/文档/root.xlsx", read_only=True)['Sheet1']
-                for i, row in enumerate(ws.rows):
-                    Host.objects.filter(ipaddress=row[0].value).update(password_hash=Host.make_password(row[1].value))
+                import ast
+                import operator
+                from functools import reduce
+                from django.db.models import Q
+                # Host.objects.filter(reduce())
+                a = Host.objects.filter(zone__in=[1,2,3])
+                print(a)
+                # from openpyxl import load_workbook
+                # ws = load_workbook("/home/jin/文档/root.xlsx", read_only=True)['Sheet1']
+                # for i, row in enumerate(ws.rows):
+                #     Host.objects.filter(ipaddress=row[0].value).update(password_hash=Host.make_password(row[1].value))
                     # print(row[0].value,row[1].value)
                 # from apps.host.models import ConnctUser
                 # u = Host.objects.get(ipaddress='192.168.1.107')

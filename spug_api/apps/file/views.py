@@ -13,6 +13,8 @@ from libs import json_response, JsonParser, Argument
 from functools import partial
 import os
 from libs.pwd import encryptPwd,decryptPwd
+import ast
+from django.db.models import Q
 
 class FileView(View):
     def get(self, request):
@@ -92,23 +94,80 @@ class ObjectView(View):
         rds_cli.lpush(token, percent)
         rds_cli.expire(token, 300)
 
-def Exceldown(request,type):
-    if type == "host":
-        if not os.path.exists('./upload/'):
-            os.makedirs('./upload/')
-        connecbase = ','
-        connecstr = connecbase.join(host_select_args)
-        response = HttpResponse()
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode('gb2312')
-        write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts",host_select_args ,host_select_cns)
-        full_path = os.path.join('./upload/', "资产信息汇总"+ '.xls')
-        if os.path.exists(full_path):
-            response['Content-Length'] = os.path.getsize(full_path)  # 可不加
-            response['Content-Type'] = 'application/octet-stream'
-            response['Content-Disposition'] = 'attachment;filename="%s.xls"' % "资产信息汇总"
-            content = open(full_path, 'rb').read()
-            response.write(content)
-            return response
+class Exceldown(View):
+
+    def get(self,request,type):
+        if type == "host":
+            if not os.path.exists('./upload/'):
+                os.makedirs('./upload/')
+            connecbase = ','
+            connecstr = connecbase.join(host_select_args)
+            response = HttpResponse()
+            response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode('gb2312')
+            write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts",host_select_args ,host_select_cns)
+            full_path = os.path.join('./upload/', "资产信息汇总"+ '.xls')
+            if os.path.exists(full_path):
+                response['Content-Length'] = os.path.getsize(full_path)  # 可不加
+                response['Content-Type'] = 'application/octet-stream'
+                response['Content-Disposition'] = 'attachment;filename="%s.xls"' % "资产信息汇总"
+                content = open(full_path, 'rb').read()
+                response.write(content)
+                return response
+
+    def post(self,request,type):
+        form, error = JsonParser(
+            Argument('data', type=list, required=False),
+            # Argument('child_project', type=list, required=False),
+            # Argument('zone', type=list, required=False),
+            # Argument('otp', type=str, required=False),
+            # Argument('provider', type=str, required=False),
+            # Argument('cluster', type=list, required=False),
+            # Argument('work_zone', type=int, required=False),
+            # Argument('f_ip', type=list, required=False),
+        ).parse(request.body)
+        if error is None:
+            tmp = []
+            for x in form.data:
+                 tmp.append(x["id"])
+            if len(tmp) > 0 and len(tmp) ==1:
+                if type == "host":
+                    if not os.path.exists('./upload/'):
+                        os.makedirs('./upload/')
+                    connecbase = ','
+                    connecstr = connecbase.join(host_select_args)
+                    response = HttpResponse()
+                    response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode(
+                        'gb2312')
+                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts  where id in {}".format(','.join('({})'.format(t) for t in tmp)), host_select_args,
+                                        host_select_cns)
+                    full_path = os.path.join('./upload/', "资产信息汇总" + '.xls')
+                    if os.path.exists(full_path):
+                        response['Content-Length'] = os.path.getsize(full_path)  # 可不加
+                        response['Content-Type'] = 'application/octet-stream'
+                        response['Content-Disposition'] = 'attachment;filename="%s.xls"' % "资产信息汇总"
+                        content = open(full_path, 'rb').read()
+                        response.write(content)
+                        return response
+            elif len(tmp) > 1:
+                if type == "host":
+                    if not os.path.exists('./upload/'):
+                        os.makedirs('./upload/')
+                    connecbase = ','
+                    connecstr = connecbase.join(host_select_args)
+                    response = HttpResponse()
+                    response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode(
+                        'gb2312')
+                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from hosts  where id in {}".format(tuple(tmp)), host_select_args,
+                                        host_select_cns)
+                    full_path = os.path.join('./upload/', "资产信息汇总" + '.xls')
+                    if os.path.exists(full_path):
+                        response['Content-Length'] = os.path.getsize(full_path)  # 可不加
+                        response['Content-Type'] = 'application/octet-stream'
+                        response['Content-Disposition'] = 'attachment;filename="%s.xls"' % "资产信息汇总"
+                        content = open(full_path, 'rb').read()
+                        response.write(content)
+                        return response
+
 
 
 def write_data_to_excel(fpath,name,sql,header,header_cns):

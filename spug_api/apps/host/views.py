@@ -75,7 +75,7 @@ class HostView(View):
     def post(self, request,tag):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
-            Argument('zone', type=list, help='请输入分组类型'),
+            Argument('zone', type=list, help='请输入资源类别'),
             # Argument('name', help='请输主机名称'),
             Argument('username', type=int, help='请输入登录用户名'),
             Argument('ipaddress', handler=str.strip, help='请输入主机名或IP'),
@@ -102,10 +102,11 @@ class HostView(View):
             # Argument('ext_config1', required=False),
             Argument('cluster',type=list, required=False),
 
-            # Argument('cpus',type=int, required=False),
-            # Argument('memory', type=int, required=False),
+            Argument('cpus',type=int, required=False),
+            Argument('memory', type=float, required=False),
             Argument('osType',handler=str.strip, required=False),
             Argument('osVerion', handler=str.strip, required=False),
+            Argument('coreVerion', handler=str.strip, required=False),
 
         ).parse(request.body)
         if error is None:
@@ -133,7 +134,7 @@ class HostView(View):
                     request.user.role.add_host_perm(host.id)
         return json_response(error=error)
 
-    def patch(self, request):
+    def patch(self, request,tag):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('zone', help='请输入主机类别')
@@ -146,7 +147,7 @@ class HostView(View):
             return json_response(count)
         return json_response(error=error)
 
-    def delete(self, request):
+    def delete(self, request,tag):
         form, error = JsonParser(
             Argument('id', type=int, help='请指定操作对象')
         ).parse(request.GET)
@@ -171,7 +172,7 @@ class HostView(View):
                 return json_response(error=f'主机已待回收')
             t = Host.objects.filter(pk=form.id).first()
             Host.objects.filter(pk=form.id).update(
-                zone="待回收",
+                # zone="待回收",
                 ipaddress="",
                 iprelease=t.ipaddress,
                 deleted_at=human_datetime(),
@@ -258,23 +259,57 @@ def post_import(request):
 
         # if data.ostp == 'Windows':
         #     pwd = data.pop("password")
+        us = data.username
+        if (data.resource_type).strip() == "主机":
+            sv = []
+            if data.service_pack is not None:
+                for x in (data.service_pack).split(";"):
+                    sv.append((Servicebag.objects.get(name=x)).id)
+                data["service_pack"] = sv
+            else:
+                data["service_pack"] = sv
+
+
+            if data.ostp =="Windows":
+                dd = (data.data_disk).split(";")
+                del dd[-1]
+                one = []
+                two = []
+                for x in dd:
+                    if x.find("数据盘:") == 0:
+                        one.append(x.split("数据盘:")[1])
+
+                    if x.find("容量:") == 0:
+                        two.append(x.split("容量:")[1])
+                e = []
+                for k, v in dict(zip(one, two)).items():
+                    e.append({"type": "windata", "name": k, "size": v})
+
+                data["data_disk"] = e
+
+                data["sys_disk"] = [{"type":"nfds","name":data.sys_disk,"mount":"/"}]
         data["password_hash"] = Host.make_password(pwd)
         data["env_id"] = (Environment.objects.get(name=data.env_id)).id
+
         tp =[]
         for x in (data.top_project).split(";"):
             tp.append((ProjectConfig.objects.get(name=x)).id)
         data["top_project"] = tp
+
         cp = []
         for x in (data.child_project).split(";"):
             cp.append((ProjectConfig.objects.get(name=x)).id)
         data["child_project"] = cp
 
         cst = []
-        for x in (data.cluster).split(";"):
-            cst.append((ClusterConfig.objects.get(name=x)).id)
-        data["cluster"] = cst
+        if data.cluster is not None:
+            for x in (data.cluster).split(";"):
+                cst.append((ClusterConfig.objects.get(name=x)).id)
+            data["cluster"] = cst
+        else:
+            data["cluster"] = cst
 
-        us = data.username
+
         data["username"] = (ConnctUser.objects.get(name=data.username)).id
         zz = []
         for x in (data.zone).split(";"):
@@ -283,33 +318,14 @@ def post_import(request):
         data["provider"] = (DevicePositon.objects.get(name=data.provider)).id
         data["resource_type"] = (ResourceType.objects.get(name=data.resource_type)).id
         data["work_zone"] = (WorkZone.objects.get(name=data.work_zone)).id
-        sv = []
-        for x in (data.service_pack).split(";"):
-            sv.append((Servicebag.objects.get(name=x)).id)
-        data["service_pack"] = sv
+        # sv = []
+        # for x in (data.service_pack).split(";"):
+        #     sv.append((Servicebag.objects.get(name=x)).id)
+        # data["service_pack"] = sv
+        # data["status"] = 0
+
+
         data["status"] = 0
-
-        if data.ostp =="Windows":
-
-            dd = (data.data_disk).split(";")
-            del dd[-1]
-            one = []
-            two = []
-            for x in dd:
-                if x.find("数据盘:") == 0:
-                    one.append(x.split("数据盘:")[1])
-
-                if x.find("容量:") == 0:
-                    two.append(x.split("容量:")[1])
-            e = []
-            for k, v in dict(zip(one, two)).items():
-                e.append({"type": "windata", "name": k, "size": v})
-
-            data["data_disk"] = e
-
-            data["sys_disk"] = [{"type":"nfds","name":data.sys_disk,"mount":"/"}]
-
-
 
         host = Host.objects.create(create_by=request.user, **data)
         if us == "root":
