@@ -18,3 +18,15 @@ class EmailRecord(models.Model):
         app_label = 'message'
         verbose_name = '邮件记录'
         verbose_name_plural = '邮件记录'
+
+
+class LoggerTaskRecord(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='修改时间')
+    action_task = models.CharField(max_length=64, db_index=True,verbose_name='task')
+    content = models.TextField(verbose_name='邮件内容')
+    status = models.IntegerField(verbose_name='执行状态')
+
+
+    class Meta:
+        db_table = 'task_record'

@@ -155,7 +155,8 @@ class MyAnsiable2(object):
 
 if __name__ == '__main__' :
     ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
-    ansible3.run(hosts=["192.168.50.146","127.0.0.1"], module="ping", args='')
+    # ansible3.run(hosts=["192.168.50.146","127.0.0.1"], module="user", args="""name=jin update_password=always password={{ newpassword|password_hash('sha512') }}" -b --extra-vars 'newpassword=jin'""")
+    ansible3.run(hosts=["127.0.0.1"], module="user", args="name=%s update_password=always password={{ '%s'|password_hash('sha512') }} "%('jin','jinjin123'))
     stdout_dict = json.loads(ansible3.get_result())
     # print(stdout_dict['success']['127.0.0.1']["ansible_facts"]["ansible_mounts"])
     print(stdout_dict)

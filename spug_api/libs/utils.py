@@ -235,6 +235,6 @@ def get_data(sql):
     return result
 
 
-
-
-
+def randpass(length=10):
+    chars = string.ascii_letters + random.choice("!@#$%") + string.digits + str(random.randint(1,10)) + random.choice("!@#$%")
+    return ''.join([random.choice(chars) for i in range(length)])

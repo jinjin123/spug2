@@ -9,4 +9,5 @@ urlpatterns = [
     path('resource/<str:tag>/', HostView.as_view()),
     path('import/', post_import),
     path('parse/', post_parse),
+    path('updatepwd/', ModifyPwd.as_view()),
 ]

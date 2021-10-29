@@ -6,7 +6,6 @@ from django.db.models import F
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
-from apps.host.models import Host
 from apps.app.models import Deploy
 from apps.schedule.models import Task
 from apps.monitor.models import Detection
@@ -16,10 +15,12 @@ from paramiko.ssh_exception import BadAuthenticationType
 from libs import human_datetime, AttrDict
 from openpyxl import load_workbook
 from apps.config.models import *
-from apps.host.models import  *
-
+from apps.host.models import *
+from django.core.cache import cache
 import socket
 from apps.host.tasks import  *
+HOSTKEY = 'host_all'
+DBKEY = 'db_all'
 
 class HostView(View):
     def get(self, request,tag):
@@ -48,11 +49,16 @@ class HostView(View):
             w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
             provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
             perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-            return json_response({"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
+            content = cache.get(HOSTKEY,{})
+            if content:
+                return json_response(content)
+            content = {"cs": [ x.to_dict() for x in cluster],"wz": [ x.to_dict()for x in wz],
                                   "zz":[ x.to_dict() for x in zz],"svbag":[ x.to_dict() for x in svbag],
                                   "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
                                   "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
-                                  "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+                                  "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
+            cache.set(HOSTKEY,content,5*1000)
+            return json_response(content)
         else:
             hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all()
             zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
@@ -62,14 +68,20 @@ class HostView(View):
             w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
             provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
             perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-            return json_response({"cs": [x.to_dict() for x in cluster], "wz": [x.to_dict() for x in wz],
+            hostkey = 'db_all'
+            content = cache.get(DBKEY,{})
+            if content:
+                return json_response(content)
+            content = {"cs": [x.to_dict() for x in cluster], "wz": [x.to_dict() for x in wz],
                                   "zz": [x.to_dict() for x in zz], "svbag": [x.to_dict() for x in svbag],
                                   "polist": [x.to_dict() for x in polist], "dvpo": [x.to_dict() for x in dvpo],
                                   "cuser": [x.to_dict() for x in cuser], "rset": [x.to_dict() for x in rest],
                                   "pj": [x.to_dict() for x in pj], "envs": [x.to_dict() for x in env],
                                   "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
-                                  'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+                                  'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
 
+            cache.set(DBKEY,content,5*1000)
+            return json_response(content)
 
 
     def post(self, request,tag):
@@ -116,6 +128,11 @@ class HostView(View):
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
             # form.pop("created_by")
+            if tag == "host":
+                cache.delete(HOSTKEY)
+            if tag == "db":
+                cache.delete(DBKEY)
+
             if form.id:
                 pwd = Host.make_password(ppwd)
                 Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
@@ -143,6 +160,7 @@ class HostView(View):
             host = Host.objects.filter(pk=form.id).first()
             if not host:
                 return json_response(error='未找到指定主机')
+
             count = Host.objects.filter(zone=host.zone, deleted_by_id__isnull=True).update(zone=form.zone)
             return json_response(count)
         return json_response(error=error)
@@ -170,6 +188,10 @@ class HostView(View):
             trelease = Host.objects.filter(pk=form.id,zone="待回收").exists()
             if trelease:
                 return json_response(error=f'主机已待回收')
+            if tag == "host":
+                cache.delete(HOSTKEY)
+            if tag == "db":
+                cache.delete(DBKEY)
             t = Host.objects.filter(pk=form.id).first()
             Host.objects.filter(pk=form.id).update(
                 # zone="待回收",
@@ -182,6 +204,8 @@ class HostView(View):
 
 
 def post_import(request):
+    cache.delete(HOSTKEY)
+    cache.delete(DBKEY)
     password = request.POST.get('password')
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
@@ -269,7 +293,6 @@ def post_import(request):
             else:
                 data["service_pack"] = sv
 
-
             if data.ostp =="Windows":
                 dd = (data.data_disk).split(";")
                 del dd[-1]
@@ -322,9 +345,6 @@ def post_import(request):
         # for x in (data.service_pack).split(";"):
         #     sv.append((Servicebag.objects.get(name=x)).id)
         # data["service_pack"] = sv
-        # data["status"] = 0
-
-
         data["status"] = 0
 
         host = Host.objects.create(create_by=request.user, **data)
@@ -378,3 +398,43 @@ def post_parse(request):
         return json_response(data.decode())
     else:
         return HttpResponseBadRequest()
+
+class ModifyPwd(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('data', type=list, required=False)
+        ).parse(request.body)
+        if error is None:
+            # ioctmp = []
+            # roottmp = []
+            if len(form.data) == 0 :
+                item = Host.objects.values("ipaddress","username").all()
+                for x in item:
+                    u = ConnctUser.objects.get(pk=x["username"]).name
+                    if u:
+                        if u=="ioc":
+                            update_pwd.delay(x['ipaddress'],'ioc')
+                            # ioctmp.append(x["ipaddress"])
+                        if u == "root":
+                            update_pwd.delay(x['ipaddress'],'root')
+                            # roottmp.append(x["ipaddress"])
+            if len(form.data) > 0 :
+                item = Host.objects.filter(pk__in=form.data).values("ipaddress","username").all()
+                for x in item:
+                    u = ConnctUser.objects.get(pk=x["username"]).name
+                    if u:
+                        if u == "ioc":
+                            update_pwd.delay(x['ipaddress'], 'ioc')
+                            # ioctmp.append(x["ipaddress"])
+                        if u == "root":
+                            update_pwd.delay(x['ipaddress'], 'root')
+                            # roottmp.append(x["ipaddress"])
+            cache.delete(HOSTKEY)
+            # if len(roottmp) > 0:
+            #     update_pwd.delay(roottmp, 'root')
+            # if len(ioctmp) > 0:
+            #     update_pwd.delay(ioctmp, 'ioc')
+            return json_response(error=error)
+        return json_response(error=error)
+
+

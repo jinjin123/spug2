@@ -29,7 +29,7 @@ class UserView(View):
             Argument('username', help='请输入登录名'),
             Argument('password', help='请输入密码'),
             Argument('nickname', help='请输入姓名'),
-            Argument('email', help='请输入email'),
+            Argument('email', help='请输入email',required=False),
             Argument('role_id', type=int, help='请选择角色'),
         ).parse(request.body)
         if error is None:
@@ -46,7 +46,7 @@ class UserView(View):
             Argument('username', required=False),
             Argument('password', required=False),
             Argument('nickname', required=False),
-            Argument('email', help='请输入email'),
+            Argument('email', help='请输入email',required=False),
             Argument('role_id', required=False),
             Argument('is_active', type=bool, required=False),
         ).parse(request.body, True)

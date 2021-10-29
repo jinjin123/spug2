@@ -1,6 +1,8 @@
 from spug.celery import app
 from libs.ansible29 import *
 from apps.host.models import *
+from libs.utils import randpass
+from apps.message.tasklog import tasksave
 import ast
 import math
 import logging
@@ -74,10 +76,10 @@ def update_hostinfo(ip,user='root'):
                 # Host.objects.filter(ipaddress=xip).update(**data)
             except Exception as e:
                 print(e)
-                logger.error("update host %s error :%s",(xip,e))
+                logger.error("update host %s error :%s"%(xip,e))
         else:
             print('no')
-            logger.error("host %s connect failed" , xip)
+            logger.error("host %s connect failed" % (xip))
 
 
 @app.task
@@ -109,3 +111,27 @@ def update_hoststatus():
         if not stdout_dict['success'].get(xxx):
             root_batch.append(Host(id=(Host.objects.get(ipaddress=xxx)).id, status=1))
     Host.objects.bulk_update(root_batch,['status'])
+
+
+@app.task
+def update_pwd(ip, user):
+    ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart', remote_user=user)  # 创建资源库对象
+    m = randpass()
+    global stdout_dict
+    try:
+        ansible3.run(hosts=ip, module="user", args="name=%s update_password=always password={{ '%s'|password_hash('sha512') }} "%(user,m))
+        stdout_dict = json.loads(ansible3.get_result())
+        if stdout_dict["success"].get(ip):
+            Host.objects.filter(ipaddress=ip).update(password_hash=Host.make_password(m))
+            tasksave('update_pwd',stdout_dict,0)
+            logger.info("##update password## ->ip:%s,user:%s ,pwd:%s"%(ip,user,m))
+        else:
+            logger.error("##update password faild## ->ip:%s,user:%s ,pwd:%s"%(ip,user,m))
+
+    except Exception as e:
+        logger.error("##update password faild## %s", (e))
+        tasksave('update_pwd', stdout_dict, 1)
+
+
+
+

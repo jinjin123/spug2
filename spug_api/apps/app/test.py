@@ -559,14 +559,17 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                from apps.host.models import Host
+                from apps.host.models import Host,ConnctUser
                 import ast
                 import operator
                 from functools import reduce
                 from django.db.models import Q
+                # h = Host.objects.values("ipaddress","username").all()
+                # for x in h:
+                #     print(ConnctUser.objects.get(pk=x["username"]).name)
                 # Host.objects.filter(reduce())
-                a = Host.objects.filter(zone__in=[1,2,3])
-                print(a)
+                # a = Host.objects.filter(zone__in=[1,2,3])
+                # print(a)
                 # from openpyxl import load_workbook
                 # ws = load_workbook("/home/jin/文档/root.xlsx", read_only=True)['Sheet1']
                 # for i, row in enumerate(ws.rows):
