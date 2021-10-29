@@ -30,3 +30,4 @@ class LoggerTaskRecord(models.Model):
 
     class Meta:
         db_table = 'task_record'
+        app_label = 'message'
