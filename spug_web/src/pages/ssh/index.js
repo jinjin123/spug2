@@ -69,7 +69,7 @@ class WebSSH extends React.Component {
   };
 
   _fetch = () => {
-    http.get(`/api/host/?id=${this.id}`)
+    http.get(`/api/host/resource/host/?id=${this.id}`)
       .then(res => {
         document.title = res.ipaddress;
         this.setState({host: res, managerDisabled: false})

@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, message,Select, Tag } from 'antd';
-import { Action } from 'components';
+import { AuthDiv } from 'components';
 import ComForm from './Form';
 import FormWin from './FormWin';
 import ComImport from './Import';
@@ -21,7 +21,8 @@ class ComTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        moreAction: [{"id":0,"v":"更多操作...."}]
+        moreAction: [{"id":0,"v":"更多操作...."}],
+        modifypwd: []
     };
   
   }
@@ -333,17 +334,21 @@ class ComTable extends React.Component {
     {
       title: '操作',
       render: info => {
-        return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+        return        <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>
+        <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
           <Select.Option value={1}>编辑</Select.Option>
           <Select.Option value={2}>终端</Select.Option>
           <Select.Option value={3}>待回收</Select.Option>
         </Select>
+        </AuthDiv>
       }
     },
   ]
   rowSelection = {
+    
     onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      store.modifypwdkey = selectedRowKeys
+
     },
     getCheckboxProps: record => ({
       

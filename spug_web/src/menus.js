@@ -6,7 +6,7 @@
 export default [
   {icon: 'desktop', title: '工作台', auth: 'home.home.view', path: '/home'},
   {
-    icon: 'cloud-server', title: '资产管理', auth: 'exec.task.do|exec.template.view', child: [
+    icon: 'cloud-server', title: '资产管理', auth: 'host.host.view', child: [
       // {title: '', auth: 'exec.task.do', path: '/exec/task'},
       {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
       {icon: 'cloud-server', title: '数据库管理', auth: 'host.host.view', path: '/dbserver'},

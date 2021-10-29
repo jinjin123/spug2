@@ -5,7 +5,7 @@
  */
 import { observable } from "mobx";
 import http from 'libs/http';
-import { message } from 'antd';
+import { message,Modal } from 'antd';
 
 class Store {
   @observable records = [];
@@ -48,6 +48,8 @@ class Store {
   @observable envs=[];
 
   @observable tmpExcel=[];
+  @observable modifypwdkey=[];
+
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -150,6 +152,56 @@ class Store {
     })
     .finally(() => this.isFetching = false)
   }
+  modifypwd = () => {
+    // let FormData = {}
+    // FormData["data"] = this.modifypwdkey
+    if((this.modifypwdkey).length === 0) {
+      Modal.confirm({
+        title: '修改密码确认',
+        content:  `没有选中则默认修改所有主机密码，谨慎操作！`,
+        // content: `确定要回收【${text['ipaddress']}】?`,
+        onOk: () => {
+          return http.post('/api/host/updatepwd/', {data: []})
+            .then(() => {
+              this.isFetching = true
+              message.success('修改密码中。。。1分钟后改完');
+
+              setTimeout(() => {
+                this.isFetching = false
+                this.fetchRecords()
+              },15000)
+
+            })
+        }
+      })
+    }else{
+      Modal.confirm({
+        title: '修改密码确认',
+        content:  `修改【${(this.modifypwdkey).length}】台主机密码，谨慎操作！`,
+        // content: `确定要回收【${text['ipaddress']}】?`,
+        onOk: () => {
+          return http.post('/api/host/updatepwd/', {data: this.modifypwdkey})
+            .then(() => {
+              this.isFetching = true
+              message.success('修改密码中。。。1分钟后改完');
+
+              setTimeout(() => {
+                this.isFetching = false
+                this.fetchRecords()
+              },15000)
+            })
+        }
+      })
+    }
+  }
+  //   return http.post(
+  //     '/api/host/updatepwd/', FormData
+  //   )
+  //   .then(res => {
+  //       message.success('异步任务改密中。。。1分钟后密码即可生效');
+  //   })
+  //   .finally(() => this.isFetching = false)
+  // } 
 }
 
 export default new Store()

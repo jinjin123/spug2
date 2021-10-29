@@ -116,7 +116,7 @@ export default observer(function () {
                 onClick={() => store.importVisible = true}>批量导入</Button>
 
         <Button style={{marginLeft: 20}} type="danger" icon="lock"
-                        >批量改密</Button>
+              onClick={()=> store.modifypwd()}     >批量改密</Button>
       </AuthDiv>
       <ComTable/>
     </AuthCard>
