@@ -68,7 +68,6 @@ class HostView(View):
             w_z = [x['work_zone'] for x in hosts.order_by('work_zone').values('work_zone').distinct()]
             provider = [x['provider'] for x in hosts.order_by('provider').values('provider').distinct()]
             perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-            hostkey = 'db_all'
             content = cache.get(DBKEY,{})
             if content:
                 return json_response(content)
@@ -315,14 +314,21 @@ def post_import(request):
         data["env_id"] = (Environment.objects.get(name=data.env_id)).id
 
         tp =[]
-        for x in (data.top_project).split(";"):
-            tp.append((ProjectConfig.objects.get(name=x)).id)
-        data["top_project"] = tp
+        if data.top_project is not None:
+            for x in (data.top_project).split(";"):
+                tp.append((ProjectConfig.objects.get(name=x)).id)
+            data["top_project"] = tp
+        else:
+            data["top_project"] = tp
 
         cp = []
-        for x in (data.child_project).split(";"):
-            cp.append((ProjectConfig.objects.get(name=x)).id)
-        data["child_project"] = cp
+        if data.child_project is not None:
+            # print(data.child_project)
+            for x in (data.child_project).split(";"):
+                cp.append((ProjectConfig.objects.get(name=x)).id)
+            data["child_project"] = cp
+        else:
+            data["child_project"] = cp
 
         cst = []
         if data.cluster is not None:

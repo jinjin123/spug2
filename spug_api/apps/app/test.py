@@ -560,6 +560,9 @@ class Mytest(unittest.TestCase):
 
             def test_pb_approval(self):
                 from apps.host.models import Host,ConnctUser
+                from apps.config.models import ProjectConfig
+                a = ProjectConfig.objects.get(name='IOC事件管理与联动指挥系统')
+                print(a)
                 import ast
                 import operator
                 from functools import reduce
