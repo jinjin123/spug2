@@ -460,7 +460,7 @@ class ModifyPwd(View):
             # ioctmp = []
             # roottmp = []
             if len(form.data) == 0 :
-                item = Host.objects.values("ipaddress","username").all()
+                item = Host.objects.exclude(ipaddress="19.104.50.128").values("ipaddress","username").all()
                 for x in item:
                     u = ConnctUser.objects.get(pk=x["username"]).name
                     if u:
@@ -471,7 +471,7 @@ class ModifyPwd(View):
                             update_pwd.delay(x['ipaddress'],'root')
                             # roottmp.append(x["ipaddress"])
             if len(form.data) > 0 :
-                item = Host.objects.filter(pk__in=form.data).values("ipaddress","username").all()
+                item = Host.objects.filter(pk__in=form.data).exclude(ipaddress="19.104.50.128").values("ipaddress","username").all()
                 for x in item:
                     u = ConnctUser.objects.get(pk=x["username"]).name
                     if u:
