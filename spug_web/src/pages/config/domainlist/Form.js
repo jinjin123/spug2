@@ -22,7 +22,7 @@ class ComForm extends React.Component {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
     formData['id'] = store.record.id;
-    http.post('/api/config/portlist/', formData)
+    http.post('/api/config/domainlist/', formData)
       .then(res => {
         message.success('操作成功');
         store.formVisible = false;
@@ -38,19 +38,19 @@ class ComForm extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑端口记录' : '新增端口记录'}
+        title={store.record.id ? '编辑域名记录' : '新增域名记录'}
         onCancel={() => store.formVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-          <Form.Item required label="ip地址">
-            {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
-              <Input placeholder="请输入ip地址，例如：1.1.1.1"/>
+          <Form.Item required label="域名">
+            {getFieldDecorator('domain', {initialValue: info['domain']})(
+              <Input placeholder="请输入ip地址，例如：www.baidu.com"/>
             )}
           </Form.Item>
-          <Form.Item required label="端口">
-            {getFieldDecorator('port', {initialValue: info['port']})(
-              <Input placeholder="请输入端口，例如：22，333，444"/>
+          <Form.Item required label="ip地址">
+            {getFieldDecorator('ipaddress', {initialValue: info['ipaddress']})(
+              <Input placeholder="请输入ip地址多个用分号表示，例如：1.1.1.1;2.2.2.2"/>
             )}
           </Form.Item>
           <Form.Item label="备注信息">

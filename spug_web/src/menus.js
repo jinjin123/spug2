@@ -18,6 +18,7 @@ export default [
       {icon: 'cloud-server', title: '资源类别管理', auth: 'host.host.view', path: '/config/zone'},
       {icon: 'cloud-server', title: '设备位置管理', auth: 'host.host.view', path: '/config/device'},
       {icon: 'cloud-server', title: '连接用户管理', auth: 'host.host.view', path: '/config/cuser'},
+      {icon: 'cloud-server', title: '域名管理', auth: 'host.host.view', path: '/config/domain'},
 
       {icon: 'cloud-server', title: '资源类型管理', auth: 'host.host.view', path: '/config/resouret'},
 

@@ -11,6 +11,8 @@ import Portlist from './portlist';
 import ServiceBag from './servicebag';
 import Workzone from './workzone';
 import Cuser from './cuser';
+import Domain from './domainlist';
+
 import Resource from './resourcet';
 
 import Zone from './zone';
@@ -26,6 +28,7 @@ export default [
   makeRoute('/environment', Environment),
   makeRoute('/cuser', Cuser),
   makeRoute('/resouret', Resource),
+  makeRoute('/domain', Domain),
 
   makeRoute('/project', Project),
   makeRoute('/cluster', Cluster),
