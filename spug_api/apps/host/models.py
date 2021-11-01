@@ -153,8 +153,9 @@ class Host(models.Model, ModelMixin):
         # tt = ""
         # for x in ast.literal_eval(self.disk):
         #     tt += "类型:"+x.get("type")+",数据盘:"+x.get("name")+",挂载目录:"+x.get("mount")+",总大小:"+str(x.get("total_szie"))+"G,数据盘已使用"+str(x.get("used"))+"G,"
-        tmp["disk"] = self.conver_disk(self.data_disk)
+        # tmp["disk"] = self.conver_disk(self.data_disk)
         tmp["sys_disk"] = self.tosys_disk(self.sys_disk)
+        tmp["data_disk"] = self.conver_disk(self.data_disk)
         tmp['create_by'] = self.create_by.nickname
         # tmp['env'] = "生产" if self.env_id == 2 else "测试"
         tmp['status'] =  "在线" if self.status == 0 else "离线"

@@ -30,6 +30,7 @@ class HostView(View):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
+        # cache.delete(HOSTKEY)
         cluster = ClusterConfig.objects.all()
         wz = WorkZone.objects.all()
         zz = Zone.objects.all()
@@ -119,6 +120,9 @@ class HostView(View):
             Argument('osVerion', handler=str.strip, required=False),
             Argument('coreVerion', handler=str.strip, required=False),
 
+            Argument('sys_disk', handler=str.strip, required=False),
+            Argument('data_disk', handler=str.strip, required=False),
+
         ).parse(request.body)
         if error is None:
             ppwd = form.pop('password')
@@ -134,6 +138,38 @@ class HostView(View):
 
             if form.id:
                 pwd = Host.make_password(ppwd)
+                sd = form.pop("sys_disk")
+                ddd = form.pop("data_disk")
+                if ddd is not None:
+                    if (ddd).find(";") != -1:
+                        dd = (ddd).split(";")
+                        del dd[-1]
+                        one = []
+                        two = []
+                        for x in dd:
+                            if x.find("数据盘:") != -1:
+                                one.append(x.split("数据盘:")[1])
+
+                            if x.find("容量:") != -1:
+                                two.append((x.split("容量:")[1])[:-1])
+                        e = []
+                        for k, v in dict(zip(one, two)).items():
+                            if form.ostp == "Linux":
+                                e.append({"type": "xfs", "name": k, "size": v,"used": 0})
+                            if form.ostp == "Windows":
+                                e.append({"type": "ntfs", "name": k, "size": v,"used": 0})
+
+                        form["data_disk"] = e
+                    else:
+                        form["data_disk"] = []
+                if sd is not None:
+                    if form.ostp == "Linux":
+                        form["sys_disk"] = [{"type": "xfs", "name": sd, "mount": "/", "used": 0}]
+                    if form.ostp == "Windows":
+                        form["sys_disk"] = [{"type": "ntfs", "name": sd, "mount": "/", "used": 0}]
+                else:
+                    form["sys_disk"] = []
+
                 Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
                 return json_response(error=error)
             if Host.objects.filter(ipaddress=form.ipaddress).exists():
@@ -292,24 +328,37 @@ def post_import(request):
             else:
                 data["service_pack"] = sv
 
-            if data.ostp =="Windows":
-                dd = (data.data_disk).split(";")
-                del dd[-1]
-                one = []
-                two = []
-                for x in dd:
-                    if x.find("数据盘:") == 0:
-                        one.append(x.split("数据盘:")[1])
+            # if data.ostp =="Windows":
+            if data.data_disk is not None:
+                if (data.data_disk).find(";") != -1:
+                    dd = (data.data_disk).split(";")
+                    del dd[-1]
+                    one = []
+                    two = []
+                    for x in dd:
+                        if x.find("数据盘:") != -1:
+                            one.append(x.split("数据盘:")[1])
 
-                    if x.find("容量:") == 0:
-                        two.append(x.split("容量:")[1])
-                e = []
-                for k, v in dict(zip(one, two)).items():
-                    e.append({"type": "windata", "name": k, "size": v})
+                        if x.find("容量:") != -1:
+                            two.append((x.split("容量:")[1])[:-1])
+                    e = []
 
-                data["data_disk"] = e
+                    for k, v in dict(zip(one, two)).items():
+                        if data.ostp == 'Linux':
+                            e.append({"type": "xfs", "name": k, "size": v,"used": 0})
+                        if data.ostp == 'Windows':
+                            e.append({"type": "windata", "name": k, "size": v,"used": 0})
 
-                data["sys_disk"] = [{"type":"nfds","name":data.sys_disk,"mount":"/"}]
+                    data["data_disk"] = e
+                else:
+                    data["data_disk"] = []
+            else:
+                data["data_disk"] = []
+
+        if data.ostp == 'Linux':
+            data["sys_disk"] = [{"type":"xfs","name":data.sys_disk,"mount":"/","used": 0}]
+        if data.ostp == 'Windows':
+            data["sys_disk"] = [{"type":"ntfs","name":data.sys_disk,"mount":"/","used": 0}]
         data["password_hash"] = Host.make_password(pwd)
         data["env_id"] = (Environment.objects.get(name=data.env_id)).id
 
@@ -323,7 +372,6 @@ def post_import(request):
 
         cp = []
         if data.child_project is not None:
-            # print(data.child_project)
             for x in (data.child_project).split(";"):
                 cp.append((ProjectConfig.objects.get(name=x)).id)
             data["child_project"] = cp
@@ -341,16 +389,14 @@ def post_import(request):
 
         data["username"] = (ConnctUser.objects.get(name=data.username)).id
         zz = []
-        for x in (data.zone).split(";"):
-            zz.append((Zone.objects.get(name=x)).id)
+        if data.zone is not None:
+            for x in (data.zone).split(";"):
+                zz.append((Zone.objects.get(name=x)).id)
         data["zone"] = zz
         data["provider"] = (DevicePositon.objects.get(name=data.provider)).id
         data["resource_type"] = (ResourceType.objects.get(name=data.resource_type)).id
         data["work_zone"] = (WorkZone.objects.get(name=data.work_zone)).id
-        # sv = []
-        # for x in (data.service_pack).split(";"):
-        #     sv.append((Servicebag.objects.get(name=x)).id)
-        # data["service_pack"] = sv
+
         data["status"] = 0
 
         host = Host.objects.create(create_by=request.user, **data)
