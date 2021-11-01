@@ -289,6 +289,10 @@ def post_import(request):
             iprelease=row[29].value,
             comment=row[30].value
         )
+        uuu = data.username
+        if uuu is None:
+            summary['skip'].append(i)
+            continue
         if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=(ConnctUser.objects.get(name=data.username)).id).exists():
         # if Host.objects.filter(ipaddress=row[i].value, port=row[i].value, username=ConnctUser.objects.get w  ).exists():
             # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
@@ -355,10 +359,15 @@ def post_import(request):
             else:
                 data["data_disk"] = []
 
-        if data.ostp == 'Linux':
+        if data.ostp == 'Linux' and (data.resource_type).strip() == "主机":
             data["sys_disk"] = [{"type":"xfs","name":data.sys_disk,"mount":"/","used": 0}]
-        if data.ostp == 'Windows':
+        if data.ostp == 'Windows' and (data.resource_type).strip() == "主机":
             data["sys_disk"] = [{"type":"ntfs","name":data.sys_disk,"mount":"/","used": 0}]
+
+        if (data.resource_type).strip() == "数据库":
+            data["sys_disk"] = []
+            data["data_disk"] = []
+            data["service_pack"] = []
         data["password_hash"] = Host.make_password(pwd)
         data["env_id"] = (Environment.objects.get(name=data.env_id)).id
 
