@@ -624,6 +624,42 @@ class PortlistConfig(View):
         return json_response(error=error)
 
 
+class DomainConfig(View):
+    def get(self, request):
+        query = {}
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        envs = Domainlist.objects.all()
+        return json_response(envs)
+
+    def post(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, required=False),
+            Argument('domain', help='请输入域名'),
+            Argument('ipaddress', help='请输入ip'),
+            Argument('comment', required=False)
+        ).parse(request.body)
+        if error is None:
+            env = Domainlist.objects.filter(domain=form.domain).first()
+            if env and env.id != form.id:
+                return json_response(error=f'唯一标识符 {form.domain} 已存在，请更改后重试')
+            if form.id:
+                Domainlist.objects.filter(pk=form.id).update(**form)
+            else:
+                env = Domainlist.objects.create(created_by=request.user, **form)
+                if request.user.role:
+                    request.user.role.add_deploy_perm('envs', env.id)
+        return json_response(error=error)
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='请指定操作对象')
+        ).parse(request.GET)
+        if error is None:
+            Portlist.objects.filter(pk=form.id).delete()
+        return json_response(error=error)
+
+
 class DevicePoConfig(View):
     def get(self, request):
         query = {}

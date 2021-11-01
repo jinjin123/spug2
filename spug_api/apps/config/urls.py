@@ -21,6 +21,7 @@ urlpatterns = [
     path('devpostion/', DevicePoConfig.as_view()),
     path('servicebag/', ServicebagConfig.as_view()),
     path('portlist/', PortlistConfig.as_view()),
+    path('domainlist/', DomainConfig.as_view()),
     path('service/', ServiceView.as_view()),
     path('history/', HistoryView.as_view()),
     path('rsnamespace/', RancherNsView.as_view()),

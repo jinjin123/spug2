@@ -273,3 +273,14 @@ class ResourceType(models.Model,ModelMixin):
 
     class Meta:
         db_table = "resource_type"
+
+class Domainlist(models.Model,ModelMixin):
+    domain = models.CharField(max_length=50)
+    ipaddress = models.CharField(max_length=255)
+    comment = models.CharField(max_length=500, null=True)
+    created_by = models.ForeignKey(User, models.PROTECT, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "domain_list"

@@ -168,6 +168,8 @@ class Exceldown(View):
                         response.write(content)
                         return response
 
+            return json_response(error="")
+
 
 
 def write_data_to_excel(fpath,name,sql,header,header_cns):
