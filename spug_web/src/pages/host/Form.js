@@ -574,6 +574,16 @@ class ComForm extends React.Component {
               <Input  disabled placeholder="内核版本"/>
             )}
           </Form.Item>
+          <Form.Item  required label="系统盘">
+            {getFieldDecorator('sys_disk', {initialValue: info['sys_disk']})(
+              <Input  disabled placeholder="系统盘"/>
+            )}
+          </Form.Item>
+          <Form.Item  required label="数据盘">
+            {getFieldDecorator('data_disk', {initialValue: info['data_disk']})(
+              <Input  disabled placeholder="数据盘"/>
+            )}
+          </Form.Item>
           <Form.Item label="备注信息">
             {getFieldDecorator('comment', {initialValue: info['comment']})(
               <Input.TextArea placeholder="请输入主机备注信息"/>

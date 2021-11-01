@@ -409,7 +409,7 @@ class ComTable extends React.Component {
 
           dataSource={data}
           columns={this.columns}
-          expandedRowRender={data => <p style={{ margin: 0 }}>{data.disk}</p>}
+          expandedRowRender={data => <p style={{ margin: 0 }}>{data.data_disk}</p>}
           scroll={{ x: '210%' }}
           pagination={{
             showSizeChanger: true,

@@ -539,6 +539,16 @@ class FormWin extends React.Component {
               <Input   placeholder="内核版本"/>
             )}
           </Form.Item>
+          <Form.Item  required label="系统盘">
+            {getFieldDecorator('sys_disk', {initialValue: info['sys_disk']})(
+              <Input   placeholder="系统盘"/>
+            )}
+          </Form.Item>
+          <Form.Item  required label="数据盘">
+            {getFieldDecorator('data_disk', {initialValue: info['data_disk']})(
+              <Input   placeholder="数据盘"/>
+            )}
+          </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(
               <Input.TextArea  placeholder="实际用途"/>
