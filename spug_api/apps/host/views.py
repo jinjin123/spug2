@@ -172,7 +172,7 @@ class HostView(View):
 
                 Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
                 return json_response(error=error)
-            if Host.objects.filter(ipaddress=form.ipaddress).exists():
+            if Host.objects.filter(ipaddress=form.ipaddress, port=form.port, username=(ConnctUser.objects.get(pk=form.username)).id).exists():
                 return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
                 if form.ostp == "Linux" and (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
