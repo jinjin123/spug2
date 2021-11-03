@@ -206,7 +206,7 @@ host_select_args = [
     # "status","disks","disk","serial_num","supplier","developer","opsper","service_pack","host_bug","ext_config1","env_id","comment"
     # "status", "supplier", "developer", "opsper", "service_pack", "host_bug", "ext_config1", "env_id", "comment"
                                                                                                       "status",
-    "supplier", "developer", "opsper", "service_pack",  "env_id", 'iprelease',"comment"
+    "supplier", "developer", "opsper", "service_pack",  "env_id", 'iprelease',"comment","sys_data"
 ]
 host_select_cns = ['实体项目','项目子类','所属集群','主机名',
                    '虚拟IP','外网IP',
@@ -215,7 +215,7 @@ host_select_cns = ['实体项目','项目子类','所属集群','主机名',
                    '系统类型','设备位置','资源类型','系统盘','数据盘','所属区域','实际用途',
                    # '状态(上/下线)','挂载盘数','挂载盘','序列号','供应商','开发','运维','安装服务','补丁服务与版本' ,'扩展配置','环境','备注']
                    #  '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '补丁服务与版本', '扩展配置', '环境', '备注']
-        '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '环境','待回收ip' ,'备注']
+        '状态(在/离线)', '供应商', '开发', '运维', '安装服务', '环境','待回收ip' ,'备注','硬盘分区']
 
 def get_data(sql):
     # 创建数据库连接.

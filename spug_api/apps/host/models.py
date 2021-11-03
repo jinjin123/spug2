@@ -50,7 +50,8 @@ class Host(models.Model, ModelMixin):
     disk = models.TextField(verbose_name="disk arguments",null=True)
     disks = models.IntegerField(verbose_name='数据盘数量', null=True)
     # disks_capacity = models.CharField(max_length=255, verbose_name="数据盘容量'',''", null=True)
-    memory = models.FloatField(verbose_name='内存GB', null=True)
+    # memory = models.FloatField(verbose_name='内存GB', null=True)
+    memory = models.IntegerField(verbose_name='内存GB', null=True)
     cpus = models.IntegerField(default=0, verbose_name='cpu逻辑数量', null=True)
     # cpucore = models.IntegerField(default=0, verbose_name='cpu物理核', null=True)
     # serial_num = models.CharField(verbose_name='序列号', max_length=100, null=True)
@@ -73,6 +74,7 @@ class Host(models.Model, ModelMixin):
     password_expire = models.IntegerField(null=True,verbose_name="expire ")
     sys_disk = models.CharField(max_length=255,verbose_name="sys disk", null=True)
     data_disk = models.TextField(verbose_name="data_disk", null=True)
+    sys_data = models.CharField(max_length=500,verbose_name="sys+data", null=True)
 
 
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
@@ -123,7 +125,7 @@ class Host(models.Model, ModelMixin):
         tt = ""
         if disk != "[]"  and  disk != "" and disk is not None and not isinstance(disk,list):
             for x in ast.literal_eval(disk):
-                tt += x.get("name")
+                tt = "系统盘:" + x.get("name") + ";容量:" + str(x.get("total_size")) + "G;"
             return tt
         else:
             return ""

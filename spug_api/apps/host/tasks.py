@@ -44,7 +44,16 @@ def update_hostinfo(ip,user='root'):
                 sysdisk = [x for x in ttmp if x["mount"] == "/"]
                 datadisk = [{"name": x["name"], "size": x["total_size"], "mount": x["mount"]} for x in ttmp if
                             x["mount"] != "/" and x["mount"] in tag]
-
+                sys_size = [int(x["total_size"]) for x in sysdisk][0]
+                data_size = 0
+                sysdatasize = ""
+                if len(datadisk) > 0:
+                    for x in datadisk:
+                        data_size += int(x["size"])
+                if data_size != 0:
+                    sysdatasize = (str(sys_size) + "G") + "+" + (str(data_size) + "G")
+                else:
+                    sysdatasize = str(sys_size) + "G"
                 data = dict(
                     ipaddress=tip,
                     # paddress=[ x  for x in stdout_dict['success'][xip]["ansible_facts"]["ansible_all_xipv4_addresses"] ][0],
@@ -55,8 +64,8 @@ def update_hostinfo(ip,user='root'):
                     disks=len(stdout_dict['success'][xip]["ansible_facts"]["ansible_mounts"]),
                     status=0,
                     # memory= int(stdout_dict['success'][xip]["ansible_facts"]["ansible_memory_mb"]["real"]["total"] / 1024 ),
-                    # memory=math.ceil(stdout_dict['success'][xip]["ansible_facts"]["ansible_memtotal_mb"] / 1024),
-                    memory=round(stdout_dict['success'][xip]["ansible_facts"]["ansible_memtotal_mb"] / 1024, 2),
+                    memory=math.ceil(stdout_dict['success'][xip]["ansible_facts"]["ansible_memtotal_mb"] / 1024),
+                    # memory=round(stdout_dict['success'][xip]["ansible_facts"]["ansible_memtotal_mb"] / 1024, 2),
 
                     # cpus=stdout_dict['success'][xip]["ansible_facts"]["ansible_processor_count"],
                     # cpucore=stdout_dict['success'][xip]["ansible_facts"]["ansible_processor_cores"],
@@ -71,8 +80,10 @@ def update_hostinfo(ip,user='root'):
                     # resource_type="主机",
                     sys_disk=sysdisk,
                     data_disk=datadisk,
+                    sys_data=sysdatasize,
                 )
-                Host.objects.update_or_create(defaults=data,ipaddress=xip)
+                # ip + user filter one
+                Host.objects.update_or_create(defaults=data,ipaddress=xip,username=(ConnctUser.objects.get(name=user)).id)
                 # Host.objects.filter(ipaddress=xip).update(**data)
             except Exception as e:
                 print(e)

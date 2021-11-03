@@ -122,6 +122,7 @@ class HostView(View):
 
             Argument('sys_disk', handler=str.strip, required=False),
             Argument('data_disk', handler=str.strip, required=False),
+            Argument('sys_data', handler=str.strip, required=False),
 
         ).parse(request.body)
         if error is None:
@@ -138,8 +139,10 @@ class HostView(View):
 
             if form.id:
                 pwd = Host.make_password(ppwd)
-                sd = form.pop("sys_disk")
-                ddd = form.pop("data_disk")
+                # sd = form.pop("sys_disk")
+                # ddd = form.pop("data_disk")
+                sd = form.sys_disk
+                ddd = form.data_disk
                 if ddd is not None:
                     if (ddd).find(";") != -1:
                         dd = (ddd).split(";")
@@ -164,9 +167,31 @@ class HostView(View):
                         form["data_disk"] = []
                 if sd is not None:
                     if form.ostp == "Linux":
-                        form["sys_disk"] = [{"type": "xfs", "name": sd, "mount": "/", "used": 0}]
+                        sd = (form.sys_disk).split(";")
+                        one = []
+                        two = []
+                        for x in sd:
+                            if x.find("系统盘:") != -1:
+                                one.append(x.split("系统盘:")[1])
+
+                            if x.find("容量:") != -1:
+                                two.append((x.split("容量:")[1])[:-1])
+
+                        for k, v in dict(zip(one, two)).items():
+                            form["sys_disk"] = [{"type": "xfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
                     if form.ostp == "Windows":
-                        form["sys_disk"] = [{"type": "ntfs", "name": sd, "mount": "/", "used": 0}]
+                        sd = (form.sys_disk).split(";")
+                        one = []
+                        two = []
+                        for x in sd:
+                            if x.find("系统盘:") != -1:
+                                one.append(x.split("系统盘:")[1])
+
+                            if x.find("容量:") != -1:
+                                two.append((x.split("容量:")[1])[:-1])
+
+                        for k, v in dict(zip(one, two)).items():
+                            form["sys_disk"] = [{"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
                 else:
                     form["sys_disk"] = []
 
@@ -175,12 +200,140 @@ class HostView(View):
             if Host.objects.filter(ipaddress=form.ipaddress, port=form.port, username=(ConnctUser.objects.get(pk=form.username)).id).exists():
                 return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
-                if form.ostp == "Linux" and (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
+                if (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
                     pwd = Host.make_password(ppwd)
+                    sd = form.sys_disk
+                    ddd = form.data_disk
+                    if ddd is not None:
+                        if (ddd).find(";") != -1:
+                            dd = (ddd).split(";")
+                            del dd[-1]
+                            one = []
+                            two = []
+                            for x in dd:
+                                if x.find("数据盘:") != -1:
+                                    one.append(x.split("数据盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+                            e = []
+                            for k, v in dict(zip(one, two)).items():
+                                if form.ostp == "Linux":
+                                    e.append({"type": "xfs", "name": k, "size": v, "used": 0})
+                                if form.ostp == "Windows":
+                                    e.append({"type": "ntfs", "name": k, "size": v, "used": 0})
+
+                            form["data_disk"] = e
+                        else:
+                            form["data_disk"] = []
+                    if sd is not None:
+                        if form.ostp == "Linux":
+                            sd = (form.sys_disk).split(";")
+                            one = []
+                            two = []
+                            for x in sd:
+                                if x.find("系统盘:") != -1:
+                                    one.append(x.split("系统盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+
+                            for k, v in dict(zip(one, two)).items():
+                                form["sys_disk"] = [
+                                    {"type": "xfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+
+                        if form.ostp == "Windows":
+                            sd = (form.sys_disk).split(";")
+                            one = []
+                            two = []
+                            for x in sd:
+                                if x.find("系统盘:") != -1:
+                                    one.append(x.split("系统盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+
+                            for k, v in dict(zip(one, two)).items():
+                                form["sys_disk"] = [
+                                    {"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+                    else:
+                        form["sys_disk"] = []
+
+                    sys_size = [int(x["total_size"]) for x in form["sys_disk"]][0]
+                    data_size=0
+                    sysdatasize=""
+                    if len(form["data_disk"]) > 0:
+                        for x in form["data_disk"]:
+                            data_size += x["size"]
+                    if data_size !=0:
+                       sysdatasize = (str(sys_size)+ "G") +"+" + (str(data_size) + "G")
+                    else:
+                        sysdatasize = str(sys_size) + "G"
+                    form["sys_data"] = sysdatasize
+
                     host = Host.objects.create(create_by=request.user,  password_hash=pwd,**form)
                     update_hostinfo.delay([form.ipaddress], (ConnctUser.objects.get(pk=form.username)).name)
                 else:
+                    # db not need sysdata
                     pwd = Host.make_password(ppwd)
+                    sd = form.pop("sys_disk")
+                    ddd = form.pop("data_disk")
+                    if ddd is not None:
+                        if (ddd).find(";") != -1:
+                            dd = (ddd).split(";")
+                            del dd[-1]
+                            one = []
+                            two = []
+                            for x in dd:
+                                if x.find("数据盘:") != -1:
+                                    one.append(x.split("数据盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+                            e = []
+                            for k, v in dict(zip(one, two)).items():
+                                if form.ostp == "Linux":
+                                    e.append({"type": "xfs", "name": k, "size": v, "used": 0})
+                                if form.ostp == "Windows":
+                                    e.append({"type": "ntfs", "name": k, "size": v, "used": 0})
+
+                            form["data_disk"] = e
+                        else:
+                            form["data_disk"] = []
+                    if sd is not None:
+                        if form.ostp == "Linux":
+                            sd = (form.sys_disk).split(";")
+                            one = []
+                            two = []
+                            for x in sd:
+                                if x.find("系统盘:") != -1:
+                                    one.append(x.split("系统盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+
+                            for k, v in dict(zip(one, two)).items():
+                                form["sys_disk"] = [
+                                    {"type": "xfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+
+                        if form.ostp == "Windows":
+                            sd = (form.sys_disk).split(";")
+                            one = []
+                            two = []
+                            for x in sd:
+                                if x.find("系统盘:") != -1:
+                                    one.append(x.split("系统盘:")[1])
+
+                                if x.find("容量:") != -1:
+                                    two.append((x.split("容量:")[1])[:-1])
+
+                            for k, v in dict(zip(one, two)).items():
+                                form["sys_disk"] = [
+                                    {"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+                    else:
+                        form["sys_disk"] = []
+
+
                     host = Host.objects.create(create_by=request.user, password_hash=pwd, **form)
                 if request.user.role:
                     request.user.role.add_host_perm(host.id)
@@ -351,7 +504,7 @@ def post_import(request):
                         if data.ostp == 'Linux':
                             e.append({"type": "xfs", "name": k, "size": v,"used": 0})
                         if data.ostp == 'Windows':
-                            e.append({"type": "windata", "name": k, "size": v,"used": 0})
+                            e.append({"type": "ntfs", "name": k, "size": v,"used": 0})
 
                     data["data_disk"] = e
                 else:
@@ -359,10 +512,49 @@ def post_import(request):
             else:
                 data["data_disk"] = []
 
-        if data.ostp == 'Linux' and (data.resource_type).strip() == "主机":
-            data["sys_disk"] = [{"type":"xfs","name":data.sys_disk,"mount":"/","used": 0}]
-        if data.ostp == 'Windows' and (data.resource_type).strip() == "主机":
-            data["sys_disk"] = [{"type":"ntfs","name":data.sys_disk,"mount":"/","used": 0}]
+            if data.sys_disk is not None:
+                if (data.sys_disk).find(";") !=-1:
+                    if data.ostp == 'Linux':
+                        sd = (data.sys_disk).split(";")
+                        one = []
+                        two = []
+                        for x in sd:
+                            if x.find("系统盘:") != -1:
+                                one.append(x.split("系统盘:")[1])
+
+                            if x.find("容量:") != -1:
+                                two.append((x.split("容量:")[1])[:-1])
+
+                        for k, v in dict(zip(one, two)).items():
+                               data["sys_disk"] = [{"type":"xfs","name":k,"total_size": v,"mount":"/","used": 0}]
+
+                    if data.ostp == 'Windows':
+                        sd = (data.sys_disk).split(";")
+                        one = []
+                        two = []
+                        for x in sd:
+                            if x.find("系统盘:") != -1:
+                                one.append(x.split("系统盘:")[1])
+
+                            if x.find("容量:") != -1:
+                                two.append((x.split("容量:")[1])[:-1])
+
+                        for k, v in dict(zip(one, two)).items():
+                            data["sys_disk"] = [{"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+
+            sys_size = [int(x["total_size"]) for x in data["sys_disk"]][0]
+            data_size = 0
+            sysdatasize = ""
+            if len(data["data_disk"]) > 0:
+                for x in data["data_disk"]:
+                    data_size += int(x["size"])
+            if data_size != 0:
+                sysdatasize = (str(sys_size) + "G") + "+" + (str(data_size) + "G")
+            else:
+                sysdatasize = str(sys_size) + "G"
+
+            data["sys_data"] = sysdatasize
+
 
         if (data.resource_type).strip() == "数据库":
             data["sys_disk"] = []

@@ -198,7 +198,7 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 tt = ""
                 if data_dict[key] != "[]" and  data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt = x["name"]
+                        tt = "系统盘:"+ x["name"] +";容量:" + str(x.get("total_size")) + "G;"
                 # for x in ast.literal_eval(data_dict[key]):
                     # tt += u"类型:" + x.get("type") + u",数据盘:" + x.get("name") + u",挂载目录:" + x.get("mount") + u",总大小:" + str(
                     #     x.get("total_szie")) + u"G,数据盘已使用" + str(x.get("used")) + u"G,"

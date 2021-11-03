@@ -95,6 +95,19 @@ class Mytest(unittest.TestCase):
                         # keyworkds = "/data,/opt"
                         # datadisk = [w in tag and w for w in keyworkds.split(',')]
                         datadisk = [ {"name":x["name"] ,"size": x["total_size"],"mount":x["mount"]} for x in ttmp if x["mount"] != "/" and x["mount"] in tag]
+                    # Host.objects.filter(ipaddress=tip).update(memory=math.ceil(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ))
+                    # Host.objects.filter(ipaddress=tip).update(sys_disk=sysdisk,data_disk=datadisk)
+                    sys_size = [int(x["total_size"]) for x in sysdisk][0]
+                    data_size=0
+                    sysdatasize=""
+                    if len(datadisk) > 0:
+                        for x in datadisk:
+                            data_size += x["size"]
+                    if data_size !=0:
+                       sysdatasize = (str(sys_size)+ "G") +"+" + (str(data_size) + "G")
+                    else:
+                        sysdatasize = str(sys_size) + "G"
+                    # Host.objects.filter(ipaddress=tip).update(sys_data=sysdatasize)
                     Host.objects.create(
                             # ipaddress=[ x  for x in ser["ansible_facts"]["ansible_all_ipv4_addresses"] if not x.startswith("192.168") ][0],
                             ipaddress=tip,
@@ -105,8 +118,8 @@ class Mytest(unittest.TestCase):
                             disk=ttmp,
                             disks=len(ser["ansible_facts"]["ansible_mounts"]),
                             # memory= int(ser["ansible_facts"]["ansible_memory_mb"]["real"]["total"] / 1024 ),
-                            # memory=math.ceil(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ),
-                            memory=round(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ,2),
+                            memory=math.ceil(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ),
+                            # memory=round(ser["ansible_facts"]["ansible_memtotal_mb"] / 1024 ,2),
                             cpus=int(ser["ansible_facts"]["ansible_processor_count"]) * int(ser["ansible_facts"]["ansible_processor_cores"]) ,
                             # cpucore=ser["ansible_facts"]["ansible_processor_cores"],
                             hostname=ser["ansible_facts"]["ansible_nodename"],
@@ -118,6 +131,7 @@ class Mytest(unittest.TestCase):
                             resource_type="2",
                             sys_disk= sysdisk,
                             data_disk= datadisk,
+                            sys_data=sysdatasize,
                             # data_disk=set(list(tag)),
                         )
                 except Exception as e:
