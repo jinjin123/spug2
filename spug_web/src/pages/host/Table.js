@@ -95,6 +95,18 @@ class ComTable extends React.Component {
   };
   columns = [
     {
+      title: '操作',
+      render: info => {
+        return        <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>
+        <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+          <Select.Option value={1}>编辑</Select.Option>
+          <Select.Option value={2}>终端</Select.Option>
+          <Select.Option value={3}>待回收</Select.Option>
+        </Select>
+        </AuthDiv>
+      }
+    },
+    {
       title: '实体项目',
       dataIndex: 'top_project',
       render: info => {
@@ -249,6 +261,10 @@ class ComTable extends React.Component {
       dataIndex: 'sys_disk',
     },
     {
+      title: '硬盘空间',
+      dataIndex: 'sys_data',
+    },
+    {
       title: '设备位置',
       dataIndex: 'provider',
       render: info =>{
@@ -330,18 +346,6 @@ class ComTable extends React.Component {
     {
       title: '备注信息',
       dataIndex: 'comment',
-    },
-    {
-      title: '操作',
-      render: info => {
-        return        <AuthDiv auth="host.host.add" style={{marginBottom: 16}}>
-        <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-          <Select.Option value={1}>编辑</Select.Option>
-          <Select.Option value={2}>终端</Select.Option>
-          <Select.Option value={3}>待回收</Select.Option>
-        </Select>
-        </AuthDiv>
-      }
     },
   ]
   rowSelection = {
