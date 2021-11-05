@@ -327,7 +327,7 @@ class ComForm extends React.Component {
               <Input placeholder="请输入主机名称"/>
             )}
           </Form.Item> */}
-          <Form.Item required label="管理员用户" style={{marginBottom: 0}}>
+          <Form.Item required label="连接用户" style={{marginBottom: 0}}>
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>

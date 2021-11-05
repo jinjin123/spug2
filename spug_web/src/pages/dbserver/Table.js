@@ -169,7 +169,7 @@ class ComTable extends React.Component {
       dataIndex: 'ipaddress',
     },
     {
-      title: '管理员用户',
+      title: '连接用户',
       dataIndex: 'username',
       render: info =>{
         let tinfo = "";
