@@ -5,6 +5,8 @@ from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, 
 from apps.config.models import RancherApiConfig
 import unittest
 from django.core.mail import send_mail
+from apps.host.models import *
+from apps.config.models import *
 
 class Mytest(unittest.TestCase):
     # def test_get_dev_project(self):
@@ -559,10 +561,50 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                from apps.host.models import Host,ConnctUser
-                from apps.config.models import ProjectConfig
-                a = ProjectConfig.objects.get(name='IOC事件管理与联动指挥系统')
-                print(a)
+                from openpyxl import load_workbook
+
+                ws = load_workbook("/home/jin/文档/newdbtest.xlsx", read_only=True)['Sheet1']
+                for i, row in enumerate(ws.rows):
+                    if i == 0:  # 第1行是表头 略过
+                        continue
+
+                    # if not DevicePositon.objects.filter(name=row[17].value).exists()  and  row[17].value is not None :
+                    #      m = DevicePositon.objects.create(
+                    #         name=(row[17].value).strip(),
+                    #         created_by_id=1,
+                    #      )
+                    #      m.save()
+                        # print(row[17].value)
+                    # if not ProjectConfig.objects.filter(name=row[0].value).exists()  and  row[0].value is not None :
+                    #     print(row[0].value)
+                    # if not WorkZone.objects.filter(name=row[21].value).exists()  and  row[21].value is not None :
+                    #      m = WorkZone.objects.create(
+                    #         name=(row[21].value).strip(),
+                    #         created_by_id=1,
+                    #      )
+                    #      m.save()
+                    # if not Zone.objects.filter(name=row[10].value).exists()  and  row[10].value is not None :
+                    #      m = Zone.objects.create(
+                    #         name=(row[10].value).strip(),
+                    #         created_by_id=1,
+                    #      )
+                    #      m.save()
+                    #     print(row[21].value)
+                    if not ConnctUser.objects.filter(name=row[7].value).exists() :
+                        if row[7].value is not None  and row[7].value != ""  and row[7].value :
+                            if row[7].value is None:
+                                continue
+                            else:
+                                 m = ConnctUser.objects.create(
+                                    name=(row[7].value).strip(),
+                                    created_by_id=1,
+                                 )
+                                 m.save()
+                             # print(row[7].value)
+
+                # from apps.config.models import ProjectConfig
+                # a = ProjectConfig.objects.get(name='IOC事件管理与联动指挥系统')
+                # print(a)
                 import ast
                 import operator
                 from functools import reduce

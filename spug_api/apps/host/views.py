@@ -31,6 +31,7 @@ class HostView(View):
             return json_response(Host.objects.get(pk=host_id))
         # hosts = Host.objects.filter(deleted_by_id__isnull=True)
         # cache.delete(HOSTKEY)
+        # cache.delete(DBKEY)
         cluster = ClusterConfig.objects.all()
         wz = WorkZone.objects.all()
         zz = Zone.objects.all()
@@ -440,22 +441,30 @@ def post_import(request):
             # ext_config1=row[18].value,
             env_id=row[28].value,
             iprelease=row[29].value,
-            comment=row[30].value
+            comment=row[30].value,
+            shili=row[31].value
         )
         uuu = data.username
         if uuu is None:
             summary['skip'].append(i)
             continue
-        if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=(ConnctUser.objects.get(name=data.username)).id).exists():
-        # if Host.objects.filter(ipaddress=row[i].value, port=row[i].value, username=ConnctUser.objects.get w  ).exists():
-            # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
-            summary['skip'].append(i)
-            continue
+        if (data.resource_type).strip() == "主机":
+            if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=(ConnctUser.objects.get(name=(data.username).strip())).id).exists():
+            # if Host.objects.filter(ipaddress=row[i].value, port=row[i].value, username=ConnctUser.objects.get w  ).exists():
+                # Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=data.username).update(create_by=request.user,**data)
+                summary['skip'].append(i)
+                continue
+        else:
+            pass
+            # if Host.objects.filter(ipaddress=data.ipaddress, port=data.port, username=(ConnctUser.objects.get(name=(data.username).strip())).id).exists():
+            #     summary['skip'].append(i)
+            #     continue
         try:
             if data.ostp == "" or data.resource_type == "" or data.top_project == "" or data.ipaddress == "" or data.zone == "" \
                     or data.provider == "":
                 summary['fail'].append(i)
                 continue
+
             pwd = data.pop('password')
             if data.ostp == 'Linux' and (data.resource_type).strip() == "主机" and valid_ssh(data.ipaddress, data.port, data.username, pwd ) is False:
                 summary['fail'].append(i)
@@ -560,7 +569,10 @@ def post_import(request):
             data["sys_disk"] = []
             data["data_disk"] = []
             data["service_pack"] = []
-        data["password_hash"] = Host.make_password(pwd)
+        if pwd is not None and pwd != "":
+            data["password_hash"] = Host.make_password(pwd)
+        else:
+           data["password_hash"] = None
         data["env_id"] = (Environment.objects.get(name=data.env_id)).id
 
         tp =[]
@@ -588,23 +600,26 @@ def post_import(request):
             data["cluster"] = cst
 
 
-        data["username"] = (ConnctUser.objects.get(name=data.username)).id
+        data["username"] = (ConnctUser.objects.get(name=(data.username).strip())).id
         zz = []
         if data.zone is not None:
             for x in (data.zone).split(";"):
                 zz.append((Zone.objects.get(name=x)).id)
+        rest = data.resource_type
+
         data["zone"] = zz
         data["provider"] = (DevicePositon.objects.get(name=data.provider)).id
         data["resource_type"] = (ResourceType.objects.get(name=data.resource_type)).id
-        data["work_zone"] = (WorkZone.objects.get(name=data.work_zone)).id
+        data["work_zone"] = (WorkZone.objects.get(name=(data.work_zone).strip())).id
 
         data["status"] = 0
 
         host = Host.objects.create(create_by=request.user, **data)
-        if us == "root":
-            roottmp.append(data.ipaddress)
-        elif us == "ioc":
-            ioctmp.append(data.ipaddress)
+        if rest.strip() == "主机":
+            if us == "root":
+                roottmp.append(data.ipaddress)
+            elif us == "ioc":
+                ioctmp.append(data.ipaddress)
         # tmp.append(data.ipaddress)
         # update_hostinfo.delay(tmp, 'root')
         if request.user.role:
