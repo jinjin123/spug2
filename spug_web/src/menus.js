@@ -10,6 +10,8 @@ export default [
       // {title: '', auth: 'exec.task.do', path: '/exec/task'},
       {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
       {icon: 'cloud-server', title: '数据库管理', auth: 'host.host.view', path: '/dbserver'},
+      {icon: 'cloud-server', title: '数据库多用户管理', auth: 'host.host.view', path: '/dbmserver'},
+
       {icon: 'cloud-server', title: '服务包管理', auth: 'host.host.view', path: '/config/servicebag'},
       {icon: 'cloud-server', title: '端口管理', auth: 'host.host.view', path: '/config/portlist'},
       {icon: 'cloud-server', title: '集群管理', auth: 'host.host.view', path: '/config/cluster'},
