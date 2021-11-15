@@ -202,7 +202,7 @@ class HostView(View):
             # if (ResourceType.objects.get(pk=form.resource_type)).name == "数据库" :
             # union db
             # if Host.objects.filter(ipaddress=form.ipaddress, port=form.port).exists():
-            if Host.objects.filter(ipaddress=form.ipaddress ).exists():
+            if Host.objects.filter(ipaddress=form.ipaddress,resource_type=(ResourceType.objects.get(pk=form.resource_type)).id).exists():
                     return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
                 if (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
