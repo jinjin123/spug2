@@ -201,8 +201,9 @@ class HostView(View):
                 return json_response(error=error)
             # if (ResourceType.objects.get(pk=form.resource_type)).name == "数据库" :
             # union db
-            if Host.objects.filter(ipaddress=form.ipaddress, port=form.port).exists():
-                return json_response(error=f'已存在的ip【{form.ipaddress}】')
+            # if Host.objects.filter(ipaddress=form.ipaddress, port=form.port).exists():
+            if Host.objects.filter(ipaddress=form.ipaddress ).exists():
+                    return json_response(error=f'已存在的ip【{form.ipaddress}】')
             else:
                 if (ResourceType.objects.get(pk=form.resource_type)).name == "主机" :
                     pwd = Host.make_password(ppwd)
