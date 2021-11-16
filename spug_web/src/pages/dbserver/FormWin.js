@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,InputNumber } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,InputNumber,Radio } from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 import { Link } from 'react-router-dom';
@@ -155,9 +155,9 @@ class FormWin extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑Linux类型数据库' : '新建Linux类型数据库'}
+        title={store.record.id ? '编辑Windows类型数据库' : '新建Windows类型数据库'}
         okText="提交"
-        onCancel={() => store.formVisible = false}
+        onCancel={() => store.winformVisible = false}
         confirmLoading={loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 5}} wrapperCol={{span: 17}}>
@@ -502,6 +502,16 @@ class FormWin extends React.Component {
               <Col span={5} offset={2}>
                   <Link to="/config/environment">新建环境</Link>
               </Col>
+          </Form.Item>
+          <Form.Item label="选择关系">
+            {getFieldDecorator('dbrelation', {initialValue: info['dbrelation'] !=null ? info['dbrelation'] : 4})(
+              <Radio.Group  >
+                <Radio value={1}>主</Radio>
+                <Radio value={2}>从</Radio>
+                <Radio value={3}>集群</Radio>
+                <Radio value={4}>无</Radio>
+              </Radio.Group>
+            )}
           </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(

@@ -94,60 +94,71 @@ class ComTable extends React.Component {
   columns = [
     {
       title: '操作',
-      render: info => {
+      key:'opeations',
+      render: (info,index) => {
         return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-          <Select.Option value={1}>编辑</Select.Option>
+          <Select.Option key={index} value={1}>编辑</Select.Option>
           {/* <Select.Option value={2}>终端</Select.Option> */}
-          <Select.Option value={3}>待回收</Select.Option>
+          <Select.Option key={index} value={3}>待回收</Select.Option>
         </Select>
       }
     },
     {
       title: '实体项目',
       dataIndex: 'top_project',
+      key:'top_project',
       render: info => {
         let tinfo = [];
+        let tindex = "";
         let data = store.pj
         // console.log(data)
         info.map(ditem => { 
             let newArr = data.filter(item => item.id === ditem)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 tinfo.push(dd.name)
+                tindex = index
             })
         })
-        return <span>{tinfo.join(";")}</span>
+        return <span key={tindex}>{tinfo.join(";")}</span>
       },
     },
     {
       title: '项目子类',
       dataIndex: 'child_project',
+      key:'child_project',
       render: info => {
         let tinfo = [];
+        let tindex= ""; 
         let data = store.pj
         // console.log(data)
         info.map(ditem => { 
             let newArr = data.filter(item => item.id === ditem)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 tinfo.push(dd.name)
+                tindex = index
+
             })
         })
-        return <span>{tinfo.join(";")}</span>
+        return <span key={tindex}>{tinfo.join(";")}</span>
       },
     },
     {
       title: '所属集群',
       dataIndex: 'cluster',
+      key:'cluster',
       render: info =>{
         let tinfo =[];
+        let tindex= ""; 
         let data = store.cs
         // console.log(cuStore.records)
             info.map(ditem => { 
               let newArr = data.filter(item => item.id === ditem)
-              newArr.map(dd => {
+              newArr.map((dd,index) => {
                   tinfo.push(dd.name)
+                  tindex = index
               })
           })
-          return <span>{tinfo.join(";")}</span>
+          return <span key={tindex}>{tinfo.join(";")}</span>
 
 
       },
@@ -159,81 +170,102 @@ class ComTable extends React.Component {
     {
       title: '外网IP',
       dataIndex: 'outter_ip',
+      key:'outter_ip',
     },
     {
       title: '虚拟IP',
       dataIndex: 'v_ip',
+      key:'v_ip',
     },
     {
       title: '业务IP',
       dataIndex: 'ipaddress',
+      key:'ipaddress',
+
     },
     {
       title: '连接用户',
       dataIndex: 'username',
+      key:'username',
       render: info =>{
         let tinfo = "";
+        let tindex= "";
         let data = store.cuser
         // console.log(cuStore.records)
         // info.map(ditem => { 
             let newArr = data.filter(item => item.id === info)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 // tinfo.push(dd.name)
                 tinfo = dd.name
+                tindex = index
             })
         // })
-        return <span>{tinfo}</span>
+        return <span key={tindex}>{tinfo}</span>
       },
     },
     {
       title: '端口',
       dataIndex: 'port',
+      key:'port',
+
     },
     {
       title: '资源类别',
       dataIndex: 'zone',
+      key:'zone',
+
       render: info => {
         let tinfo = [];
+        let tindex= "";
         let data = store.zz
         // console.log(data)
           info.map(ditem => { 
             let newArr = data.filter(item => item.id === ditem)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 tinfo.push(dd.name)
+                tindex = index
             })
         })
-        return <span>{tinfo.join(";")}</span>
+        return <span key={tindex}>{tinfo.join(";")}</span>
       
       },
     },
     {
       title: '系统类型',
       dataIndex: 'ostp',
+      key:'ostp',
+
     },
     {
       title: '资源类型',
+      key:'resource_type',
       dataIndex: 'resource_type',
       render: info =>{
         let tinfo = "";
+        let tindex = ""
         let data = store.rset
         // console.log(cuStore.records)
         // info.map(ditem => { 
             let newArr = data.filter(item => item.id === info)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 // tinfo.push(dd.name)
                 tinfo = dd.name
+                tindex = index
             })
         // })
-        return <span>{tinfo}</span>
+        return <span key={tindex}>{tinfo}</span>
       },
     },
     {
       title: '系统',
       dataIndex: 'osType',
+      key:'osType',
+
     },
     {
       title: '版本',
       dataIndex: 'osVerion',
+      key:'osVerion',
     },
     // {
     //   title: '内核版本',
@@ -249,9 +281,10 @@ class ComTable extends React.Component {
     // },
     {
       title: '状态',
+      key:'status',
       dataIndex: 'status',
-      render: status => {
-          return      <Tag color={status === "在线" ? "green":"volcano"} key={status}>
+      render: (status,index) => {
+          return      <Tag color={status === "在线" ? "green":"volcano"} key={index}>
           {status ==="在线" ? "在线" : "离线"}
         </Tag>
       },
@@ -263,23 +296,28 @@ class ComTable extends React.Component {
     {
       title: '设备位置',
       dataIndex: 'provider',
+      key:'provider',
       render: info =>{
         let tinfo = "";
+        let tindex = "";
         let data = store.dvpo
         // console.log(cuStore.records)
         // info.map(ditem => { 
             let newArr = data.filter(item => item.id === info)
-            newArr.map(dd => {
+            newArr.map((dd,index) => {
                 // tinfo.push(dd.name)
                 tinfo = dd.name
+                tindex = index
             })
         // })
-        return <span>{tinfo}</span>
+        return <span key={tindex}>{tinfo}</span>
       },
     },
     {
       title: '实际用途',
       dataIndex: 'use_for',
+      key:'use_for',
+
     },
     // {
     //   title: '供应商',
@@ -288,14 +326,20 @@ class ComTable extends React.Component {
     {
       title: '开发',
       dataIndex: 'developer',
+      key:'developer',
+
     },
     {
       title: '运维',
       dataIndex: 'opsper',
+      key:'opsper',
+
     },
     {
       title: '录入人',
       dataIndex: 'create_by',
+      key:'create_by',
+
     },
     // {
     //   title: '安装服务',
@@ -324,24 +368,31 @@ class ComTable extends React.Component {
     {
       title: '环境',
       dataIndex: 'env_id',
+      key:'env_id',
       render: info => {
         let tinfo = "";
         let data = store.envs
+        let tindex = ""
         let newArr = data.filter(item => item.id === info)
-        newArr.map(dd => {
+        newArr.map((dd,index) => {
             // tinfo.push(dd.name)
             tinfo = dd.name
+            tindex = index
         })
-        return  <span>{tinfo}</span>
+        return  <span key={tindex}>{tinfo}</span>
       },
     },
     {
       title: '待回收ip',
       dataIndex: 'iprelease',
+      key:'iprelease',
+
     },
     {
       title: '备注信息',
       dataIndex: 'comment',
+      key:'comment',
+
     },
 
   ]

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,InputNumber } from 'antd';
+import { Modal, Form, Input, Select, Col, Button, Upload, message,Icon,Checkbox,Radio} from 'antd';
 import { http, X_TOKEN } from 'libs';
 import store from './store';
 import { Link } from 'react-router-dom';
@@ -23,6 +23,7 @@ class ComForm extends React.Component {
       addZone: null,
       fileList: [],
       editZone: store.record.zone,
+      value: 4,
     }
   }
 
@@ -502,6 +503,16 @@ class ComForm extends React.Component {
               <Col span={5} offset={2}>
                   <Link to="/config/environment">新建环境</Link>
               </Col>
+          </Form.Item>
+          <Form.Item label="选择关系">
+            {getFieldDecorator('dbrelation', {initialValue: info['dbrelation'] !=null ? info['dbrelation'] : 4})(
+              <Radio.Group  >
+                <Radio value={1}>主</Radio>
+                <Radio value={2}>从</Radio>
+                <Radio value={3}>集群</Radio>
+                <Radio value={4}>无</Radio>
+              </Radio.Group>
+            )}
           </Form.Item>
           <Form.Item  label="实际用途">
             {getFieldDecorator('use_for', {initialValue: info['use_for']})(

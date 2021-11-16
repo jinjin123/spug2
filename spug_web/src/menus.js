@@ -36,7 +36,7 @@ export default [
   {
     icon: 'flag', title: '应用发布', auth: 'deploy.app.view|deploy.request.view|deploy.rancher.view', child: [
       {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app'},
-      {title: '发布申请', auth: 'deploy.request.view', path: '/deploy/request'},
+      {title: '发布状态', auth: 'deploy.request.view', path: '/deploy/request'},
       {title: 'rancher应用管理', auth: 'deploy.rancher.view', path: '/deploy/rancher'},
       {title: '应用发布审核关联管理', auth: 'deploy.notice.view', path: '/deploy/rancher/notice'},
     ]

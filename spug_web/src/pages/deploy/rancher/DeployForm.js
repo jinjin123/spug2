@@ -90,16 +90,16 @@ class DeployForm extends React.Component {
             </Form.Item>
             </Form>
             <Form layout="inline" wrapperCol={{ span: 24 }}>
-              <Form.Item required label="Docker镜像" rules={[{ required: true, message: 'Please input your username!' }]}>
-                  {/* {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })( */}
-                    <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                <Form.Item required label="Docker镜像" rules={[{ required: true, message: 'Please input your username!' }]}>
+                    {/* {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })( */}
+                      <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                      {/* )} */}
+                </Form.Item>
+                <Form.Item required label="命名空间" rules={[{ required: true, message: 'Please input your username!' }]}>
+                    {/* {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })( */}
+                      <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                     {/* )} */}
-              </Form.Item>
-              <Form.Item required label="命名空间" rules={[{ required: true, message: 'Please input your username!' }]}>
-                  {/* {getFieldDecorator('configMap_k', { initialValue: info['configMap_k'] })( */}
-                    <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
-                  {/* )} */}
-              </Form.Item>
+                </Form.Item>
               </Form>
               <Form>
                   <Form.Item  label="端口映射" rules={[{ required: true, message: 'Please input your username!' }]}>
@@ -127,6 +127,7 @@ class DeployForm extends React.Component {
                       {/* )} */}
                   </Form.Item>
               </Form>
+ 
         </Modal>
     )
   }
