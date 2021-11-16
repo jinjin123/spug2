@@ -37,6 +37,12 @@ class Store {
   @observable pbtype = 1;
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
+
+  @observable rancherenv=[{"k":"","v":""}];
+  @observable rancherport=[{}];
+  @observable rancherVolume=[];
+
+
   // @observable loadings = [];
 
   fetchRecords = () => {
