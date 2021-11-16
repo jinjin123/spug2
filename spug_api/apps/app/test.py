@@ -561,12 +561,16 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
-                from openpyxl import load_workbook
-
-                ws = load_workbook("/home/jin/文档/after.xlsx", read_only=True)['Sheet1']
-                for i, row in enumerate(ws.rows):
-                    if i == 0:  # 第1行是表头 略过
-                        continue
+                from django.db.models import Count
+                a = MultiDBUser.objects.annotate(num=Count('ipaddress'))
+                for x in a:
+                    print(x.ipaddress)
+                # from openpyxl import load_workbook
+                #
+                # ws = load_workbook("/home/jin/文档/after.xlsx", read_only=True)['Sheet1']
+                # for i, row in enumerate(ws.rows):
+                #     if i == 0:  # 第1行是表头 略过
+                #         continue
 
                     # if not DevicePositon.objects.filter(name=row[17].value).exists()  and  row[17].value is not None :
                     #      m = DevicePositon.objects.create(
@@ -583,12 +587,12 @@ class Mytest(unittest.TestCase):
                     #         created_by_id=1,
                     #      )
                     #      m.save()
-                    if not Zone.objects.filter(name=row[10].value).exists()  and  row[10].value is not None :
-                         m = Zone.objects.create(
-                            name=row[10].value,
-                            created_by_id=1,
-                         )
-                         m.save()
+                    # if not Zone.objects.filter(name=row[10].value).exists()  and  row[10].value is not None :
+                    #      m = Zone.objects.create(
+                    #         name=row[10].value,
+                    #         created_by_id=1,
+                    #      )
+                    #      m.save()
                     #     print(row[21].value)
                     # if not ConnctUser.objects.filter(name=row[7].value).exists() :
                     #     if row[7].value is not None  and row[7].value != ""  and row[7].value :

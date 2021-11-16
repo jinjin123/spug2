@@ -353,6 +353,16 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 if data_dict[key] != "[]" and data_dict[key] is not None:
                     ttt = (WorkZone.objects.get(pk=data_dict[key]).name)
                 sheet.write(i + 1, index, ttt)
+
+            elif key == "dbrelation":
+                if data_dict[key] == 1:
+                    sheet.write(i + 1, index, "主")
+                if data_dict[key] == 2:
+                    sheet.write(i + 1, index, "从")
+                if data_dict[key] == 3:
+                    sheet.write(i + 1, index, "集群")
+                if data_dict[key] == 4:
+                    sheet.write(i + 1, index, "无")
             else:
                 sheet.write(i + 1, index, data_dict[key])
     wbk.save(fpath + name + '.xls')

@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from django.db.models import F
+from django.db.models import F,Count
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
@@ -63,7 +63,7 @@ class HostView(View):
             cache.set(HOSTKEY,content,5*1000)
             return json_response(content)
         else:
-            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all()
+            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all().annotate(num=Count("dbtag")).order_by('-ipaddress')
             zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
             tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
             ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct()]
@@ -125,6 +125,8 @@ class HostView(View):
             Argument('sys_disk', handler=str.strip, required=False),
             Argument('data_disk', handler=str.strip, required=False),
             Argument('sys_data', handler=str.strip, required=False),
+            Argument('dbrelation', type=int, required=False),
+            Argument('dbtag', type=str, required=False),
 
         ).parse(request.body)
         if error is None:
@@ -196,7 +198,7 @@ class HostView(View):
                             form["sys_disk"] = [{"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
                 else:
                     form["sys_disk"] = []
-
+                form['dbtag'] = form.ipaddress + '_V'
                 Host.objects.filter(pk=form.pop('id')).update(**form,password_hash=pwd)
                 return json_response(error=error)
             # if (ResourceType.objects.get(pk=form.resource_type)).name == "数据库" :
@@ -283,6 +285,7 @@ class HostView(View):
                     pwd = Host.make_password(ppwd)
                     sd = form.pop("sys_disk")
                     ddd = form.pop("data_disk")
+                    form['dbtag'] = form.ipaddress + '_V'
                     if ddd is not None:
                         if (ddd).find(";") != -1:
                             dd = (ddd).split(";")
@@ -814,7 +817,10 @@ def post_import(request):
             env_id=row[28].value,
             iprelease=row[29].value,
             comment=row[30].value,
-            shili=row[31].value
+            sys_data=row[31].value,
+            shili=row[32].value,
+            dbrelation=row[33].value,
+            dbtag=row[34].value
         )
         uuu = data.username
         if uuu is None:
@@ -941,6 +947,18 @@ def post_import(request):
 
 
         if (data.resource_type).strip() == "数据库":
+            if data['dbrelation'] !="无" and data['dbrelation'] != "" and data['dbrelation'] is not None:
+                data['dbtag'] = data['ipaddress'] + '_V'
+            if data['dbrelation'] != "" and data['dbrelation'] is not None:
+                if data['dbrelation'] == "主":
+                    data['dbrelation'] = 1
+                if data['dbrelation'] == "从":
+                    data['dbrelation'] = 2
+                if data['dbrelation'] == "集群":
+                    data['dbrelation'] = 3
+                if data['dbrelation'] == "无":
+                    data['dbrelation'] = 4
+            data["sys_disk"] = []
             data["sys_disk"] = []
             data["data_disk"] = []
             data["service_pack"] = []

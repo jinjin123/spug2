@@ -75,7 +75,8 @@ class Host(models.Model, ModelMixin):
     sys_disk = models.CharField(max_length=255,verbose_name="sys disk", null=True)
     data_disk = models.TextField(verbose_name="data_disk", null=True)
     sys_data = models.CharField(max_length=500,verbose_name="sys+data", null=True)
-
+    dbrelation = models.IntegerField(verbose_name='master/slave/cluster/none',null=True,default=4)
+    dbtag = models.CharField(max_length=100,verbose_name="IP_V",null=True)
 
     supplier = models.CharField(max_length=100, verbose_name='供应商', null=True)
     # host_bug = models.CharField(max_length=500, verbose_name='服务版本与是否打补丁['','']', null=True)
