@@ -19,6 +19,7 @@ class DeployForm extends React.Component {
     this.state = {
       loading: false,
         value: 1,
+        hostvalue: 2,
         input_value: 1,
         moreAction: [{"id":0,"v":"添加卷..."}]
 
@@ -47,11 +48,30 @@ class DeployForm extends React.Component {
       value: e.target.value,
     });
   };
-
+  onCallHostChange = e => {
+    console.log('radio checked', e.target.value);
+    // this.setState({
+    //   hostvalue: e.target.value,
+    // });
+    if(e.target.value === 1){
+      store.rancherCallhost = []
+      store.rancherCallhost.push({
+        "itemid":1,"iteminput":"", 
+      })
+    }else{
+      store.rancherCallhost = []
+      store.rancherCallhost.push(
+        {"itemid":1,"itemtitle":"必须","itemk":"","itemtype":"","itemv":""},
+        {"itemid":2,"itemtitle":"最好","itemk":"","itemtype":"","itemv":""},
+        {"itemid":3,"itemtitle":"首选","itemk":"","itemtype":"","itemv":""}
+      )
+    }
+  }
+  
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport)
+    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv)
   };
 
   onVolumeChange = (action) => {
@@ -161,20 +181,20 @@ class DeployForm extends React.Component {
                                 <Input placeholder="容器端口" defaultValue={item["containerport"]} onChange={e => item['containerport'] = e.target.value}  style={{ width: 150, marginLeft: 10 }}/>
                           </Form.Item>
                           <Form.Item>
-                                <Select defaultValue={item["potocol"]}  onChange={e => item['potocol'] = e.target.value} style={{ width: 100 }} >
+                                <Select defaultValue={item["potocol"]!= null ? item["potocol"]: "TCP"}  onChange={v => item['potocol'] = v} style={{ width: 100 }} >
                                   <Option value="TCP">TCP</Option>
                                   <Option value="UDP">UDP</Option>
                                 </Select>
                           </Form.Item>
                           <Form.Item>
-                                  <Select defaultValue={item["policy"]}  style={{ width: 280 }} >
+                                  <Select defaultValue={item["policy"] !=null ? item["policy"] : "NodePort" } onChange={v => item['policy'] = v}  style={{ width: 280 }} >
                                     <Option value="NodePort">NodePort (所有主机端口均可访问)</Option>
                                     <Option value="HostPort">HostPort (仅 Pod 所在主机端口可访问)</Option>
                                     <Option value="ClusterIP">集群 IP(集群内部访问)</Option>
                                   </Select>
                           </Form.Item>
                           <Form.Item>
-                                <Input value={item["targetport"]}  onChange={e => item['targetport'] = e.target.value} placeholder="默认NodePort随机端口30000-32768" style={{ width: 250, marginLeft: 10 }}/>
+                                <Input defaultValue={item["targetport"]!=null ? item["targetport"]: null}  onChange={e => item['targetport'] = e.target.value} placeholder="默认NodePort随机端口30000-32768" style={{ width: 250, marginLeft: 10 }}/>
                           </Form.Item>
                             <div  onClick={() => store.rancherport.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
@@ -183,7 +203,7 @@ class DeployForm extends React.Component {
                         </div>
                       ))}
                     <Button  type="dashed" block  
-                      onClick={() => {store.rancherport.push({"portname":"","containerport":"","potocol":"","policy":"","targetport":""})}}>
+                      onClick={() => {store.rancherport.push({"portname":"","containerport":"","potocol":"","policy":"NodePort","targetport":""})}}>
                             <i type="plus">添加端口映射</i>
                     </Button>
                   </Form.Item>
@@ -191,7 +211,9 @@ class DeployForm extends React.Component {
                     {store.rancherenv.map((item,index)=>(
                       <div key={index}>
                         <Col style={{ display:'flex'}}>
-                          <Input   placeholder="键"  style={{ width: 300}}/> = <Input   placeholder="值" style={{ width: 300}}/>
+                          <Input   placeholder="键"  defaultValue={item["k"]} onChange={e => item['k'] = e.target.value}   style={{ width: 300}}/> 
+                          = 
+                          <Input  defaultValue={item["v"]} onChange={e => item['v'] = e.target.value} placeholder="值" style={{ width: 300}}/>
                           <div  onClick={() => store.rancherenv.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
                           </div>
@@ -204,57 +226,41 @@ class DeployForm extends React.Component {
                     </Button>
                   </Form.Item>
 
-                  <Form.Item  label="主机调度" rules={[{ required: true, message: 'Please input your username!' }]}>
-                      <Radio.Group  >
-                        <Radio value={1}>指定主机运行所有 Pods
-                            <Input placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
-                        </Radio>
-                        <Radio value={2}>每个 Pod 自动匹配主机
-                            <Card key="1" title="必须" style={{ width: 450 }}>
-                                  <Input  placeholder="键" style={{ width: 150}}/>
-                                  <Select defaultValue="="  style={{ width: 100 }} >
-                                    <Option value="=">=</Option>
-                                    <Option value="!=">≠</Option>
-                                    <Option value="Exists">已设置</Option>
-                                    <Option value="DoesNotExist">未设置</Option>
-                                    <Option value="In">在列表中</Option>
-                                    <Option value="NotIn">不在列表中</Option>
-                                    <Option value="<">{"<"}</Option>
-                                    <Option value=">">{">"}</Option>
-                                  </Select>
-                                  <Input  placeholder="值" style={{ width: 150}}/>
-                            </Card>
-                            <Card key="2" title="最好" style={{ width: 450 }}>
-                                  <Input  placeholder="键" style={{ width: 150}}/>
-                                  <Select defaultValue="="  style={{ width: 100 }} >
-                                    <Option value="=">=</Option>
-                                    <Option value="!=">≠</Option>
-                                    <Option value="Exists">已设置</Option>
-                                    <Option value="DoesNotExist">未设置</Option>
-                                    <Option value="In">在列表中</Option>
-                                    <Option value="NotIn">不在列表中</Option>
-                                    <Option value="<">{"<"}</Option>
-                                    <Option value=">">{">"}</Option>
-                                  </Select>
-                                  <Input  placeholder="值" style={{ width: 150}}/>
-                            </Card>
-                            <Card key="3" title="首选" style={{ width: 450 }}>
-                                  <Input  placeholder="键" style={{ width: 150}}/>
-                                  <Select defaultValue="="  style={{ width: 100 }} >
-                                    <Option value="=">=</Option>
-                                    <Option value="!=">≠</Option>
-                                    <Option value="Exists">已设置</Option>
-                                    <Option value="DoesNotExist">未设置</Option>
-                                    <Option value="In">在列表中</Option>
-                                    <Option value="NotIn">不在列表中</Option>
-                                    <Option value="<">{"<"}</Option>
-                                    <Option value=">">{">"}</Option>
-                                  </Select>
-                                  <Input  placeholder="值" style={{ width: 150}}/>
-                            </Card>
-                        </Radio>
-
-                      </Radio.Group>
+                  <Form.Item  label="主机调度" rules={[{ required: true, message: '请选择调度方式!' }]}>
+                        <Radio.Group onChange={this.onCallHostChange} >
+                          
+                  
+                              <Radio  value={1}>指定主机运行所有 Pods
+                                  {store.rancherCallhost.length <2
+                                  ?
+                                    store.rancherCallhost.map((item,index)=>(
+                                      <Input  key={index} defaultValue={item["iteminput"]} onChange={e => item['iteminput'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                    ))
+                                  : null}
+                              </Radio>
+                              <Radio value={2}>每个 Pod 自动匹配主机
+                                {store.rancherCallhost.length >1
+                                  ?
+                                    store.rancherCallhost.map((item,index)=>(
+                                      <Card key={index} title={item["itemtitle"]} style={{ width: 450 }}>
+                                            <Input  defaultValue={item["itemk"]} onChange={e => item['itemk'] = e.target.value}  placeholder="键" style={{ width: 150}}/>
+                                            <Select  defaultValue={item["itemtype"] !=null ? item["itemtype"] : "=" } onChange={v => item['itemtype'] = v}   style={{ width: 100 }} >
+                                              <Option value="=">=</Option>
+                                              <Option value="!=">≠</Option>
+                                              <Option value="Exists">已设置</Option>
+                                              <Option value="DoesNotExist">未设置</Option>
+                                              <Option value="In">在列表中</Option>
+                                              <Option value="NotIn">不在列表中</Option>
+                                              <Option value="<">{"<"}</Option>
+                                              <Option value=">">{">"}</Option>
+                                            </Select>
+                                            <Input  defaultValue={item["itemv"]} onChange={e => item['itemv'] = e.target.value} placeholder="值" style={{ width: 150}}/>
+                                      </Card>
+                                    ))
+                                  : null }   
+                              </Radio>
+                    
+                        </Radio.Group>
                   </Form.Item>
 
                   <Form.Item  label="数据卷" >

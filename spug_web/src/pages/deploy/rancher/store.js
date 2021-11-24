@@ -38,9 +38,15 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
 
-  @observable rancherenv=[{"k":"","v":""}];
+  @observable rancherenv=[{}];
   @observable rancherport=[{}];
   @observable rancherVolume=[];
+  @observable rancherCallhost=[];
+  // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
+  // {"itemid":2,"itemdata":
+  // [{"itemid":1,"itemtitle":"必须","itemk":"","itemtype":"","itemv":""},
+  // {"itemid":2,"itemtitle":"最好","itemk":"","itemtype":"","itemv":""},
+  // {"itemid":3,"itemtitle":"首选","itemk":"","itemtype":"","itemv":""}]}];
 
 
   // @observable loadings = [];
