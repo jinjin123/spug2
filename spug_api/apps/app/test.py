@@ -543,7 +543,7 @@ class Mytest(unittest.TestCase):
             #                            "pvcid": px["pvcid"],
             #                            "pvcsize": xxx.get("resources").get("requests").get("storage"),
             #                            "rancher_url": px["rancher_url"], "pubsvc": px["pubsvc"],
-            #                            }))
+            #                            })local:p-wg946)
             #         else:
             #            pvcnew.append(ProjectService(**px))
                 # if px["pvcid"] == "":
@@ -561,10 +561,145 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             def test_pb_approval(self):
+                from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
                 from django.db.models import Count
-                a = MultiDBUser.objects.annotate(num=Count('ipaddress'))
-                for x in a:
-                    print(x.ipaddress)
+                #---------------------------------------------------------
+                # get fangyi  configmap
+                # pj = RancherApiConfig.objects.filter(env_id=3, label="GETCONFIGMAP").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="feiyan").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         t=[]
+                #         for k, v in dict.items(xx["data"]):
+                #             t.append({"k":k,"v":v})
+                #         m = ProjectConfigMap.objects.create(
+                #             pjid=xx['projectId'],
+                #             configId=xx['id'],
+                #             configName=xx['name'],
+                #             configMap=t,
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='feiyan'
+                #         )
+                #         m.save()
+                #-------------------------------------------------------------
+                # get fangyi pvc
+                # pj = RancherApiConfig.objects.filter(env_id=3, label="GETPVC").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="feiyan").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         m = ProjectPvc.objects.create(
+                #             pjid=xx['projectId'],
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             pvcid=xx['id'],
+                #             pvcname=xx['name'],
+                #             storageid=xx['storageClassId'],
+                #             capacity=xx['status']['capacity']['storage'],
+                #             accessMode=xx['status']['accessModes'],
+                #             volumeid=xx['volumeId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='feiyan',
+                #         )
+                #         m.save()
+                #-------------------------------------------------------
+                #get ioc pvc
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         m = ProjectPvc.objects.create(
+                #             pjid=xx['projectId'],
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             pvcid=xx['id'],
+                #             pvcname=xx['name'],
+                #             storageid=xx['storageClassId'],
+                #             capacity=xx['status']['capacity']['storage'],
+                #             accessMode=xx['status']['accessModes'],
+                #             volumeid=xx['volumeId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='ioc',
+                #         )
+                #         m.save()
+                #---------------------------------------------------------------
+                # get  ioc configmap
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         t=[]
+                #         for k, v in dict.items(xx["data"]):
+                #             t.append({"k":k,"v":v})
+                #         m = ProjectConfigMap.objects.create(
+                #             pjid=xx['projectId'],
+                #             configId=xx['id'],
+                #             configName=xx['name'],
+                #             configMap=t,
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='ioc'
+                #         )
+                #         m.save()
+
+                #_----------------------------------------------------------
+                    # print(pjdatalist)
+                # for x in a:
+                #     print(x['pjid'])
+                # from django.db.models import Count
+                # a = MultiDBUser.objects.annotate(num=Count('ipaddress'))
+                # for x in a:
+                #     print(x.ipaddress)
                 # from openpyxl import load_workbook
                 #
                 # ws = load_workbook("/home/jin/文档/after.xlsx", read_only=True)['Sheet1']

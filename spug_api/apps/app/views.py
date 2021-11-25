@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
 from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService,ProjectServiceApprovalNotice
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService,ProjectServiceApprovalNotice,ProjectConfigMap,ProjectPvc
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 from apps.account.models import User
@@ -211,9 +211,19 @@ class RancherSvcNoticeView(View):
 
 
 class RancherSvcView(View):
-    def get(self,request):
+    def get(self,request,tag):
         # svc = RancherDeployment.objects.all()
-        svc = ProjectService.objects.all()
+        svc = ""
+        cmap= ""
+        pvc=""
+        if tag == "ioc":
+            svc = ProjectService.objects.filter(rancher_url__contains="ioc").all()
+            cmap = ProjectConfigMap.objects.filter(tag='ioc').all()
+            pvc  = ProjectPvc.objects.filter(tag='ioc').all()
+        elif tag == "fangyi":
+            svc = ProjectService.objects.filter(rancher_url__contains="feiyan").all()
+            cmap = ProjectConfigMap.objects.filter(tag='feiyan').all()
+            pvc = ProjectPvc.objects.filter(tag='feiyan').all()
         pj = [x['top_project'] for x in svc.order_by('top_project').values('top_project').distinct()]
         rj = [x['pjname'] for x in svc.order_by('pjname').values('pjname').distinct()]
         ns = [x['nsname'] for x in svc.order_by('nsname').values('nsname').distinct()]
@@ -223,7 +233,9 @@ class RancherSvcView(View):
             # data = item.to_dict(excludes=("create_by_id", "project_id", "namespace_id", "modify_time"))
             # data = item.to_dict()
             # tmp.append(data)
-        return json_response({"pj":pj,"rj":rj,"ns": ns,"app":app,"svc":[x.to_dict() for x in svc]})
+        return json_response({"pj":pj,"rj":rj,"ns": ns,"app":app,'cmap':[x.to_dict() for x in cmap],
+                              "pvc": [x.to_dict() for x in pvc],
+                              "svc":[x.to_dict() for x in svc]})
 
     def post(self,request):
         form, error = JsonParser(

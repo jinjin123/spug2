@@ -197,6 +197,59 @@ class ProjectService(models.Model, ModelMixin):
     class Meta:
         db_table = 'rancher_service'
 
+class ProjectConfigMap(models.Model, ModelMixin):
+    pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    configId = models.CharField(max_length=200, verbose_name='configId')
+    configName = models.CharField(max_length=200, verbose_name='配置映射卷名')
+    configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]', default='[]')
+    nsname = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+    nsid = models.CharField(max_length=50, verbose_name='ranchernamespaceid唯一', null=True)
+    dellinks = models.CharField(max_length=300,null=True)
+    selflinks = models.CharField(max_length=300,null=True)
+    updatelinks = models.CharField(max_length=300,null=True)
+    yamllinks = models.CharField(max_length=300,null=True)
+    tag = models.CharField(max_length=10,null=True)
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        t = []
+        for x in ast.literal_eval(self.configMap):
+            t.append(x)
+
+        tmp["configMap"] = t
+        tmp['create_by'] = self.create_by.username
+        return tmp
+
+    class Meta:
+        db_table = 'rancher_configmap'
+
+class ProjectPvc(models.Model, ModelMixin):
+    pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    nsname = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
+    nsid = models.CharField(max_length=50, verbose_name='ranchernamespaceid唯一', null=True)
+    pvcname = models.CharField(max_length=50, null=True)
+    pvcid = models.CharField(max_length=50, null=True)
+    storageid = models.CharField(max_length=50, null=True)
+    capacity = models.CharField(max_length=30, null=True)
+    accessMode= models.CharField(max_length=30, null=True)
+    volumeid = models.CharField(max_length=255, null=True)
+    dellinks = models.CharField(max_length=300,null=True)
+    selflinks = models.CharField(max_length=300,null=True)
+    updatelinks = models.CharField(max_length=300,null=True)
+    yamllinks = models.CharField(max_length=300,null=True)
+    tag = models.CharField(max_length=10,null=True)
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['create_by'] = self.create_by.username
+        return tmp
+    class Meta:
+        db_table = 'rancher_pvc'
+
+
 class tmp(models.Model, ModelMixin):
     STATUS_CHOOSE = (
         ('Y', 'up'),
@@ -568,7 +621,7 @@ class RancherConfigMap(models.Model, ModelMixin):
         return tmp
 
     class Meta:
-        db_table = 'rancher_configmap'
+        db_table = 'rancher_configmapbak'
         unique_together = ("env", "configname", "namespace")
 
 
