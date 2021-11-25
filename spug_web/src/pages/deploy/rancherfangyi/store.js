@@ -8,6 +8,8 @@ import http from 'libs/http';
 
 class Store {
   @observable records = [];
+  @observable cmaprecords = [];
+  @observable pvcrecords = [];
   @observable toppj = [];
   @observable rancherpj = [];
   @observable nsname = [];
@@ -53,13 +55,15 @@ class Store {
 
   fetchRecords = () => {
     this.isFetching = true;
-    return http.get('/api/app/deploy/svc')
-      .then(({pj,svc,rj,ns,app})=>{
+    return http.get('/api/app/deploy/svc/fangyi/')
+      .then(({pj,svc,rj,ns,app,cmap,pvc})=>{
         this.records = svc;
         this.toppj = pj;
         this.rancherpj = rj;
         this.nsname = ns;
         this.apps = app;
+        this.cmaprecords =  cmap;
+        this.pvcrecords =  pvc;
       })
       .finally(() => this.isFetching = false)
   };

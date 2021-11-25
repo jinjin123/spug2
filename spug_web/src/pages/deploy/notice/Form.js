@@ -9,7 +9,7 @@ import { Modal, Form, Select, Input, message, Col } from 'antd';
 import http from 'libs/http';
 import store from './store';
 
-import svcstore from '../rancher/store';
+import svcstore from '../rancherioc/store';
 import userStore from 'pages/system/account/store';
 import { Link } from "react-router-dom";
 import { SearchForm, AuthCard } from 'components';

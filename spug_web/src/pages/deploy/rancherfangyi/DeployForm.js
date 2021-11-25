@@ -61,17 +61,37 @@ class DeployForm extends React.Component {
     }else{
       store.rancherCallhost = []
       store.rancherCallhost.push(
-        {"itemid":1,"itemtitle":"必须","itemk":"","itemtype":"","itemv":""},
-        {"itemid":2,"itemtitle":"最好","itemk":"","itemtype":"","itemv":""},
-        {"itemid":3,"itemtitle":"首选","itemk":"","itemtype":"","itemv":""}
+        {"itemid":1,"itemtitle":"必须","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"itemid":2,"itemtitle":"最好","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"itemid":3,"itemtitle":"首选","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]}
       )
     }
+  }
+  onCallHostClick = e => {
+    switch(e){
+      case 0:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 1 ? item["itemdata"].push({"itemk":"","itemtype":"=","itemv":""}): null
+        ))}
+        break;;
+      case 1:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 2 ? item["itemdata"].push({"itemk":"","itemtype":"=","itemv":""}): null
+        ))}
+        break;;
+      case 2:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 3 ? item["itemdata"].push({"itemk":"","itemtype":"=","itemv":""}): null
+        ))}
+        break;;
+    }
+    console.log(e)
   }
   
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv)
+    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
   };
 
   onVolumeChange = (action) => {
@@ -87,7 +107,7 @@ class DeployForm extends React.Component {
           })
         },500)
         break;
-      case "pvc":
+      case "oldpvc":
         store.rancherVolume.push({"k":"使用现有的PVC" })
         this.setState({
           moreAction : [{"id": 2,"v":"使用现有的PVC"}]
@@ -98,10 +118,21 @@ class DeployForm extends React.Component {
           })
         },500)
         break;
+      case "newpvc":
+          store.rancherVolume.push({"k":"添加新的PVC" })
+          this.setState({
+            moreAction : [{"id": 3,"v":"使用新的的PVC"}]
+          })
+          setTimeout(() => {
+            this.setState({
+              moreAction : "添加卷..."
+            })
+          },500)
+          break;
       case "config":
         store.rancherVolume.push({"k":"配置映射卷"})
         this.setState({
-          moreAction : [{"id": 3,"v":"配置映射卷"}]
+          moreAction : [{"id": 4,"v":"配置映射卷"}]
         })
         setTimeout(() => {
           this.setState({
@@ -112,7 +143,26 @@ class DeployForm extends React.Component {
     }
   }
   
-
+  onCallHostItemClick = (index,tindex) => {
+    console.log(index,tindex)
+    switch(tindex){
+      case 0:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 1 ? item["itemdata"].splice(index,1): null
+        ))}
+        break;;
+      case 1:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 2 ? item["itemdata"].splice(index,1): null
+        ))}
+        break;;
+      case 2:
+        {store.rancherCallhost.map((item)=>(
+          item["itemid"] === 3 ? item["itemdata"].splice(index,1): null
+        ))}
+        break;;
+    }
+  }
   onRadioInputChange = e => {
     this.setState({
       input_value: e.target.value,
@@ -227,9 +277,7 @@ class DeployForm extends React.Component {
                   </Form.Item>
 
                   <Form.Item  label="主机调度" rules={[{ required: true, message: '请选择调度方式!' }]}>
-                        <Radio.Group onChange={this.onCallHostChange} >
-                          
-                  
+                        <Radio.Group onChange={this.onCallHostChange} > 
                               <Radio  value={1}>指定主机运行所有 Pods
                                   {store.rancherCallhost.length <2
                                   ?
@@ -241,31 +289,41 @@ class DeployForm extends React.Component {
                               <Radio value={2}>每个 Pod 自动匹配主机
                                 {store.rancherCallhost.length >1
                                   ?
-                                    store.rancherCallhost.map((item,index)=>(
-                                      <Card key={index} title={item["itemtitle"]} style={{ width: 450 }}>
-                                            <Input  defaultValue={item["itemk"]} onChange={e => item['itemk'] = e.target.value}  placeholder="键" style={{ width: 150}}/>
-                                            <Select  defaultValue={item["itemtype"] !=null ? item["itemtype"] : "=" } onChange={v => item['itemtype'] = v}   style={{ width: 100 }} >
-                                              <Option value="=">=</Option>
-                                              <Option value="!=">≠</Option>
-                                              <Option value="Exists">已设置</Option>
-                                              <Option value="DoesNotExist">未设置</Option>
-                                              <Option value="In">在列表中</Option>
-                                              <Option value="NotIn">不在列表中</Option>
-                                              <Option value="<">{"<"}</Option>
-                                              <Option value=">">{">"}</Option>
-                                            </Select>
-                                            <Input  defaultValue={item["itemv"]} onChange={e => item['itemv'] = e.target.value} placeholder="值" style={{ width: 150}}/>
+                                    store.rancherCallhost.map((item,tindex)=>(
+                                      <Card key={tindex} title={item["itemtitle"]} style={{ width: 450 }}>
+                                          {item["itemdata"].map((item,index) => (
+                                            <div key={index}>
+                                              <Input  defaultValue={item["itemk"]} onChange={e => item['itemk'] = e.target.value}  placeholder="键" style={{ width: 150}}/>
+                                              <Select  defaultValue={item["itemtype"] !=null ? item["itemtype"] : "=" } onChange={v => item['itemtype'] = v}   style={{ width: 100 }} >
+                                                <Option value="=">=</Option>
+                                                <Option value="!=">≠</Option>
+                                                <Option value="Exists">已设置</Option>
+                                                <Option value="DoesNotExist">未设置</Option>
+                                                <Option value="In">在列表中</Option>
+                                                <Option value="NotIn">不在列表中</Option>
+                                                <Option value="<">{"<"}</Option>
+                                                <Option value=">">{">"}</Option>
+                                              </Select>
+                                              <Input  defaultValue={item["itemv"]} onChange={e => item['itemv'] = e.target.value} placeholder="值" style={{ width: 150}}/>
+                                              <div  onClick={() => this.onCallHostItemClick(index,tindex)}>
+                                                      <Icon type="minus-circle"/>移除
+                                                </div>    
+                                            </div>                           
+                                          ))}
+                                        <Button key={tindex} type="dashed" block  onClick={() => this.onCallHostClick(tindex)}>
+                                                <i type="plus">添加规则</i>
+                                        </Button>
                                       </Card>
                                     ))
-                                  : null }   
+                                  : null } 
                               </Radio>
-                    
                         </Radio.Group>
                   </Form.Item>
 
                   <Form.Item  label="数据卷" >
                         <Select value={this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "添加卷..."} style={{ width: 250 }} onChange={this.onVolumeChange.bind(this)} >
-                          <Option value="pvc">使用现有PVC</Option>
+                          <Option value="newpvc">添加新的PVC</Option>
+                          <Option value="oldpvc">使用现有PVC</Option>
                           <Option value="host">映射主机目录</Option>
                           <Option value="config">配置映射卷</Option>
                         </Select>
@@ -274,6 +332,7 @@ class DeployForm extends React.Component {
                             <Card title={item["k"]} style={{ width: 400 }}>
                                   <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
                                   <Input  placeholder="默认权限模式" defaultValue="400" style={{ width: 350}}/>
+                                  <Input   placeholder="主机路径" style={{ width: 350}}/>
                                   <Input   placeholder="容器路径" style={{ width: 350}}/>
                                   <Input   placeholder="子路径" style={{ width: 350}}/>
                                   
