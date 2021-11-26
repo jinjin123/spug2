@@ -209,6 +209,7 @@ class ProjectConfigMap(models.Model, ModelMixin):
     updatelinks = models.CharField(max_length=300,null=True)
     yamllinks = models.CharField(max_length=300,null=True)
     tag = models.CharField(max_length=10,null=True)
+    verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
 
 
@@ -240,6 +241,7 @@ class ProjectPvc(models.Model, ModelMixin):
     updatelinks = models.CharField(max_length=300,null=True)
     yamllinks = models.CharField(max_length=300,null=True)
     tag = models.CharField(max_length=10,null=True)
+    verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
 
     def to_dict(self, *args, **kwargs):
