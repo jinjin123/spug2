@@ -26,6 +26,9 @@ class Store {
   @observable ext1Visible = false;
   @observable ext2Visible = false;
   @observable deployForm =false;
+  @observable pvcForm =false;
+  @observable cmpForm =false;
+
   @observable f_name;
   @observable f_desc;
   @observable project;
@@ -41,6 +44,7 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
 
+  @observable ranchercmp=[{"k":"","v":""}];
   @observable rancherenv=[{}];
   @observable rancherport=[{}];
   @observable rancherVolume=[];
@@ -71,6 +75,12 @@ class Store {
 
   showAddForm = () => {
     this.deployForm = true;
+  }
+  showAddPvcForm = () => {
+    this.pvcForm = true;
+  }
+  showAddCmpForm = () => {
+    this.cmpForm = true;
   }
   showRancerExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
     if (e) e.stopPropagation();

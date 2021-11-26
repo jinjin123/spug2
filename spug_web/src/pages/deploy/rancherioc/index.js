@@ -10,6 +10,9 @@ import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
 import ComTable from './Table';
 import store from './store';
 import DeployForm from './DeployForm';
+import PvcFrom from './PvcForm';
+import CmpFrom from './CmpForm';
+
 import AddRancherSelect from './AddRancherSelect';
 import Ext2Form from './Ext2Form';
 @observer
@@ -52,6 +55,8 @@ class Rancher extends  React.Component {
         </SearchForm>
         <ComTable/>
         {store.deployForm && <DeployForm/>}
+        {store.pvcForm && <PvcFrom/>}
+        {store.cmpForm && <CmpFrom/>}
         {store.addRancherVisible && <AddRancherSelect />}
         {store.ext2Visible &&  <Ext2Form />}
       </AuthCard>

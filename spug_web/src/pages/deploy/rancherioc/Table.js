@@ -9,6 +9,7 @@ import { Table,  Tag,  message,Select,Tabs } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import noticStore from '../notice/store';
+import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
 // import { Action } from "components";
 const { Column } = Table;
 const { TabPane } = Tabs;
@@ -168,12 +169,20 @@ class ComTable extends React.Component {
           </Table>
         </TabPane>
         <TabPane tab="配置映射" key="2">
+          <AuthCard auth="deploy.rancher.view">
+                <SearchForm>
+                  <SearchForm.Item span={4} style={{textAlign: 'left'}}>
+                    <AuthButton auth="deploy.rancher.edit_config" 
+                                type="primary" icon="plus" onClick={() => store.showAddCmpForm()}>添加配置映射</AuthButton>
+                  </SearchForm.Item>
+              </SearchForm>
+            </AuthCard>
           <Table
               rowKey="id"
               loading={store.isFetching}
               dataSource={cmapdata}
               scroll={{ x: '100%' }}
-              // expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
+              expandedRowRender={cmapdata => <a href={cmapdata.verifyurl} target="_blank" style={{ margin: 0 }}>{cmapdata.verifyurl}</a>}
               pagination={{
                 showSizeChanger: true,
                 showLessItems: true,
@@ -195,12 +204,20 @@ class ComTable extends React.Component {
             </Table>
         </TabPane>
         <TabPane tab="PVC" key="3">
+            <AuthCard auth="deploy.rancher.view">
+                <SearchForm>
+                  <SearchForm.Item span={4} style={{textAlign: 'left'}}>
+                    <AuthButton auth="deploy.rancher.edit_config" 
+                                type="primary" icon="plus" onClick={() => store.showAddPvcForm()}>添加 PVC</AuthButton>
+                  </SearchForm.Item>
+              </SearchForm>
+            </AuthCard>
             <Table
               rowKey="id"
               loading={store.isFetching}
               dataSource={pvcdata}
               scroll={{ x: '100%' }}
-              // expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
+              expandedRowRender={pvcdata => <a href={pvcdata.verifyurl} target="_blank" style={{ margin: 0 }}>{pvcdata.verifyurl}</a>}
               pagination={{
                 showSizeChanger: true,
                 showLessItems: true,
