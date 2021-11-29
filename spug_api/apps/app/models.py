@@ -199,6 +199,7 @@ class ProjectService(models.Model, ModelMixin):
 
 class ProjectConfigMap(models.Model, ModelMixin):
     pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    pjname = models.CharField(max_length=100, verbose_name='rancher项目id唯一', null=True)
     configId = models.CharField(max_length=200, verbose_name='configId')
     configName = models.CharField(max_length=200, verbose_name='配置映射卷名')
     configMap = SizedTextField(size_class=3, verbose_name='配置映射卷多[{k,v}]', default='[]')
@@ -228,6 +229,7 @@ class ProjectConfigMap(models.Model, ModelMixin):
 
 class ProjectPvc(models.Model, ModelMixin):
     pjid = models.CharField(max_length=50, verbose_name='rancher项目id唯一', null=True)
+    pjname = models.CharField(max_length=100, verbose_name='rancher项目id唯一', null=True)
     nsname = models.CharField(max_length=50, verbose_name='rancher命名空间名称唯一', null=True)
     nsid = models.CharField(max_length=50, verbose_name='ranchernamespaceid唯一', null=True)
     pvcname = models.CharField(max_length=50, null=True)

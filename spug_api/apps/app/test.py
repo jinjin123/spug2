@@ -563,11 +563,14 @@ class Mytest(unittest.TestCase):
             def test_pb_approval(self):
                 from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
                 from django.db.models import Count
-                a = ProjectConfigMap.objects.filter(tag='feiyan').values("id","pjid","configId").all()
+                a = ProjectConfigMap.objects.filter(tag="ioc").values("id","pjid")
                 for x in a:
-                    v = "https://rancher.feiyan.com/p/"+x['pjid']+'/config-maps/'+x['configId']
-                    # print(v)
-                    ProjectConfigMap.objects.filter(id=x['id']).update(verifyurl=v)
+                    print(x)
+                # a = ProjectConfigMap.objects.filter(tag='feiyan').values("id","pjid","configId").all()
+                # for x in a:
+                #     v = "https://rancher.feiyan.com/p/"+x['pjid']+'/config-maps/'+x['configId']
+                #     # print(v)
+                #     ProjectConfigMap.objects.filter(id=x['id']).update(verifyurl=v)
                     # print(x['id'])
                 #---------------------------------------------------------
                 # get fangyi  configmap
