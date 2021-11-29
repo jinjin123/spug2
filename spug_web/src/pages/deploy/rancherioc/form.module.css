@@ -18,10 +18,10 @@
 }
 :global .CodeMirror{
     height: 100px;
-    /* width: 550px; */
     font-size: 9px;
     line-height: 11px;
 }
+
 /* :global .ant-modal{
     float: right;
     width: 40% !important;

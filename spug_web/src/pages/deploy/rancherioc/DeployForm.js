@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,Radio,Select,Card,Icon} from 'antd';
+import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,Radio,Select,Card,Icon,Tag} from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 // import historystore from '../rancherconfhisotry/store';
@@ -24,6 +24,7 @@ class DeployForm extends React.Component {
         tmpns: [],
         tmpimg: [],
         tmppvc:[],
+        tmpcmp:[],
         moreAction: [{"id":0,"v":"添加卷..."}]
 
     }
@@ -176,17 +177,24 @@ class DeployForm extends React.Component {
     this.setState({
       tmpns: [],
       tmpimg: [],
-      tmppvc: []
+      tmppvc: [],
+      tmpcmp:[]
     }) 
     let tmp = []
     let tmpimg = []
     let pvc = []
+    let cmap = []
     let t = store.records.filter(item => item['pjname'] === v)
     t.map(item => {
         let newArr = store.pvcrecords.filter(x=>x['pjid'] === item['pjid'])
         newArr.map(dd =>{
           pvc.push(dd['pvcname'])
         })
+        let newBrr = store.cmaprecords.filter(x=>x['nsname'] === item['nsname'])
+        newBrr.map (de =>{
+            cmap.push(de["configName"])
+        })
+
       }
     )
     t.map(item =>(
@@ -196,7 +204,8 @@ class DeployForm extends React.Component {
     this.setState({
       tmpns: [... new Set(tmp)],
       tmpimg: [... new Set(tmpimg)],
-      tmppvc: [... new Set(pvc)]
+      tmppvc: [... new Set(pvc)],
+      tmpcmp: [... new Set(cmap)]
     }) 
     
   }
@@ -315,8 +324,8 @@ class DeployForm extends React.Component {
                     {store.rancherenv.map((item,index)=>(
                       <div key={index}>
                         <Col style={{ display:'flex'}}>
-                          <Input   placeholder="键"  defaultValue={item["k"]} onChange={e => item['k'] = e.target.value}   style={{ width: 300}}/> 
-                          = 
+                          <Input   placeholder="键"  defaultValue={item["k"]} onChange={e => item['k'] = e.target.value}   style={{marginRight:10, width: 300}}/> 
+                          <Tag style={{ height:32}}>=</Tag>
                           <Input  defaultValue={item["v"]} onChange={e => item['v'] = e.target.value} placeholder="值" style={{ width: 300}}/>
                           <div  onClick={() => store.rancherenv.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
@@ -410,7 +419,11 @@ class DeployForm extends React.Component {
                                       <div>
                                         <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
                                         <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
-                                        <Input   placeholder="主机路径" style={{ width: 350}}/>
+                                        <Select >
+                                          {this.state.tmpcmp.map(item =>(
+                                              <Option key={item} value={item}>{item}</Option>
+                                          ))}
+                                        </Select>
                                         <Input   placeholder="容器路径" style={{ width: 350}}/>
                                         <Input   placeholder="子路径" style={{ width: 350}}/>
                                       </div>

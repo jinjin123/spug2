@@ -29,7 +29,7 @@ class Store {
   @observable pvcForm =false;
   @observable cmpForm =false;
   @observable codeRead = false;
-  @observable fullmode=[];
+  // @observable fullmode=[];
 
   @observable f_name;
   @observable f_desc;
@@ -46,8 +46,8 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
 
-  // @observable ranchercmp=[{"k":"","v":""}];
-  @observable ranchercmp=[];
+  @observable ranchercmp=[{"k":"","v":""}];
+  // @observable ranchercmp=[];
   @observable rancherenv=[{}];
   @observable rancherport=[{}];
   @observable rancherVolume=[];
@@ -86,6 +86,9 @@ class Store {
   }
   showAddCmpForm = () => {
     this.cmpForm = true;
+    this.cmaprecord = {};
+    this.fullmode=[false];
+    this.ranchercmp=[{"k":"","v":""}]
   }
   showRancerExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
     if (e) e.stopPropagation();

@@ -215,13 +215,13 @@ class PvcForm extends React.Component {
         >
           <Form  layout="inline" wrapperCol={{ span: 24 }}>
               <Form.Item required label="名称"  rules={[{ required: true, message: '必填volume名' }]}>
-                  {getFieldDecorator('pvc_name')(
+                  {getFieldDecorator('pvcname')(
                     <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                   )}
               </Form.Item>
 
                 <Form.Item required label="rancher项目" rules={[{ required: true, message: '必填项目' }]}>
-                    {getFieldDecorator('rjproject')(
+                    {getFieldDecorator('pjname')(
                       <Select  onChange={v=> this.onRjChange(v)} style={{ width: 200 }} >
                           {store.rancherpj.map((item,index)=>(
                               <Option key={item} value={item}>{item}</Option>
@@ -232,7 +232,7 @@ class PvcForm extends React.Component {
                 </Form.Item>
 
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('namespace')(
+                    {getFieldDecorator('nsname')(
                       <Select   style={{ width: 300 }} >
                           {this.state.tmpns.map((item,index)=>(
                               <Option key={index} value={item}>{item}</Option>
@@ -241,7 +241,7 @@ class PvcForm extends React.Component {
                       </Select>
                     )}
                 </Form.Item>
-                <Form.Item required label="存储类型(Storage Class)" rules={[{ required: true, message: '必填项目' }]}>
+                <Form.Item required label="存储类型(Storage Class)" rules={[{ required: true, message: '必填type' }]}>
                     {getFieldDecorator('vtype')(
                       <Select  style={{ width: 400 }} >
                           <Option value={0}>{"使用默认 storage class"}</Option>
@@ -253,9 +253,9 @@ class PvcForm extends React.Component {
                       </Select>
                     )}
                 </Form.Item>
-                <Form.Item required label="容量"  rules={[{ required: true, message: '必填volume名' }]}>
+                <Form.Item required label="容量"  rules={[{ required: true, message: '必填size' }]}>
                   <div style={{display: "flex"}}>
-                    {getFieldDecorator('pvc_name')(
+                    {getFieldDecorator('pvcsize')(
                       <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                     )}
                     <Tag style={{ height:32}}>GiB</Tag>

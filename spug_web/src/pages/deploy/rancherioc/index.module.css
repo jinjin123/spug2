@@ -79,9 +79,9 @@
 .fullscreen {
     z-index: 100;
     position: absolute !important;
-    left: 920px;
+    left: 870px;
 }
-
-/* .CodeMirror{
-    width: 550px !important;
+/*  bug cannot set fixed the width  */
+/* :global .cmpeditor > div> .CodeMirror{
+    width: 550px
 } */

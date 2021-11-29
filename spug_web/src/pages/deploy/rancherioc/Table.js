@@ -246,7 +246,7 @@ class ComTable extends React.Component {
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >
-                      <Option value={1}>编辑</Option>
+                      {/* <Option value={1}>编辑</Option> */}
                       <Option value={2}>删除</Option>
                     </Select>
                   )}/>

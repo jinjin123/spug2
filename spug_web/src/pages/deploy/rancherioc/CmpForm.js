@@ -70,7 +70,7 @@ class CmpForm extends React.Component {
     })
   }
   handleFullmode = (index,status) => {
-    //  console.log(index,status)
+    // console.log(index,status)
     store.showFullMode(index,status)
   }
   handleDelete = (text) => {
@@ -116,7 +116,8 @@ class CmpForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    // console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    console.log(formData,store.ranchercmp)
   };
 
   
@@ -156,7 +157,13 @@ class CmpForm extends React.Component {
     }) 
   }
   handleChange = (index,...value) => {
-    store.cmaprecord.configMap[index]["v"] = value[3]
+    // console.log(index)
+    store.cmaprecord["configMap"][index]["v"] = value[3]
+    // console.log(value[3])
+  };
+  handleNewEditChange = (index,...value) => {
+    // console.log(index)
+    store.ranchercmp[index]["v"] = value[3]
     // console.log(value[3])
   };
   render() {
@@ -190,7 +197,7 @@ class CmpForm extends React.Component {
               </Form.Item>
 
                 <Form.Item required label="rancher项目" rules={[{ required: true, message: '必填项目' }]}>
-                    {getFieldDecorator('rjproject',{initialValue:info['pjname']} )(
+                    {getFieldDecorator('pjname',{initialValue:info['pjname']} )(
                       (info.id ?
                         <Select onChange={v=> this.onRjChange(v)} style={{ width: 200 }} >
                         {store.rancherpj.map((item,index)=>(
@@ -208,28 +215,27 @@ class CmpForm extends React.Component {
                 </Form.Item>
 
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('nsname'), (
-                      (info.id ? 
-                        <Select  defaultValue={info['nsname']}  style={{ width: 150 }} >
-                          {/* <Option key={info['nsname']} value={info['nsname']} >{info['nsname']}</Option> */}
+                      {getFieldDecorator('nsname',{initialValue:info['nsname']} )(
+                        (info.id ? 
+                        <Select   style={{ width: 150 }} >
                           {this.state.tmpns.map((item,index)=>(
                               <Option key={index} value={item}>{item}</Option>
                           ))} 
                           </Select>
                         :  
-                        <Select   style={{ width: 150 }} >
-                          {this.state.tmpns.map((item,index)=>(
+                          <Select    style={{ width: 150 }} >
+                            {this.state.tmpns.map((item,index)=>(
                               <Option key={index} value={item}>{item}</Option>
-                          ))}
-                        </Select> 
+                            ))}    
+                          </Select>
                         )
                     )}
                 </Form.Item>
                 <Form.Item required label="配置映射" >
                     <Card title="配置映射" style={{ width: 1000 }}>
                         {info.id ?
-                          info.configMap.map((item,index)=>(
-                            <div key={index} style={{ padding:10,display: "flex"}}>
+                          info["configMap"].map((item,index)=>(
+                            <div className={"cmpeditor"} key={index} style={{ padding:10,display: "flex"}}>
                               <Input value={item["k"]} onChange={e => item['k'] = e.target.value} style={{ width:350, marginRight: 10 }} placeholder="请输入" />
                               <Tag style={{ height:32}}>=</Tag>
 
@@ -253,29 +259,52 @@ class CmpForm extends React.Component {
                                     readOnly: codeRead
                                   }}
                                 />
+                                  <div style={{width:50}}  onClick={() => {info["configMap"].splice(index,1);fullmode.splice(index,1)}}>
+                                    <Icon type="minus-circle"/>移除
+                                  </div>  
                             </div>
                           ))
                         :
-                          <div>
-                            {store.ranchercmp.map((item,index)=>(
-                              <div key={index} style={{ display: "flex"}}>
-                                
-                                  <Input value={item['k']} style={{ width: 350, marginRight: 10 }} placeholder="key" />  = 
-                                  <Input value={item['v']}  style={{ width: 350 , marginLeft: 10}} placeholder="value"/>
-                                  <div  onClick={() => store.ranchercmp.splice(index,1)}>
-                                    <Icon type="minus-circle"/>移除
-                                  </div>  
+                            store.ranchercmp.map((item,index) => (
+                              <div key={index} style={{ padding:10,display: "flex"}}>
+                                <Input value={item["k"]} onChange={e => item['k'] = e.target.value} style={{ width:350, marginRight: 10 }} placeholder="请输入" />
+                                <Tag style={{ height:32}}>=</Tag>
+                                <Button size="small" className={styles.fullscreen} onClick={this.handleFullmode.bind(this,index,true)}><img src={fullicon} /></Button>
+
+                                <CodeMirror
+                                  onBeforeChange={this.handleNewEditChange.bind(this,index,value)}
+                                  value={item["v"]}
+                                  options={{
+                                    mode: 'text/yaml',
+                                    theme: 'monokai',
+                                    smartIndent: true,
+                                    foldGutter: true,
+                                    lineWrapping: true,
+                                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+                                    matchBrackets: true,
+                                    lineNumbers: true,
+                                    lint: true,
+                                    styleActiveLine: true,          // 选中行高亮
+                                    indentUnit: 4,
+                                    fullScreen: fullmode[index],
+                                    readOnly: codeRead
+                                  }}
+                                />
+                                <div style={{width:50}} onClick={() => {store.ranchercmp.splice(index,1);fullmode.splice(index,1)}}>
+                                  <Icon type="minus-circle"/>移除
+                                </div>  
                               </div>
-                            ))}
-                            <Button type="dashed" block  onClick={() =>store.ranchercmp.push({"k":"","v":""})}>
-                                  <i type="plus">添加配置映射值</i>
-                            </Button>
-                          </div>
+                            ))                          
                         }
-                      
-                          <Button type="dashed" block  onClick={() =>store.cmaprecord.configMap.push({"k":"","v":""})}>
+                        {info.id ?
+                            <Button type="dashed" block  onClick={() =>{info["configMap"].push({"k":"","v":""});fullmode.push(false)}}>
                             <i type="plus">添加配置映射值</i>
-                          </Button>
+                            </Button>
+                          :                            
+                            <Button type="dashed" block  onClick={() =>{store.ranchercmp.push({"k":"","v":""});fullmode.push(false)}}>
+                                <i type="plus">添加配置映射值</i>
+                            </Button>
+                        }
                     </Card>
                 </Form.Item>
               </Form>
