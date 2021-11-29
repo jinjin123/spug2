@@ -387,7 +387,7 @@ class DeployForm extends React.Component {
                                   {item['tt'] === 0 ?
                                       <div>
                                         <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="400" style={{ width: 350}}/>
+                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
                                         <Input   placeholder="主机路径" style={{ width: 350}}/>
                                         <Input   placeholder="容器路径" style={{ width: 350}}/>
                                         <Input   placeholder="子路径" style={{ width: 350}}/>
@@ -396,7 +396,7 @@ class DeployForm extends React.Component {
                                   {item['tt'] === 1  ?
                                       <div>
                                         <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="400" style={{ width: 350}}/>
+                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
                                         <Select >
                                           {this.state.tmppvc.map(item =>(
                                               <Option key={item} value={item}>{item}</Option>
@@ -409,7 +409,7 @@ class DeployForm extends React.Component {
                                   {item['tt'] === 2  ?
                                       <div>
                                         <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="400" style={{ width: 350}}/>
+                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
                                         <Input   placeholder="主机路径" style={{ width: 350}}/>
                                         <Input   placeholder="容器路径" style={{ width: 350}}/>
                                         <Input   placeholder="子路径" style={{ width: 350}}/>

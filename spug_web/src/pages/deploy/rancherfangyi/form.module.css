@@ -16,12 +16,7 @@
 .ModelBox {
     float: right;
 }
-:global .CodeMirror{
-    height: 100px;
-    /* top:100px; */
-    font-size: 9px;
-    line-height: 11px;
-}
+
 /* :global .ant-modal{
     float: right;
     width: 40% !important;

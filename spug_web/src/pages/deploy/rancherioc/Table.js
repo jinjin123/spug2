@@ -56,15 +56,26 @@ class ComTable extends React.Component {
     }, 4000);
   };
 
-  onChange = (info, action) => {
-    console.log(info,action);
-    switch(action){
+  onChange = (info, action,tag) => {
+    console.log(info,action,tag);
+    switch(tag){
       case 1:
+        switch(action){
+          case "cmap":
+            store.cmaprecord = info;
+            store.cmpForm = true;
+            console.log(action)
+            break;;
+          case "svc":
+            break;;
+          case "pvc":
+            break;;
+        }
         break;
-        ;;
+      
       case 2:
         break;
-      ;;
+      ;
       case 3:
         ;;
       case 4:
@@ -155,13 +166,13 @@ class ComTable extends React.Component {
               <Column title="创建人" dataIndex="create_by"/>
               {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                 <Column title="操作" fixed="right" render={info => (
-                  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-                    <Option value={1}>重新部署</Option>
+                  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"svc")}  style={{ width: 100 }} >
+                    <Option value={1}>编辑</Option>
                     <Option value={2}>回滚</Option>
                     <Option value={3}>伸缩</Option>
                     <Option value={4}>终端</Option>
                     <Option value={5}>申请发布</Option>
-                    <Option value={6}>编辑</Option>
+                    <Option value={6}>重新部署</Option>
                   </Select>
                   
                 )}/>
@@ -195,7 +206,7 @@ class ComTable extends React.Component {
                 <Column title="创建人" dataIndex="create_by"/>
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
-                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"cmap")}  style={{ width: 100 }} >
                       <Option value={1}>编辑</Option>
                       <Option value={2}>删除</Option>
                     </Select>
@@ -234,7 +245,7 @@ class ComTable extends React.Component {
                 <Column title="创建人" dataIndex="create_by"/>
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
-                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
+                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >
                       <Option value={1}>编辑</Option>
                       <Option value={2}>删除</Option>
                     </Select>

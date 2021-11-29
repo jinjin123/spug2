@@ -75,3 +75,13 @@
 .RadioVisbale{
     display: grid;
 }
+
+.fullscreen {
+    z-index: 100;
+    position: absolute !important;
+    left: 920px;
+}
+
+/* .CodeMirror{
+    width: 550px !important;
+} */

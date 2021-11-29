@@ -18,7 +18,7 @@
 }
 :global .CodeMirror{
     height: 100px;
-    /* top:100px; */
+    /* width: 550px; */
     font-size: 9px;
     line-height: 11px;
 }

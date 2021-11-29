@@ -162,7 +162,7 @@ class ComForm extends React.Component {
                       styleActiveLine: true,          // 选中行高亮
                       indentUnit: 4,
                       fullScreen: fullmode[index],
-                      readOnly: codeRead
+                      readOnly: false
                     }}
                   />
                   {/* )} */}

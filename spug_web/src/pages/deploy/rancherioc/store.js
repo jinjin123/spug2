@@ -28,6 +28,8 @@ class Store {
   @observable deployForm =false;
   @observable pvcForm =false;
   @observable cmpForm =false;
+  @observable codeRead = false;
+  @observable fullmode=[];
 
   @observable f_name;
   @observable f_desc;
@@ -44,11 +46,14 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
 
-  @observable ranchercmp=[{"k":"","v":""}];
+  // @observable ranchercmp=[{"k":"","v":""}];
+  @observable ranchercmp=[];
   @observable rancherenv=[{}];
   @observable rancherport=[{}];
   @observable rancherVolume=[];
   @observable rancherCallhost=[];
+  @observable cmaprecord = {};
+
   // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
   // {"itemid":2,"itemdata":
   // [{"itemid":1,"itemtitle":"必须","itemk":"","itemtype":"","itemv":""},
