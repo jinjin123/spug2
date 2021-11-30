@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table,  Tag,  message,Select,Tabs } from 'antd';
+import { Table,  Tag,  message,Select,Tabs,Input } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import noticStore from '../notice/store';
@@ -121,6 +121,12 @@ class ComTable extends React.Component {
     if (store.app) {
       data = data.filter(item => item['dpname'].toLowerCase().includes(store.app.toLowerCase()))
     }
+    if(store.cmapsearch) {
+      cmapdata = cmapdata.filter(item => item['configName'].toLowerCase().includes(store.cmapsearch.toLowerCase()))
+    }
+    if(store.pvcsearch) {
+      pvcdata = pvcdata.filter(item => item['pvcname'].toLowerCase().includes(store.pvcsearch.toLowerCase()))
+    }
     // if (store.envname) {
     //   data = data.filter(item => item['envname'].toLowerCase().includes(store.envname.toLowerCase()))
     // }
@@ -186,6 +192,9 @@ class ComTable extends React.Component {
                     <AuthButton auth="deploy.rancher.edit_config" 
                                 type="primary" icon="plus" onClick={() => store.showAddCmpForm()}>添加配置映射</AuthButton>
                   </SearchForm.Item>
+                  <SearchForm.Item span={4} title="配置映射文件名">
+                    <Input  style={{width: 200, position: "absolute"}} allowClear value={store.cmapsearch} onChange={e => store.cmapsearch = (e.target.value).trim()} placeholder="请输入"/>
+                  </SearchForm.Item>
               </SearchForm>
             </AuthCard>
           <Table
@@ -220,6 +229,9 @@ class ComTable extends React.Component {
                   <SearchForm.Item span={4} style={{textAlign: 'left'}}>
                     <AuthButton auth="deploy.rancher.edit_config" 
                                 type="primary" icon="plus" onClick={() => store.showAddPvcForm()}>添加 PVC</AuthButton>
+                  </SearchForm.Item>
+                  <SearchForm.Item span={4} title="pvc卷名">
+                    <Input  style={{width: 200, position: "absolute"}} allowClear value={store.pvcsearch} onChange={e => store.pvcsearch = (e.target.value).trim()} placeholder="请输入"/>
                   </SearchForm.Item>
               </SearchForm>
             </AuthCard>

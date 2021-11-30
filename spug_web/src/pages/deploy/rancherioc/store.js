@@ -36,6 +36,8 @@ class Store {
   @observable project;
   @observable ns;
   @observable app;
+  @observable cmapsearch;
+  @observable pvcsearch;
   @observable fullmode=[false];
   @observable fullmode_flag=0;
   @observable envname;
@@ -47,9 +49,8 @@ class Store {
   @observable addRancherVisible = false;
 
   @observable ranchercmp=[{"k":"","v":""}];
-  // @observable ranchercmp=[];
-  @observable rancherenv=[{}];
-  @observable rancherport=[{}];
+  @observable rancherenv=[{"k":"","v":""}];
+  @observable rancherport=[{"portname":"","containerport":"","potocol":"TCP","policy":"NodePort","targetport":""}];
   @observable rancherVolume=[];
   @observable rancherCallhost=[];
   @observable cmaprecord = {};

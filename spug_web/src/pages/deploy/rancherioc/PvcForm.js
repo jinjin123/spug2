@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,Radio,Select,Tag} from 'antd';
+import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,InputNumber,Select,Tag} from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 // import historystore from '../rancherconfhisotry/store';
@@ -100,7 +100,8 @@ class PvcForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    formData["mode"] = 666
+    console.log(formData)
   };
 
   onVolumeChange = (action) => {
@@ -256,15 +257,13 @@ class PvcForm extends React.Component {
                 <Form.Item required label="容量"  rules={[{ required: true, message: '必填size' }]}>
                   <div style={{display: "flex"}}>
                     {getFieldDecorator('pvcsize')(
-                      <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                      <InputNumber  style={{ width: 410, marginLeft: 10 }}/>
                     )}
                     <Tag style={{ height:32}}>GiB</Tag>
                   </div>
                 </Form.Item>
                 <Form.Item required label="访问模式" >
-                  {getFieldDecorator('accessmode')(
                     <Checkbox defaultChecked disabled> 多主机读写模式</Checkbox>
-                  )}
                 </Form.Item>
               </Form>
         </Modal>

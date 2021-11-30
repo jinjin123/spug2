@@ -116,8 +116,9 @@ class CmpForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
+    formData["data"] = store.ranchercmp
     // console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
-    console.log(formData,store.ranchercmp)
+    console.log(formData)
   };
 
   

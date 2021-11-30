@@ -25,6 +25,9 @@ class DeployForm extends React.Component {
         tmpimg: [],
         tmppvc:[],
         tmpcmp:[],
+        tmpimgs:{},
+        tmpimgV:null,
+        // rancherBL:{},
         moreAction: [{"id":0,"v":"添加卷..."}]
 
     }
@@ -60,15 +63,30 @@ class DeployForm extends React.Component {
     if(e.target.value === 1){
       store.rancherCallhost = []
       store.rancherCallhost.push({
-        "itemid":1,"iteminput":"", 
+        "type":"host","itemid":0,"itemdata":"", 
       })
     }else{
       store.rancherCallhost = []
       store.rancherCallhost.push(
-        {"itemid":1,"itemtitle":"必须","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
-        {"itemid":2,"itemtitle":"最好","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
-        {"itemid":3,"itemtitle":"首选","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]}
+        {"type":"custom","itemid":1,"itemtitle":"必须","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"type":"custom","itemid":2,"itemtitle":"最好","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"type":"custom","itemid":3,"itemtitle":"首选","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]}
       )
+    }
+  }
+  onCallImgChange = e => {
+    console.log('radio checked', e.target.value);
+    // this.setState({
+    //   hostvalue: e.target.value,
+    // });
+    if(e.target.value === 1){
+      this.setState({
+        tmpimgs: {"tag":"select"},
+      });
+    }else{
+      this.setState({
+        tmpimgs: {"tag":"input"},
+      });
     }
   }
   onCallHostClick = e => {
@@ -95,13 +113,19 @@ class DeployForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    formData["workloadnum"] = this.state.input_value
+    formData["image"] = this.state.tmpimgV
+    formData["rancherport"] = store.rancherport
+    formData["ranchervolume"] = store.rancherVolume
+    formData["rancherenv"] = store.rancherenv
+    formData["rancherdeployhost"] = store.rancherCallhost
+    console.log(formData)
   };
 
   onVolumeChange = (action) => {
     switch(action){
       case "host":
-        store.rancherVolume.push({"t":"映射主机目录","tt":0,"tag":null,"data":[{"k":"","v":""}] })
+        store.rancherVolume.push({"t":"映射主机目录","tt":0,"tag":"host","vol":"vol1","mode":420,"hostp":"","containerp":"","subp":"" })
         this.setState({
           moreAction : [{"id": 1,"v":"映射主机目录"}]
         })
@@ -112,7 +136,7 @@ class DeployForm extends React.Component {
         },500)
         break;
       case "oldpvc":
-        store.rancherVolume.push({"t":"使用现有的PVC","tt":1,"tag":null,"data":[{"k":"","v":""}]})
+        store.rancherVolume.push({"t":"使用现有的PVC","tt":1,"tag":"oldpvc","vol":"vol2","mode":420,"pvc":"","containerp":"","subp":"" })
         this.setState({
           moreAction : [{"id": 2,"v":"使用现有的PVC"}]
         })
@@ -135,7 +159,7 @@ class DeployForm extends React.Component {
           },500)
           break;
       case "config":
-        store.rancherVolume.push({"t":"配置映射卷","tt":2,"tag":null,"data":[{"k":"","v":""}]})
+        store.rancherVolume.push({"t":"配置映射卷","tt":2,"tag":"config","vol":"vol2","mode":420,"config":"","containerp":"","subp":"" })
         this.setState({
           moreAction : [{"id": 4,"v":"配置映射卷" }]
         })
@@ -250,10 +274,8 @@ class DeployForm extends React.Component {
                     </Radio.Group>
                   )}
               </Form.Item>
-        
-                
                 <Form.Item required label="rancher项目" rules={[{ required: true, message: '必填项目' }]}>
-                    {getFieldDecorator('rjproject')(
+                    {getFieldDecorator('pjname')(
                       <Select  onChange={v=> this.onRjChange(v)} style={{ width: 200 }} >
                           {store.rancherpj.map((item,index)=>(
                               <Option key={item} value={item}>{item}</Option>
@@ -262,27 +284,39 @@ class DeployForm extends React.Component {
                       </Select>
                     )}
                 </Form.Item>
+                <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
+                    {getFieldDecorator('nsname')(
+                          <Select   style={{ width: 300 }} >
+                            {this.state.tmpns.map((item,index)=>(
+                                <Option key={index} value={item}>{item}</Option>              
+                            ))}
+                          </Select>
+                    )}
+                </Form.Item>
                 <Form.Item required label="Docker镜像" rules={[{ required: true, message: '必填镜像名' }]}>
                     {getFieldDecorator('image')(
-                        <Select   style={{ width: 600 }} >
-                            {this.state.tmpimg.map((item,index)=>(
-                                <Option key={item} value={item}>{item}</Option>
-                            ))}
-                        </Select>
+                      <Radio.Group   onChange={this.onCallImgChange} > 
+                        <Radio  value={1}>默认自带：
+                          {this.state.tmpimgs["tag"] =="select"
+                            ?
+                            <Select  onChange={v=>{this.setState({tmpimgV:v})}} style={{ width: 600 }} >
+                                {this.state.tmpimg.map((item,index)=>(
+                                    <Option key={item} value={item}>{item}</Option>
+                                ))}
+                            </Select>
+                            :null
+                          }
+                          </Radio>
+                          <Radio  value={2}>更新镜像：
+                          {this.state.tmpimgs["tag"] =="input"
+                            ?
+                              <Input onChange={e =>{this.setState({tmpimgV:e.target.value})}} placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                            :null
+                          }
+                          </Radio>
+                        </Radio.Group>
                     )}
                 </Form.Item>
-
-                <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('namespace')(
-                      <Select   style={{ width: 300 }} >
-                          {this.state.tmpns.map((item,index)=>(
-                              <Option key={index} value={item}>{item}</Option>
-                            
-                          ))}
-                      </Select>
-                    )}
-                </Form.Item>
-              
                   <Form.Item  label="端口映射" >
                     {store.rancherport.map((item,index)=>(
                       <div key={index}>
@@ -294,20 +328,20 @@ class DeployForm extends React.Component {
                                 <Input placeholder="容器端口" defaultValue={item["containerport"]} onChange={e => item['containerport'] = e.target.value}  style={{ width: 100, marginLeft: 5 }}/>
                           </Form.Item>
                           <Form.Item>
-                                <Select defaultValue={item["potocol"]!= null ? item["potocol"]: "TCP"}  onChange={v => item['potocol'] = v} style={{ width: 100 }} >
+                                <Select defaultValue={"TCP"}  onChange={v => item['potocol'] = v} style={{ width: 100 }} >
                                   <Option value="TCP">TCP</Option>
                                   <Option value="UDP">UDP</Option>
                                 </Select>
                           </Form.Item>
                           <Form.Item>
-                                  <Select defaultValue={item["policy"] !=null ? item["policy"] : "NodePort" } onChange={v => item['policy'] = v}  style={{ width: 250 }} >
+                                  <Select defaultValue={"NodePort"} onChange={v => item['policy'] = v}  style={{ width: 250 }} >
                                     <Option value="NodePort">NodePort (所有主机端口均可访问)</Option>
                                     <Option value="HostPort">HostPort (仅 Pod 所在主机端口可访问)</Option>
                                     <Option value="ClusterIP">集群 IP(集群内部访问)</Option>
                                   </Select>
                           </Form.Item>
                           <Form.Item>
-                                <Input defaultValue={item["targetport"]!=null ? item["targetport"]: null}  onChange={e => item['targetport'] = e.target.value} placeholder="默认NodePort随机端口30000-32768" style={{ width: 250, marginLeft: 5 }}/>
+                                <Input  onChange={e => item['targetport'] = e.target.value} placeholder="默认NodePort随机端口30000-32768" style={{ width: 250, marginLeft: 5 }}/>
                           </Form.Item>
                             <div  onClick={() => store.rancherport.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
@@ -316,7 +350,7 @@ class DeployForm extends React.Component {
                         </div>
                       ))}
                     <Button  type="dashed" block  
-                      onClick={() => {store.rancherport.push({"portname":"","containerport":"","potocol":"","policy":"NodePort","targetport":""})}}>
+                      onClick={() => {store.rancherport.push({"portname":"","containerport":"","potocol":"TCP","policy":"NodePort","targetport":""})}}>
                             <i type="plus">添加端口映射</i>
                     </Button>
                   </Form.Item>
@@ -345,7 +379,8 @@ class DeployForm extends React.Component {
                                   {store.rancherCallhost.length <2
                                   ?
                                     store.rancherCallhost.map((item,index)=>(
-                                      <Input  key={index} defaultValue={item["iteminput"]} onChange={e => item['iteminput'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                      // <Input  key={index}  onChange={e =>{this.setState({rancherBL:{"type": "host", "data":e.target.value}})}} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                      <Input  key={index}  onChange={e => item['itemdata'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
                                     ))
                                   : null}
                               </Radio>
@@ -395,37 +430,37 @@ class DeployForm extends React.Component {
                             <Card title={item["t"]} style={{ width: 400 }}>
                                   {item['tt'] === 0 ?
                                       <div>
-                                        <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
-                                        <Input   placeholder="主机路径" style={{ width: 350}}/>
-                                        <Input   placeholder="容器路径" style={{ width: 350}}/>
-                                        <Input   placeholder="子路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
+                                        <Input onChange={e => item['mode'] = e.target.value}   placeholder="默认权限模式" defaultValue="420" style={{ width: 350}}/>
+                                        <Input onChange={e => item['hostp'] = e.target.value}    placeholder="主机路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['containerp'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subp'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
                                       </div>
                                   : null}
                                   {item['tt'] === 1  ?
                                       <div>
-                                        <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
-                                        <Select >
+                                        <Input onChange={e => item['vol'] = e.target.value} placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
+                                        <Input onChange={e => item['mode'] = e.target.value}  placeholder="默认权限模式" defaultValue="420" style={{ width: 350}}/>
+                                        <Select onChange={v => item['pvc'] = v} >
                                           {this.state.tmppvc.map(item =>(
                                               <Option key={item} value={item}>{item}</Option>
                                           ))}
                                         </Select>
-                                        <Input   placeholder="容器路径" style={{ width: 350}}/>
-                                        <Input   placeholder="子路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['containerp'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subp'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
                                       </div>
                                   : null}
                                   {item['tt'] === 2  ?
                                       <div>
-                                        <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                        <Input  placeholder="默认权限模式" defaultValue="666" style={{ width: 350}}/>
-                                        <Select >
+                                        <Input  onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
+                                        <Input  onChange={e => item['mode'] = e.target.value} placeholder="默认权限模式" defaultValue="420" style={{ width: 350}}/>
+                                        <Select onChange={v => item['config'] = v} >
                                           {this.state.tmpcmp.map(item =>(
                                               <Option key={item} value={item}>{item}</Option>
                                           ))}
                                         </Select>
-                                        <Input   placeholder="容器路径" style={{ width: 350}}/>
-                                        <Input   placeholder="子路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['containerp'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subp'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
                                       </div>
                                   : null}
                                   
