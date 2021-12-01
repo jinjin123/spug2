@@ -238,3 +238,22 @@ def get_data(sql):
 def randpass(length=10):
     chars = string.ascii_letters + random.choice("!@#$%") + string.digits + str(random.randint(1,10)) + random.choice("!@#$%")
     return ''.join([random.choice(chars) for i in range(length)])
+
+
+def pvcargs(id=None):
+    if id == 0:
+        args = {
+                "type": "persistentVolumeClaim",
+                "accessModes": [
+                    "ReadWriteMany"
+                ],
+                "name": None,
+                "volumeId": None,
+                "resources": {
+                    "requests": {
+                        "storage": None
+                    }
+                },
+                "namespaceId": None
+        }
+        return args

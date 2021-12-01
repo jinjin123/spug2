@@ -4,7 +4,7 @@
 from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
-from libs import JsonParser, Argument, json_response
+from libs import JsonParser, Argument, json_response,pvcargs
 from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService,ProjectServiceApprovalNotice,ProjectConfigMap,ProjectPvc
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
@@ -313,3 +313,38 @@ def get_versions(request, d_id):
         return json_response(error='该应用不支持此操作')
     branches, tags = fetch_versions(deploy)
     return json_response({'branches': branches, 'tags': tags})
+
+class RancherPvcOpView(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('data', required=False,type=dict, help='pvcdata'),
+        ).parse(request.body)
+        if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            ex = ProjectService.objects.filter(pjname=(form.data)['pjname']).values('pjid')
+            if ex.exists():
+                d = ex.first()
+                pvarg = None
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+                kwargs["headers"]["Authorization"] = Action.token
+                kwargs["url"] = (Action.url).format(d['pjid'])
+                if (form.data).get("storageClassId"):
+                    pvarg = pvcargs(1)
+                else:
+                    pvarg = pvcargs(0)
+                    pvarg["name"] = (form.data)['name']
+                    pvarg["resources"]["requests"]["storage"] = (form.data)["resources"]["requests"]["storage"]
+                    pvarg['namespaceId'] = (form.data)['namespaceId']
+                kwargs['data'] = json.dumps(pvarg)
+                res = RequestApiAgent().create(**kwargs)
+                logger.info(msg="#####rancher redploy pvc call:###### " + str(res.status_code))
+                if res.status_code != 201:
+                    logger.error(msg="#####rancher redploy dev call:###### " + str(res))
+                    return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+
+        return json_response(error=error)
+
+

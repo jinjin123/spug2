@@ -572,6 +572,9 @@ class Mytest(unittest.TestCase):
             def test_pb_approval(self):
                 from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
                 from django.db.models import Count
+                # a = ProjectService.objects.filter(pjname="ioc-platform").values('pjid').first()
+                # a=ProjectService.objects.get(pjname='ioc-platform').
+                # print(a)
             #     a = ProjectConfigMap.objects.filter(tag="ioc").values("id","pjid")
             #     for x in a:
             #         print(x)
@@ -582,38 +585,38 @@ class Mytest(unittest.TestCase):
                 #     ProjectConfigMap.objects.filter(id=x['id']).update(verifyurl=v)
                     # print(x['id'])
                 #--------------
-                pj = RancherApiConfig.objects.filter(env_id=4, label="GETPVC").first()
-                token = pj.token
-                a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
-                    counts=Count("pjid"))
-                for x in a:
-                    if x['pjid'] == 'c-5tk6p:p-55knm':
-                        url = (pj.url).format(x['pjid'])
-                        kwargs = {
-                            "url": url,
-                            "headers": {"Authorization": token, "Content-Type": "application/json"}
-                        }
-                        res = RequestApiAgent().list(**kwargs)
-                        pjdatalist = (json.loads(res.content))["data"]
-                        for xx in pjdatalist:
-                            m = ProjectPvc.objects.create(
-                                pjid=xx['projectId'],
-                                nsname=xx['namespaceId'],
-                                nsid=xx['namespaceId'],
-                                pvcid=xx['id'],
-                                pvcname=xx['name'],
-                                storageid=xx['storageClassId'],
-                                capacity=xx['status']['capacity']['storage'],
-                                accessMode=xx['status']['accessModes'],
-                                volumeid=xx['volumeId'],
-                                dellinks=xx['links']['remove'],
-                                selflinks=xx['links']['self'],
-                                updatelinks=xx['links']['update'],
-                                yamllinks=xx['links']['yaml'],
-                                tag='ioc',
-                                pjname='自动化发布',
-                            )
-                            m.save()
+                # pj = RancherApiConfig.objects.filter(env_id=4, label="GETPVC").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     if x['pjid'] == 'c-5tk6p:p-55knm':
+                #         url = (pj.url).format(x['pjid'])
+                #         kwargs = {
+                #             "url": url,
+                #             "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #         }
+                #         res = RequestApiAgent().list(**kwargs)
+                #         pjdatalist = (json.loads(res.content))["data"]
+                #         for xx in pjdatalist:
+                #             m = ProjectPvc.objects.create(
+                #                 pjid=xx['projectId'],
+                #                 nsname=xx['namespaceId'],
+                #                 nsid=xx['namespaceId'],
+                #                 pvcid=xx['id'],
+                #                 pvcname=xx['name'],
+                #                 storageid=xx['storageClassId'],
+                #                 capacity=xx['status']['capacity']['storage'],
+                #                 accessMode=xx['status']['accessModes'],
+                #                 volumeid=xx['volumeId'],
+                #                 dellinks=xx['links']['remove'],
+                #                 selflinks=xx['links']['self'],
+                #                 updatelinks=xx['links']['update'],
+                #                 yamllinks=xx['links']['yaml'],
+                #                 tag='ioc',
+                #                 pjname='自动化发布',
+                #             )
+                #             m.save()
                 #-------------------
                 #spug test
                 # pj = RancherApiConfig.objects.filter(env_id=4, label="GETCONFIGMAP").first()
