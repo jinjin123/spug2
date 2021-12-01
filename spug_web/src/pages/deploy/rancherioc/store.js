@@ -49,8 +49,8 @@ class Store {
   @observable addRancherVisible = false;
 
   @observable ranchercmp=[{"k":"","v":""}];
-  @observable rancherenv=[{"k":"","v":""}];
-  @observable rancherport=[{"portname":"","containerport":"","potocol":"TCP","policy":"NodePort","targetport":""}];
+  @observable rancherenv=[];
+  @observable rancherport=[];
   @observable rancherVolume=[];
   @observable rancherCallhost=[];
   @observable cmaprecord = {};

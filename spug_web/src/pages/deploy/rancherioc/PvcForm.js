@@ -100,7 +100,28 @@ class PvcForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    formData["mode"] = 666
+    const tmpstorage =  {"requests": {"storage": formData["pvcsize"].toString() + "Gi"}}
+    // formData["mode"] = 666
+    formData["type"] = "persistentVolumeClaim"
+    formData["accessModes"] = ["ReadWriteMany"]
+    formData["volumeId"] = null
+    formData["resources"] = tmpstorage
+    switch(formData["vtype"]){
+        case 0:
+          break;
+        case 1:
+          break;
+        case 2:
+          formData["storageClassId"] = "managed-nfs-storage"
+          break;
+    }
+    http.post('/api/app/deploy/pvcop/', {"data":formData})
+    .then(() => {
+        message.success('操作成功');
+        store.pvcForm = false;
+        store.fetchRecords()
+      
+    }, () => this.setState({loading: false}))
     console.log(formData)
   };
 
@@ -216,7 +237,7 @@ class PvcForm extends React.Component {
         >
           <Form  layout="inline" wrapperCol={{ span: 24 }}>
               <Form.Item required label="名称"  rules={[{ required: true, message: '必填volume名' }]}>
-                  {getFieldDecorator('pvcname')(
+                  {getFieldDecorator('name')(
                     <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                   )}
               </Form.Item>
@@ -225,15 +246,14 @@ class PvcForm extends React.Component {
                     {getFieldDecorator('pjname')(
                       <Select  onChange={v=> this.onRjChange(v)} style={{ width: 200 }} >
                           {store.rancherpj.map((item,index)=>(
-                              <Option key={item} value={item}>{item}</Option>
-                            
+                              <Option key={item} value={item}>{item}</Option>                            
                           ))}
                       </Select>
                     )}
                 </Form.Item>
 
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('nsname')(
+                    {getFieldDecorator('namespaceId')(
                       <Select   style={{ width: 300 }} >
                           {this.state.tmpns.map((item,index)=>(
                               <Option key={index} value={item}>{item}</Option>
@@ -247,9 +267,9 @@ class PvcForm extends React.Component {
                       <Select  style={{ width: 400 }} >
                           <Option value={0}>{"使用默认 storage class"}</Option>
                           <Option value={1}>{"managed-nfs-50-128-storage"}</Option>
+                          <Option value={2}>{"managed-nfs-storage"}</Option>
                           {this.state.pvctype.map((item,index)=>(
-                              <Option key={item} value={item}>{item}</Option>
-                            
+                              <Option key={item} value={item}>{item}</Option>                           
                           ))}
                       </Select>
                     )}

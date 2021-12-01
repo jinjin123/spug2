@@ -116,7 +116,14 @@ class CmpForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    formData["data"] = store.ranchercmp
+    const tmp = {}
+    
+    store.ranchercmp.map((item,index)=>(
+      tmp['"' + item['k'] + '"']= item["v"]
+    ))
+    formData["data"] = tmp
+    formData["type"] = "configMap"
+    formData["labels"] = {}
     // console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
     console.log(formData)
   };
@@ -192,7 +199,7 @@ class CmpForm extends React.Component {
         >
           <Form  layout="inline" wrapperCol={{ span: 24 }}>
               <Form.Item required label="名称"  rules={[{ required: true, message: '必填名' }]}>
-                  {getFieldDecorator('configName',{initialValue: info['configName']})(
+                  {getFieldDecorator('name',{initialValue: info['configName']})(
                     <Input placeholder="e.g. myapp" style={{ width: 200, marginLeft: 10 }}/>
                   )}
               </Form.Item>
@@ -216,7 +223,7 @@ class CmpForm extends React.Component {
                 </Form.Item>
 
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                      {getFieldDecorator('nsname',{initialValue:info['nsname']} )(
+                      {getFieldDecorator('namespaceId',{initialValue:info['nsname']} )(
                         (info.id ? 
                         <Select   style={{ width: 150 }} >
                           {this.state.tmpns.map((item,index)=>(
