@@ -119,12 +119,20 @@ class CmpForm extends React.Component {
     const tmp = {}
     
     store.ranchercmp.map((item,index)=>(
-      tmp['"' + item['k'] + '"']= item["v"]
+      // tmp['"' + item['k'] + '"']= item["v"]
+      tmp[item['k']]= item["v"]
     ))
     formData["data"] = tmp
+    formData["dbdata"] =  store.ranchercmp
     formData["type"] = "configMap"
     formData["labels"] = {}
-    // console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    http.post('/api/app/deploy/cmapop/', {"data":formData,"env":2,"tag":"ioc"})
+    .then(() => {
+        message.success('操作成功');
+        store.cmpForm = false;
+        store.fetchRecords()
+      
+    }, () => this.setState({loading: false}))
     console.log(formData)
   };
 

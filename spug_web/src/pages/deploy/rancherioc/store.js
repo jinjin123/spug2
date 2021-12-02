@@ -10,6 +10,7 @@ class Store {
   @observable records = [];
   @observable cmaprecords = [];
   @observable pvcrecords = [];
+  @observable noderecords = [];
 
   @observable toppj = [];
   @observable rancherpj = [];
@@ -67,7 +68,7 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/app/deploy/svc/ioc/')
-      .then(({pj,svc,rj,ns,app,cmap,pvc})=>{
+      .then(({pj,svc,rj,ns,app,cmap,pvc,nodes})=>{
         this.records = svc;
         this.toppj = pj;
         this.rancherpj = rj;
@@ -75,6 +76,7 @@ class Store {
         this.apps = app;
         this.cmaprecords =  cmap;
         this.pvcrecords =  pvc;
+        this.noderecords = nodes
       })
       .finally(() => this.isFetching = false)
   };

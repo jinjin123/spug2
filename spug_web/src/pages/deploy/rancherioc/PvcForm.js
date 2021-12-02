@@ -115,7 +115,7 @@ class PvcForm extends React.Component {
           formData["storageClassId"] = "managed-nfs-storage"
           break;
     }
-    http.post('/api/app/deploy/pvcop/', {"data":formData})
+    http.post('/api/app/deploy/pvcop/', {"data":formData,"env":2,"tag":"ioc"})
     .then(() => {
         message.success('操作成功');
         store.pvcForm = false;

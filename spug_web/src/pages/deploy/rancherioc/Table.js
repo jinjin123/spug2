@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table,  Tag,  message,Select,Tabs,Input } from 'antd';
+import { Table,  Tag,  message,Select,Tabs,Input,Modal } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import noticStore from '../notice/store';
@@ -74,6 +74,42 @@ class ComTable extends React.Component {
         break;
       
       case 2:
+        switch(action){
+          case "cmap":
+            // store.cmaprecord = info;
+            // store.cmpForm = true;
+            this.setState({loading: true});
+            Modal.confirm({
+              title: '删除确认',
+              content: `确定要删除【${info['configName']}】?`,
+              onOk: () => {
+                return http.delete('/api/app/deploy/cmapop/', {params: {id: info.id, env: 2}})
+                  .then(() => {
+                    message.success('删除成功');
+                    store.fetchRecords()
+                  })
+              }
+            })
+            console.log(action)
+            break;;
+          case "svc":
+            break;;
+          case "pvc":
+            this.setState({loading: true});
+            Modal.confirm({
+              title: '删除确认',
+              content: `确定要删除【${info['pvcname']}】?`,
+              onOk: () => {
+                return http.delete('/api/app/deploy/pvcop/', {params: {id: info.id, env: 2}})
+                  .then(() => {
+                    message.success('删除成功');
+                    store.fetchRecords()
+                  })
+              }
+            })
+            console.log(info.id)
+            break;;
+        }
         break;
       ;
       case 3:
@@ -170,15 +206,18 @@ class ComTable extends React.Component {
               {/* <Column title="暴露服务信息" dataIndex="pubsvc" width={200} ellipsis={{"showTitle":false}} /> */}
               <Column title="副本" dataIndex="replica"/>
               <Column title="创建人" dataIndex="create_by"/>
+              <Column title="创建时间" dataIndex="create_time"/>
+
               {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                 <Column title="操作" fixed="right" render={info => (
                   <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"svc")}  style={{ width: 100 }} >
                     <Option value={1}>编辑</Option>
-                    <Option value={2}>回滚</Option>
+                    <Option value={2}>删除</Option>
                     <Option value={3}>伸缩</Option>
                     <Option value={4}>终端</Option>
                     <Option value={5}>申请发布</Option>
                     <Option value={6}>重新部署</Option>
+                    <Option value={7}>回滚</Option>
                   </Select>
                   
                 )}/>
@@ -213,6 +252,8 @@ class ComTable extends React.Component {
                 <Column title="配置卷名称" dataIndex="configName"/>
                 <Column title="命名空间" dataIndex="nsname"/>
                 <Column title="创建人" dataIndex="create_by"/>
+                <Column title="创建时间" dataIndex="create_time"/>
+
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"cmap")}  style={{ width: 100 }} >
@@ -255,6 +296,7 @@ class ComTable extends React.Component {
                 <Column title="pvid" dataIndex="volumeid"/>
                 <Column title="存储类" dataIndex="storageid"/>
                 <Column title="创建人" dataIndex="create_by"/>
+                <Column title="创建时间" dataIndex="create_time"/>
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >

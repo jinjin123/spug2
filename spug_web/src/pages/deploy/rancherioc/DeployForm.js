@@ -33,7 +33,8 @@ class DeployForm extends React.Component {
     }
   }
   // componentDidMount() {
-  //   historystore.fetchRecords();
+  //   // historystore.fetchRecords();
+    
   // }
 
   handleDelete = (text) => {
@@ -63,7 +64,7 @@ class DeployForm extends React.Component {
     if(e.target.value === 1){
       store.rancherCallhost = []
       store.rancherCallhost.push({
-        "type":"host","itemid":0,"itemdata":"", 
+        "type":"host","itemid":0,"itemdata": null, 
       })
     }else{
       store.rancherCallhost = []
@@ -120,7 +121,7 @@ class DeployForm extends React.Component {
     const node ={}
     const volumes = []
     const volumeMounts = []
-    formData["workloadnum"] = this.state.input_value
+    formData["scale"] = this.state.input_value
     formData["image"] = this.state.tmpimgV
     formData["ports"] = store.rancherport
     store.rancherVolume.map(item=>(
@@ -166,7 +167,9 @@ class DeployForm extends React.Component {
 
 
     store.rancherenv.map((item,index)=>(
-      tmp['"' + item['k'] + '"']= item["v"]
+      // tmp['"' + item['k'] + '"']= item["v"]
+      tmp[item['k']]= item["v"]
+
     ))
     formData["environment"] = tmp
     if(store.rancherCallhost.length > 2  ){
@@ -196,6 +199,13 @@ class DeployForm extends React.Component {
       node["preferred"] = preferred
     }
     formData["scheduling"] = {"node": node}
+    http.post('/api/app/deploy/svcop/', {"data":formData,"env":2,"tag":"ioc"})
+    .then(() => {
+        message.success('操作成功');
+        store.deployForm = false;
+        store.fetchRecords()
+      
+    }, () => this.setState({loading: false}))
     console.log(formData)
   };
 
@@ -334,10 +344,10 @@ class DeployForm extends React.Component {
         >
           <Form  layout="inline" wrapperCol={{ span: 24 }}>
               <Form.Item required label="名称"  rules={[{ required: true, message: '必填部署名' }]}>
-                  {getFieldDecorator('task_name')(
+                  {getFieldDecorator('name')(
                     <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                   )}
-              </Form.Item>
+              </Form.Item>  
               <Form.Item required label="工作负载类型"  rules={[{ required: true, message: '工作负载数量' }]}>
                   {getFieldDecorator('workloadnum')(
                     <Radio.Group onChange={this.onChange} >
@@ -362,7 +372,7 @@ class DeployForm extends React.Component {
                     )}
                 </Form.Item>
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('nsname')(
+                    {getFieldDecorator('namespaceId')(
                           <Select   style={{ width: 300 }} >
                             {this.state.tmpns.map((item,index)=>(
                                 <Option key={index} value={item}>{item}</Option>              
@@ -405,7 +415,7 @@ class DeployForm extends React.Component {
                                 <Input placeholder="容器端口" defaultValue={item["containerPort"]} onChange={e => item['containerPort'] = parseInt(e.target.value)}  style={{ width: 100, marginLeft: 5 }}/>
                           </Form.Item>
                           <Form.Item>
-                                <Select defaultValue={"TCP"}  onChange={v => item['potocol'] = v} style={{ width: 100 }} >
+                                <Select defaultValue={"TCP"}  onChange={v => item['protocol'] = v} style={{ width: 100 }} >
                                   <Option value="TCP">TCP</Option>
                                   <Option value="UDP">UDP</Option>
                                 </Select>
@@ -427,7 +437,7 @@ class DeployForm extends React.Component {
                         </div>
                       )) : null}
                     <Button  type="dashed" block  
-                      onClick={() => {store.rancherport.push({"name":"","containerPort":null,"potocol":"TCP","kind":"NodePort","sourcePort":0,"type":"containerPort","hostPort":0})}}>
+                      onClick={() => {store.rancherport.push({"name":"","containerPort":null,"protocol":"TCP","kind":"NodePort","sourcePort":0,"type":"containerPort","hostPort":0})}}>
                             <i type="plus">添加端口映射</i>
                     </Button>
                   </Form.Item>
@@ -453,12 +463,32 @@ class DeployForm extends React.Component {
                   <Form.Item  label="主机调度" rules={[{ required: true, message: '请选择调度方式!' }]}>
                         <Radio.Group onChange={this.onCallHostChange} > 
                               <Radio  value={1}>指定主机运行所有 Pods
-                                  {store.rancherCallhost.length <2
+                                  {store.rancherCallhost.length ===1
                                   ?
-                                    store.rancherCallhost.map((item,index)=>(
+                                      <Select 
+                                      showSearch
+                                      filterOption={(input, option) =>
+                                        option.props.children.indexOf(input)  >= 0
+                                      }
+                                      filterSort={(optionA, optionB) =>
+                                        optionA.props.children.localeCompare(optionB.props.children)
+                                      }
+                                      onChange={v => store.rancherCallhost[0]["itemdata"] = v} style={{ width: 200, marginLeft: 10 }}>
+                                        {store.noderecords.map((t,tindex)=>(
+                                              <Option key={tindex} value={t["nodeid"]}>{t["ipaddress"]}</Option>   
+                                        ))
+                                        }
+                                      </Select>
                                       // <Input  key={index}  onChange={e =>{this.setState({rancherBL:{"type": "host", "data":e.target.value}})}} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
-                                      <Input  key={index}  onChange={e => item['itemdata'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
-                                    ))
+                                      // <Input  key={index}  onChange={e => item['itemdata'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                        
+                                      //   <Select    onChange={v => item['itemdata'] = v}  style={{ width: 250 }} >
+                                      //       {item["itemdata"].map((t,tindex) => (
+                                      //             <Option key={tindex} value={t["nodeid"]}>{t["ipaddress"]}</Option>   
+                                      //       ))}
+                                          
+                                      // </Select>
+                                    
                                   : null}
                               </Radio>
                               <Radio value={2}>每个 Pod 自动匹配主机
