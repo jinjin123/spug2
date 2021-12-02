@@ -4,11 +4,12 @@
 from django.views.generic import View
 from django.db.models import F
 from django.conf import settings
-from libs import JsonParser, Argument, json_response,pvcargs
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2, RancherConfigMap, RancherNamespace,RancherDeployment , ProjectService,ProjectServiceApprovalNotice,ProjectConfigMap,ProjectPvc
+from libs import JsonParser, Argument, json_response,pvcargs,cmapargs,svcargs
+from apps.app.models import *
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 from apps.account.models import User
+from apps.app.tasks import after_get_svcdata
 import subprocess
 import json
 import os
@@ -216,14 +217,17 @@ class RancherSvcView(View):
         svc = ""
         cmap= ""
         pvc=""
+        nodes=""
         if tag == "ioc":
             svc = ProjectService.objects.filter(rancher_url__contains="ioc").all()
             cmap = ProjectConfigMap.objects.filter(tag='ioc').all()
             pvc  = ProjectPvc.objects.filter(tag='ioc').all()
+            nodes = RancherNode.objects.filter(tag='ioc').all()
         elif tag == "fangyi":
             svc = ProjectService.objects.filter(rancher_url__contains="feiyan").all()
             cmap = ProjectConfigMap.objects.filter(tag='feiyan').all()
             pvc = ProjectPvc.objects.filter(tag='feiyan').all()
+            nodes = RancherNode.objects.filter(tag='feiyan').all()
         pj = [x['top_project'] for x in svc.order_by('top_project').values('top_project').distinct()]
         rj = [x['pjname'] for x in svc.order_by('pjname').values('pjname').distinct()]
         ns = [x['nsname'] for x in svc.order_by('nsname').values('nsname').distinct()]
@@ -235,7 +239,7 @@ class RancherSvcView(View):
             # tmp.append(data)
         return json_response({"pj":pj,"rj":rj,"ns": ns,"app":app,'cmap':[x.to_dict() for x in cmap],
                               "pvc": [x.to_dict() for x in pvc],
-                              "svc":[x.to_dict() for x in svc]})
+                              "svc":[x.to_dict() for x in svc],"nodes":[x.to_dict() for x in nodes]})
 
     def post(self,request):
         form, error = JsonParser(
@@ -318,6 +322,8 @@ class RancherPvcOpView(View):
     def post(self,request):
         form, error = JsonParser(
             Argument('data', required=False,type=dict, help='pvcdata'),
+            Argument('env', required=False, type=int, help='env'),
+            Argument('tag', required=False, type=str, help='tag'),
         ).parse(request.body)
         if error is None:
             kwargs = {
@@ -327,8 +333,8 @@ class RancherPvcOpView(View):
             ex = ProjectService.objects.filter(pjname=(form.data)['pjname']).values('pjid')
             if ex.exists():
                 d = ex.first()
-                pvarg = None
-                Action = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+                global pvarg
+                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
                 kwargs["headers"]["Authorization"] = Action.token
                 kwargs["url"] = (Action.url).format(d['pjid'])
                 if (form.data).get("storageClassId"):
@@ -344,7 +350,157 @@ class RancherPvcOpView(View):
                 if res.status_code != 201:
                     logger.error(msg="#####rancher redploy dev call:###### " + str(res))
                     return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                red = json.loads(res.content)
+                m = ProjectPvc.objects.create(
+                    pjid=red['projectId'],
+                    nsname=red['namespaceId'],
+                    nsid=red['namespaceId'],
+                    pvcid=red['id'],
+                    pvcname=red['name'],
+                    storageid=red['storageClassId'],
+                    capacity=red['resources']['requests']['storage'],
+                    accessMode=red['accessModes'],
+                    volumeid='pvc-'+ red['uuid'],
+                    dellinks=red["links"]["remove"],
+                    selflinks=red["links"]["self"],
+                    updatelinks=red["links"]["update"],
+                    yamllinks=red["links"]["yaml"],
+                    tag=form.tag,
+                    verifyurl= "https://rancher.ioc.com/p/"+red['projectId']+'/volumes/'+ red['id'] if form.tag == "ioc" else "https://rancher.feiyan.com/p/"+red['projectId']+'/volumes/'+ red['id'] ,
+                    create_by=request.user,
+                    pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname
+                )
+                m.save()
 
         return json_response(error=error)
 
+    def delete(self,request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='id'),
+            Argument('env',type=int, help='env'),
+        ).parse(request.GET)
+        if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            m = ProjectPvc.objects.filter(id=form.id).first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
+            kwargs["headers"]["Authorization"] = Action.token
+            kwargs["url"] = m.dellinks
+            res = RequestApiAgent().delete(**kwargs)
+            if res.status_code != 200:
+                logger.error(msg="#####rancher remove pvc call:###### " + str(res))
+                return json_response(error="删除rancher pvc api 出现异常，请重试一次！如还有问题请联系运维！")
+            ProjectPvc.objects.filter(id=form.id).delete()
+
+        return json_response(error=error)
+
+class RancherCmapOpView(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('data', required=False,type=dict, help='cmapdata'),
+            Argument('env', required=False, type=int, help='env'),
+            Argument('tag', required=False, type=str, help='tag'),
+        ).parse(request.body)
+        if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            cmap = cmapargs()
+            cmap['data'] = (form.data)['data']
+            cmap['name']=  (form.data)['name']
+            cmap['namespaceId']= (form.data)['namespaceId']
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="ADDCONFIGMAP").first()
+            kwargs["headers"]["Authorization"] = Action.token
+            kwargs["url"] = (Action.url).format((ProjectConfigMap.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
+            kwargs['data'] = json.dumps(cmap)
+            res = RequestApiAgent().create(**kwargs)
+            logger.info(msg="#####rancher create cmap call:###### " + str(res.status_code))
+            red = json.loads(res.content)
+            if res.status_code != 201:
+                logger.error(msg="#####rancher create configmap call:###### " + str(res))
+                return json_response(error="重新部署rancher configmap api 出现异常，请重试一次！如还有问题请联系运维！")
+            m = ProjectConfigMap.objects.create(
+                pjid=red['projectId'],
+                configId=red['id'],
+                configName=red['name'],
+                configMap=(form.data)['dbdata'],
+                nsname=red['namespaceId'],
+                nsid=red['namespaceId'],
+                dellinks=red["links"]["remove"],
+                selflinks=red["links"]["self"],
+                updatelinks=red["links"]["update"],
+                yamllinks=red["links"]["yaml"],
+                tag=form.tag,
+                create_by=request.user,
+                verifyurl="https://rancher.ioc.com/p/"+red['projectId']+'/config-maps/'+ red['id'] if form.tag == "ioc" else "https://rancher.feiyan.com/p/"+red['projectId']+'/config-maps/'+ red['id'],
+                pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname,
+            )
+            m.save()
+
+        return json_response(error=error)
+
+
+    def delete(self, request):
+        form, error = JsonParser(
+            Argument('id', type=int, help='id'),
+            Argument('env', type=int, help='env'),
+        ).parse(request.GET)
+        if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            m = ProjectConfigMap.objects.filter(id=form.id).first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
+            kwargs["headers"]["Authorization"] = Action.token
+            kwargs["url"] = m.dellinks
+            res = RequestApiAgent().delete(**kwargs)
+            if res.status_code != 204:
+                logger.error(msg="#####rancher remove cmap call:###### " + str(res))
+                return json_response(error="删除rancher configmap api 出现异常，请重试一次！如还有问题请联系运维！")
+            ProjectConfigMap.objects.filter(id=form.id).delete()
+
+        return json_response(error=error)
+
+class RancherSvcOpView(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('data', required=False,type=dict, help='cmapdata'),
+            Argument('env', required=False, type=int, help='env'),
+            Argument('tag', required=False, type=str, help='tag'),
+        ).parse(request.body)
+        if error is None:
+            svc = svcargs()
+            svc['scheduling'] = (form.data)['scheduling']
+            svc['volumes'] = (form.data)['volumes']
+            svc['name'] = (form.data)['name']
+            svc['scale'] = (form.data)['scale']
+            svc['namespaceId'] = (form.data)['namespaceId']
+            svc['containers'][0]['ports'] =  (form.data)['ports']
+            svc['containers'][0]['namespaceId'] =  (form.data)['namespaceId']
+            svc['containers'][0]['image'] =  (form.data)['image']
+            svc['containers'][0]['name'] =  (form.data)['name']
+            svc['containers'][0]['environment'] =  (form.data)['environment']
+
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC").first()
+            newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
+            kwargs["headers"]["Authorization"] = Action.token
+            kwargs["url"] = newUrl
+            kwargs['data'] = json.dumps(svc)
+            res = RequestApiAgent().create(**kwargs)
+            logger.info(msg="#####rancher create svc call:###### " + str(res.status_code))
+            red = json.loads(res.content)
+            if res.status_code != 201:
+                logger.error(msg="#####rancher create deployment call:###### " + str(res))
+                return json_response(error="重新部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
+            # after_get_svcdata(red['id'],newUrl,form.env)
+
+        return json_response(error=error)
 

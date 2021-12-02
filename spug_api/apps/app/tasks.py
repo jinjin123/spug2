@@ -4,7 +4,8 @@ from spug.celery import app
 from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
-from apps.app.models import RancherNamespace,RancherConfigMap
+from apps.app.models import *
+from apps.config.models import RancherApiConfig
 from django.core.mail import send_mail
 from apps.message.models import EmailRecord
 import logging
@@ -87,3 +88,25 @@ def send_mail_task(subject,content,from_mail,to_email):
             message.save()
     except:
         logger.error('send_mail_task_error', exc_info=True)
+
+@app.task
+def after_get_svcdata(dpid,url, envid):
+    try:
+        newUrl = url + "/"+ dpid
+        kwargs = {
+            "url": "",
+            "headers": {"Authorization": "", "Content-Type": "application/json"}
+        }
+        Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC").first()
+        kwargs["headers"]["Authorization"] = Action.token
+        kwargs["url"] = newUrl
+        res = RequestApiAgent().list(**kwargs)
+        logger.info(msg="#####rancher create svc call:###### " + str(res.status_code))
+        red = json.loads(res.content)
+        m = ProjectService.objects.create(
+
+        )
+        m.save()
+    except Exception as e:
+        logger.error('########get svcdata fail #######--->',e)
+

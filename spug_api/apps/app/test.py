@@ -1,7 +1,7 @@
 from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
-from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, RancherDeployment, RancherSvcPubStandby,ProjectService,ProjectServiceApproval,ProjectServiceApprovalNotice
+from apps.app.models import *
 from apps.config.models import RancherApiConfig
 import unittest
 from django.core.mail import send_mail
@@ -569,9 +569,9 @@ class Mytest(unittest.TestCase):
             #     print(e)
             # print(pvcnew[:1])
 
-            def test_pb_approval(self):
-                from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
-                from django.db.models import Count
+            # def test_pb_approval(self):
+            #     from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
+            #     from django.db.models import Count
                 # a = ProjectService.objects.filter(pjname="ioc-platform").values('pjid').first()
                 # a=ProjectService.objects.get(pjname='ioc-platform').
                 # print(a)
@@ -938,5 +938,28 @@ class Mytest(unittest.TestCase):
                 #     leaderstatus=1
                 # )
                 # m1.save()
+    # def test_ioc_nodes(self):
+    #     d = RancherApiConfig.objects.filter(env_id=3,label="NODES").first()
+    #     url = d.url
+    #     token = d.token
+    #     kwargs = {
+    #         "url": url,
+    #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+    #     }
+    #     res = RequestApiAgent().list(**kwargs)
+    #     pjdatalist = (json.loads(res.content))["data"]
+    #     for x in pjdatalist:
+    #         m = RancherNode.objects.create(
+    #             state=x['state'],
+    #             ipaddress=x['ipAddress'],
+    #             nodeid=x['id'],
+    #             clusterid=x['clusterId'],
+    #             worker=x['worker'],
+    #             create_by_id=1,
+    #             hostname=x['hostname'],
+    #             tag="feiyan"
+    #         )
+    #         m.save()
 
-
+    def test(self):
+        return

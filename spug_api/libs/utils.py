@@ -193,6 +193,9 @@ class RequestApiAgent:
         return self.send_request("list", kwargs)
         # return self.send_request("list", kwargs).text
 
+    def delete(self,*args, **kwargs):
+        return self.send_request('delete',kwargs)
+
 
 host_select_args = [
     "top_project",'child_project','cluster',"hostname",
@@ -257,3 +260,91 @@ def pvcargs(id=None):
                 "namespaceId": None
         }
         return args
+
+def cmapargs(id=None):
+    args = {
+        "type":"configMap",
+        "data":{},
+        "labels":{},
+        "name":None,
+        "namespaceId":None
+    }
+    return args
+
+def svcargs(id=None):
+    args = {
+        "hostIPC": False,
+        "hostNetwork": False,
+        "hostPID": False,
+        "paused": False,
+        "type": "workload",
+        "namespaceId": None,
+        "scale": None,
+        "dnsPolicy": "ClusterFirst",
+        "restartPolicy": "Always",
+        "labels": {
+
+        },
+        "containers": [
+            {
+                "initContainer": False,
+                "restartCount": 0,
+                "stdin": True,
+                "stdinOnce": False,
+                "tty": True,
+                "type": "container",
+                "privileged": True,
+                "allowPrivilegeEscalation": True,
+                "readOnly": False,
+                "runAsNonRoot": False,
+                "namespaceId": None,
+                "imagePullPolicy": "Always",
+                "environmentFrom": [
+
+                ],
+                "resources": {
+                    "requests": {
+
+                    },
+                    "limits": {
+
+                    }
+                },
+                "capAdd": [
+
+                ],
+                "capDrop": [
+
+                ],
+                "environment": {},
+                "image": None,
+                "livenessProbe": None,
+                "name": None,
+                "ports": [],
+                "volumeMounts": []
+            }
+        ],
+        "scheduling": {
+            "node": {
+
+            }
+        },
+        "deploymentConfig": {
+            "minReadySeconds": 0,
+            "type": "deploymentConfig",
+            "revisionHistoryLimit": 10,
+            "strategy": "RollingUpdate",
+            "maxSurge": 1,
+            "maxUnavailable": 0
+        },
+        "name": None,
+        "annotations": {
+            "cattle.io/timestamp": "2021-12-01T01:02:27Z"
+        },
+        "volumes": [
+
+        ]
+    }
+
+
+    return args

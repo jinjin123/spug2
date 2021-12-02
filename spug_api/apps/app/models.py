@@ -212,6 +212,8 @@ class ProjectConfigMap(models.Model, ModelMixin):
     tag = models.CharField(max_length=10,null=True)
     verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
 
 
     def to_dict(self, *args, **kwargs):
@@ -245,6 +247,8 @@ class ProjectPvc(models.Model, ModelMixin):
     tag = models.CharField(max_length=10,null=True)
     verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
@@ -252,6 +256,24 @@ class ProjectPvc(models.Model, ModelMixin):
         return tmp
     class Meta:
         db_table = 'rancher_pvc'
+
+class RancherNode(models.Model, ModelMixin):
+    tag = models.CharField(max_length=10, verbose_name="status", null=True)
+    hostname = models.CharField(max_length=30, verbose_name="status", null=True)
+    state = models.CharField(max_length=15, verbose_name="status", null=True)
+    ipaddress = models.CharField(max_length=15, verbose_name="ip", null=True)
+    nodeid = models.CharField(max_length=50,  verbose_name="nodeid call scheduler",null=True)
+    clusterid = models.CharField(max_length=20,  verbose_name="clusterid",null=True)
+    worker = models.BooleanField(verbose_name='worker nor not',null=True)
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        return tmp
+    class Meta:
+        db_table = 'rancher_node'
 
 
 class tmp(models.Model, ModelMixin):
