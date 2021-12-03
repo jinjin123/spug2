@@ -339,6 +339,10 @@ class RancherPvcOpView(View):
                 kwargs["url"] = (Action.url).format(d['pjid'])
                 if (form.data).get("storageClassId"):
                     pvarg = pvcargs(1)
+                    pvarg["storageClassId"] = (form.data)['storageClassId']
+                    pvarg["name"] = (form.data)['name']
+                    pvarg["resources"]["requests"]["storage"] = (form.data)["resources"]["requests"]["storage"]
+                    pvarg['namespaceId'] = (form.data)['namespaceId']
                 else:
                     pvarg = pvcargs(0)
                     pvarg["name"] = (form.data)['name']
@@ -347,10 +351,10 @@ class RancherPvcOpView(View):
                 kwargs['data'] = json.dumps(pvarg)
                 res = RequestApiAgent().create(**kwargs)
                 logger.info(msg="#####rancher redploy pvc call:###### " + str(res.status_code))
+                red = json.loads(res.content)
                 if res.status_code != 201:
                     logger.error(msg="#####rancher redploy dev call:###### " + str(res))
                     return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
-                red = json.loads(res.content)
                 m = ProjectPvc.objects.create(
                     pjid=red['projectId'],
                     nsname=red['namespaceId'],
@@ -484,7 +488,7 @@ class RancherSvcOpView(View):
             svc['containers'][0]['image'] =  (form.data)['image']
             svc['containers'][0]['name'] =  (form.data)['name']
             svc['containers'][0]['environment'] =  (form.data)['environment']
-
+            svc['containers'][0]['volumeMounts'] =  (form.data)['volumeMounts']
             kwargs = {
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
@@ -494,12 +498,78 @@ class RancherSvcOpView(View):
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = newUrl
             kwargs['data'] = json.dumps(svc)
+            # print(svc)
             res = RequestApiAgent().create(**kwargs)
-            logger.info(msg="#####rancher create svc call:###### " + str(res.status_code))
+            logger.info(msg="#####rancher create deployment call:###### " + str(res.status_code))
             red = json.loads(res.content)
+            print(red)
             if res.status_code != 201:
                 logger.error(msg="#####rancher create deployment call:###### " + str(res))
                 return json_response(error="重新部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
+
+            kwargs = {
+                "url": newUrl + "/"+ "deployment:" + (form.data)['namespaceId'] + ":" + (form.data)['name'],
+                "headers": {"Authorization":  Action.token, "Content-Type": "application/json"}
+            }
+            res = RequestApiAgent().list(**kwargs)
+            if res.status_code != 200:
+                logger.error(msg="#####rancher create deployment call:###### " + str(res))
+                return json_response(error="部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
+
+            red = json.loads(res.content)
+            tmpenv= []
+            if red['containers'][0].get('environment'):
+                tmpenv.append(red['containers'][0].get('environment'))
+
+            m = ProjectService.objects.create(
+                top_project=(ProjectService.objects.filter(pjid=red['projectId']).first()).top_project,
+                toppjid=(ProjectService.objects.filter(pjid=red['projectId']).first()).toppjid,
+                pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname,
+                pjid=red['projectId'],
+                nsname=red['namespaceId'],
+                nsid=red['namespaceId'],
+                dpname=red['name'],
+                dpid=red['id'],
+                img=red['containers'][0]['image'],
+                replica=red['scale'],
+                rancher_url= "https://rancher.ioc.com/" if red["actions"]["resume"].find("rancher.ioc")  > 0 else "https://rancher.feiyan.com/",
+                state=red['state'],
+                pubsvc=red.get('publicEndpoints',None),
+                create_by=request.user,
+                env_id=2,
+                cbox_env=tmpenv,
+                v_mount=red['containers'][0].get('volumeMounts',[]),
+                volumes=red['volumes'],
+                cports=red['containers'][0].get('ports',[]),
+                pauselinks=red['actions']['pause'],
+                rdplinks=red['actions']['redeploy'],
+                rollbacklinks=red['actions']['rollback'],
+                updatelinks=red['links']['update'],
+                removelinks=red['links']['remove'],
+                revisionslinks=red['links']['revisions'],
+                statuslinks=((RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC").first()).url).format(red['projectId']) + "/" +red['id'] ,
+                verifyurl="https://rancher.ioc.com/p/"+ red['projectId'] + "/workload/" + red['id']  if red["actions"]["resume"].find("rancher.ioc")  > 0 else  "https://rancher.feiyan.com/p/"+ red['projectId'] + "/workload/" + red['id']
+
+            )
+            m.save()
+            if (form.data)['cmapid'] is not None:
+                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGCMAP").first()
+                newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid,(form.data)['cmapid'])
+                kwargs = {
+                    "url": newUrl,
+                    "headers": {"Authorization": Action.token, "Content-Type": "application/json"}
+                }
+                cres = RequestApiAgent().list(**kwargs)
+                cred = json.loads(cres.content)
+                kvtmp = []
+                if cred.get("data",None):
+                    for k,v in dict.items(cred["data"]):
+                        kvtmp.append({"k":k,"v":v})
+
+                ProjectService.objects.filter(dpid=red['id']).update(configId=cred['id'],configName=cred['name'], configMap=kvtmp)
+
+
+
             # after_get_svcdata(red['id'],newUrl,form.env)
 
         return json_response(error=error)

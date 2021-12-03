@@ -244,6 +244,7 @@ def randpass(length=10):
 
 
 def pvcargs(id=None):
+    global args
     if id == 0:
         args = {
                 "type": "persistentVolumeClaim",
@@ -259,7 +260,23 @@ def pvcargs(id=None):
                 },
                 "namespaceId": None
         }
-        return args
+    else:
+        args = {
+                "type": "persistentVolumeClaim",
+                "accessModes": [
+                    "ReadWriteMany"
+                ],
+                "name": None,
+                "storageClassId": None,
+                "volumeId": None,
+                "resources": {
+                    "requests": {
+                        "storage": None
+                    }
+                },
+                "namespaceId": None
+        }
+    return args
 
 def cmapargs(id=None):
     args = {
@@ -275,7 +292,7 @@ def svcargs(id=None):
     args = {
         "hostIPC": False,
         "hostNetwork": False,
-        "hostPID": False,
+        "hostPID": True,
         "paused": False,
         "type": "workload",
         "namespaceId": None,

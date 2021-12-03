@@ -176,12 +176,24 @@ class ProjectService(models.Model, ModelMixin):
     opsper = models.CharField(max_length=200, verbose_name='运维负责人',null=True)
     create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
     pubsvc = models.CharField(max_length=300, verbose_name='暴露端口与服务所在部署主机地址', null=True)
-    v_mount = models.CharField(max_length=1500,verbose_name="挂载详情",null=True)
-    volumes = models.CharField(max_length=1500,verbose_name="卷详情",null=True)
+    v_mount = models.CharField(max_length=1500,verbose_name="挂载详情 c mount",null=True)
+    volumes = models.CharField(max_length=1500,verbose_name="卷详情 out volume",null=True)
     cbox_env = models.CharField(max_length=1500,verbose_name="容器变量",null=True)
     verifyurl = models.CharField(max_length=255,verbose_name='rancher app check',null=True)
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     modify_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='更新时间')
+
+    pauselinks = models.CharField(max_length=300,null=True, verbose_name="暂停")
+    rdplinks = models.CharField(max_length=300,null=True, verbose_name="重新部署")
+    rollbacklinks = models.CharField(max_length=300,null=True, verbose_name="回滚")
+    revisionslinks = models.CharField(max_length=300,null=True, verbose_name="回滚version")
+    updatelinks =  models.CharField(max_length=300,null=True, verbose_name="update")
+    removelinks = models.CharField(max_length=300,null=True, verbose_name="remove")
+    statuslinks = models.CharField(max_length=300,null=True, verbose_name="status")
+
+    cports = models.CharField(max_length=1500,null=True, verbose_name="port list")
+
+
     # depends_svc = models.CharField(max_length=500, verbose_name="依赖服务或组件多余注释", null=True)
 
     def to_dict(self, *args, **kwargs):

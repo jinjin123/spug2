@@ -962,4 +962,11 @@ class Mytest(unittest.TestCase):
     #         m.save()
 
     def test(self):
-        return
+        kwargs = {
+            # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
+            "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234",
+            "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"}
+        }
+        res = RequestApiAgent().list(**kwargs)
+        list = json.loads(res.content)
+        print(json.dumps(list))
