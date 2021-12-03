@@ -111,8 +111,11 @@ class PvcForm extends React.Component {
           break;
         case 1:
           break;
-        case 2:
-          formData["storageClassId"] = "managed-nfs-storage"
+        // case 2:
+        //   formData["storageClassId"] = "managed-nfs-storage"
+        //   break;
+        default:
+          formData["storageClassId"] =  formData['vtype']
           break;
     }
     http.post('/api/app/deploy/pvcop/', {"data":formData,"env":2,"tag":"ioc"})
@@ -267,7 +270,6 @@ class PvcForm extends React.Component {
                       <Select  style={{ width: 400 }} >
                           <Option value={0}>{"使用默认 storage class"}</Option>
                           <Option value={1}>{"managed-nfs-50-128-storage"}</Option>
-                          <Option value={2}>{"managed-nfs-storage"}</Option>
                           {this.state.pvctype.map((item,index)=>(
                               <Option key={item} value={item}>{item}</Option>                           
                           ))}

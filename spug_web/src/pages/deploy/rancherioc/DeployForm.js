@@ -27,6 +27,8 @@ class DeployForm extends React.Component {
         tmpcmp:[],
         tmpimgs:{},
         tmpimgV:null,
+        vol:0,
+        cmapid: null,
         // rancherBL:{},
         moreAction: [{"id":0,"v":"添加卷..."}]
 
@@ -124,6 +126,9 @@ class DeployForm extends React.Component {
     formData["scale"] = this.state.input_value
     formData["image"] = this.state.tmpimgV
     formData["ports"] = store.rancherport
+    formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
+    formData["cname"] = this.state.cmapid
+
     store.rancherVolume.map(item=>(
       item["tt"] === 0  ?
         (volumes.push({"type":"volume","name": item["vol"],"hostPath":{"type":"hostPathVolumeSource","kind":null,"path":item["hostPath"]}}),
@@ -137,12 +142,12 @@ class DeployForm extends React.Component {
         (volumes.push({"type":"volume","name": item["vol"], "persistentVolumeClaim": {
           "readOnly":false,
           "type":"persistentVolumeClaimVolumeSource",
-          "persistentVolumeClaimId":item["pvc"]
+          "persistentVolumeClaimId": formData["namespaceId"]+":"+item["pvc"]
         }}),
         volumeMounts.push({
           "readOnly":false,
           "type":"volumeMount",
-          "mountPath":"/tmp",
+          "mountPath":item["mountPath"],
           "subPath":item["subPath"],
           "name":item["vol"]
       },))
@@ -207,14 +212,18 @@ class DeployForm extends React.Component {
       
     }, () => this.setState({loading: false}))
     console.log(formData)
+    store.rancherVolume = []
   };
 
   onVolumeChange = (action) => {
+    let counter = this.state.vol
+    console.log(counter)
     switch(action){
       case "host":
-        store.rancherVolume.push({"t":"映射主机目录","tt":0,"tag":"host","vol":"vol0","mode":256,"hostPath":"","mountPath":"","subPath":""})
+        store.rancherVolume.push({"t":"映射主机目录","tt":0,"tag":"host","vol":"vol"+(counter).toString(),"mode":256,"hostPath":"","mountPath":"","subPath":""})
         this.setState({
-          moreAction : [{"id": 1,"v":"映射主机目录"}]
+          moreAction : [{"id": 1,"v":"映射主机目录"}],
+          vol: counter +=1
         })
         setTimeout(() => {
           this.setState({
@@ -223,13 +232,14 @@ class DeployForm extends React.Component {
         },500)
         break;
       case "oldpvc":
-        store.rancherVolume.push({"t":"使用现有的PVC","tt":1,"tag":"oldpvc","vol":"vol1","mode":256,"pvc":"","mountPath":"","subPath":"" })
+        store.rancherVolume.push({"t":"使用现有的PVC","tt":1,"tag":"oldpvc","vol":"vol"+(counter).toString(),"mode":256,"pvc":"","mountPath":"","subPath":"" })
         this.setState({
           moreAction : [{"id": 2,"v":"使用现有的PVC"}]
         })
         setTimeout(() => {
           this.setState({
-            moreAction : "添加卷..."
+            moreAction : "添加卷...",
+            vol: counter +=1
           })
         },500)
         break;
@@ -241,18 +251,20 @@ class DeployForm extends React.Component {
           })
           setTimeout(() => {
             this.setState({
-              moreAction : "添加卷..."
+              moreAction : "添加卷...",
+              vol: counter +=1
             })
           },500)
           break;
       case "config":
-        store.rancherVolume.push({"t":"配置映射卷","tt":2,"tag":"config","vol":"vol2","mode":256,"config":"","mountPath":"","subPath":"" })
+        store.rancherVolume.push({"t":"配置映射卷","tt":2,"tag":"config","vol":"vol"+(counter).toString(),"mode":256,"config":"","mountPath":"","subPath":"" })
         this.setState({
           moreAction : [{"id": 4,"v":"配置映射卷" }]
         })
         setTimeout(() => {
           this.setState({
-            moreAction : "添加卷..."
+            moreAction : "添加卷...",
+            vol: counter +=1
           })
         },500)
         break;
@@ -297,7 +309,7 @@ class DeployForm extends React.Component {
     let cmap = []
     let t = store.records.filter(item => item['pjname'] === v)
     t.map(item => {
-        let newArr = store.pvcrecords.filter(x=>x['pjid'] === item['pjid'])
+        let newArr = store.pvcrecords.filter(x=>x['nsname'] === item['nsname'])
         newArr.map(dd =>{
           pvc.push(dd['pvcname'])
         })
@@ -386,7 +398,15 @@ class DeployForm extends React.Component {
                         <Radio  value={1}>默认自带：
                           {this.state.tmpimgs["tag"] =="select"
                             ?
-                            <Select  onChange={v=>{this.setState({tmpimgV:v})}} style={{ width: 600 }} >
+                            <Select  
+                            showSearch
+                            filterOption={(input, option) =>
+                              option.props.children.indexOf(input)  >= 0
+                            }
+                            filterSort={(optionA, optionB) =>
+                              optionA.props.children.localeCompare(optionB.props.children)
+                            }
+                            onChange={v=>{this.setState({tmpimgV:v})}} style={{ width: 600 }} >
                                 {this.state.tmpimg.map((item,index)=>(
                                     <Option key={item} value={item}>{item}</Option>
                                 ))}
@@ -537,7 +557,7 @@ class DeployForm extends React.Component {
                             <Card title={item["t"]} style={{ width: 400 }}>
                                   {item['tt'] === 0 ?
                                       <div>
-                                        <Input onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" defaultValue={"vol"+item["tt"].toString()} style={{ width: 350}}/>
+                                        <Input onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol0" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()} style={{ width: 350}}/>
                                         <Input onChange={e => item['mode'] = e.target.value}   placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
                                         <Input onChange={e => item['hostPath'] = e.target.value}    placeholder="主机路径" style={{ width: 350}}/>
                                         <Input onChange={e => item['mountPath'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
@@ -546,22 +566,22 @@ class DeployForm extends React.Component {
                                   : null}
                                   {item['tt'] === 1  ?
                                       <div>
-                                        <Input onChange={e => item['vol'] = e.target.value} placeholder="默认卷名vol2" defaultValue={"vol"+item["tt"].toString()} style={{ width: 350}}/>
+                                        <Input onChange={e => item['vol'] = e.target.value} placeholder="默认卷名vol1" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
                                         <Input onChange={e => item['mode'] = e.target.value}  placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
                                         <Select onChange={v => item['pvc'] = v} >
-                                          {this.state.tmppvc.map(item =>(
-                                              <Option key={item} value={item}>{item}</Option>
+                                          {this.state.tmppvc.map((item,index) =>(
+                                              <Option key={index} value={item}>{item}</Option>
                                           ))}
                                         </Select>
                                         <Input onChange={e => item['mountPath'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
                                         <Input onChange={e => item['subPath'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
                                       </div>
-                                  : null}
+                                  : null} 
                                   {item['tt'] === 2  ?
                                       <div>
-                                        <Input  onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" defaultValue={"vol"+item["tt"].toString()}style={{ width: 350}}/>
+                                        <Input  onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
                                         <Input  onChange={e => item['mode'] = e.target.value} placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
-                                        <Select onChange={v => item['config'] = v} >
+                                        <Select onChange={v => {item['config'] = v;this.setState({"cmapid": v}) }} >
                                           {this.state.tmpcmp.map(item =>(
                                               <Option key={item} value={item}>{item}</Option>
                                           ))}

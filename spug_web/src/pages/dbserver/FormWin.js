@@ -220,7 +220,15 @@ class FormWin extends React.Component {
           <Form.Item required label="实体项目">
             <Col span={19}>
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(
-                <Select  placeholder="实体项目"  mode="multiple">
+                <Select 
+                showSearch
+                filterOption={(input, option) =>
+                  option.props.children.indexOf(input)  >= 0
+                }
+                filterSort={(optionA, optionB) =>
+                  optionA.props.children.localeCompare(optionB.props.children)
+                }
+                placeholder="实体项目"  mode="multiple">
                   {store.pj.map(item => (
                     item.tag === "实体项目" ? 
                     <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -243,7 +251,15 @@ class FormWin extends React.Component {
           <Form.Item required label="实体子项目">
           <Col span={17}>
               {getFieldDecorator('child_project',{initialValue: info['child_project']})(
-                  <Select  placeholder="实体子项目"  mode="multiple">
+                  <Select
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.props.children.indexOf(input)  >= 0
+                  }
+                  filterSort={(optionA, optionB) =>
+                    optionA.props.children.localeCompare(optionB.props.children)
+                  }
+                  placeholder="实体子项目"  mode="multiple">
                     {store.pj.map(item => (
                       item.tag === "项目子类" ? 
                       <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -262,7 +278,15 @@ class FormWin extends React.Component {
 
             {/* <Col span={14}> */}
               {getFieldDecorator('zone', {initialValue: info['zone']})(
-                <Select placeholder="资源类别"  mode="multiple" >
+                <Select 
+                showSearch
+                filterOption={(input, option) =>
+                  option.props.children.indexOf(input)  >= 0
+                }
+                filterSort={(optionA, optionB) =>
+                  optionA.props.children.localeCompare(optionB.props.children)
+                }
+                placeholder="资源类别"  mode="multiple" >
                   {store.zz.map(item => (
                   // item.tag === "项目子类" ? 
                   // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -290,7 +314,15 @@ class FormWin extends React.Component {
 
             {/* <Col span={14}> */}
               {getFieldDecorator('cluster', {initialValue: info['cluster']})(
-                <Select placeholder="资源类别"  mode="multiple" >
+                <Select
+                showSearch
+                filterOption={(input, option) =>
+                  option.props.children.indexOf(input)  >= 0
+                }
+                filterSort={(optionA, optionB) =>
+                  optionA.props.children.localeCompare(optionB.props.children)
+                }
+                placeholder="资源类别"  mode="multiple" >
                   {store.cs.map(item => (
                   // item.tag === "项目子类" ? 
                   // <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -331,7 +363,15 @@ class FormWin extends React.Component {
             <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
               {getFieldDecorator('username', {initialValue: info['username']})(
                 // <Input addonBefore="ssh" placeholder="用户名"/>
-                <Select  placeholder="用户">
+                <Select
+                showSearch
+                filterOption={(input, option) =>
+                  option.props.children.indexOf(input)  >= 0
+                }
+                filterSort={(optionA, optionB) =>
+                  optionA.props.children.localeCompare(optionB.props.children)
+                }
+                placeholder="用户">
                   {/* <Select.Option value={"root"} key={0}>{"root"}</Select.Option> */}
                   {/* <Select.Option value={"ioc"} key={1}>{"ioc"}</Select.Option> */}
                   {store.cuser.map(item => (
@@ -390,7 +430,15 @@ class FormWin extends React.Component {
               {/* <Form.Item style={{display: 'block', width: 'calc(30%)'}}> */}
                 {getFieldDecorator('provider', {initialValue: info['provider']})(
                   // <Input addonBefore="ssh" placeholder="用户名"/>
-                  <Select  placeholder="设备位置">
+                  <Select 
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.props.children.indexOf(input)  >= 0
+                  }
+                  filterSort={(optionA, optionB) =>
+                    optionA.props.children.localeCompare(optionB.props.children)
+                  }
+                  placeholder="设备位置">
                     {store.dvpo.map(item => (
                       <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                     ))}
@@ -455,7 +503,15 @@ class FormWin extends React.Component {
 
             {getFieldDecorator('work_zone', {initialValue: info['work_zone']})(
               // <Input  placeholder="工作区域"/>
-              <Select  placeholder="所属区域">
+              <Select
+              showSearch
+              filterOption={(input, option) =>
+                option.props.children.indexOf(input)  >= 0
+              }
+              filterSort={(optionA, optionB) =>
+                optionA.props.children.localeCompare(optionB.props.children)
+              }
+              placeholder="所属区域">
                 {store.wz.map(item => (
                   <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
                 ))}

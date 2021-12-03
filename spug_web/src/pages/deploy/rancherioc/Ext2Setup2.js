@@ -14,8 +14,12 @@ import envStore from 'pages/config/environment/store'
 class Ext2Setup2 extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      loading: false,
+      updatecmap: false,
+    }
   }
-
+  
   componentDidMount() {
     if (envStore.records.length === 0) {
       envStore.fetchRecords()
@@ -74,8 +78,15 @@ class Ext2Setup2 extends React.Component {
             ))}
           </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
+          <Switch
+              // defaultChecked
+              checkedChildren="不更新配置映射卷"
+              unCheckedChildren="更新配置映射卷"
+              checked={this.state.updatecmap}
+              onChange={v =>  this.setState({updatecmap: v})}
+              />
           {/* <Button disabled={info['host_ids'].filter(x => x).length === 0} type="primary" onClick={() => store.page += 1}>下一步</Button> */}
-          <Button  type="primary" onClick={() => store.page += 1}>下一步</Button>
+          <Button  type="primary" onClick={() => !this.state.updatecmap ?  store.page += 1 : console.log("pub")   }> { !this.state.updatecmap  ?"下一步":"提交发布" }</Button>
           <Button style={{marginLeft: 20}} onClick={() => store.page -= 1}>上一步</Button>
         </Form.Item>
 
