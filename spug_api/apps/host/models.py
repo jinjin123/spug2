@@ -424,6 +424,7 @@ class ConnctUser(models.Model,ModelMixin):
 
     class Meta:
         db_table = "connect_user"
+        ordering = ('name',)
 
 class ResourceType(models.Model,ModelMixin):
     name = models.CharField(max_length=50)

@@ -60,7 +60,7 @@ class HostView(View):
                                   "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
                                   "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
                                   "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
-            cache.set(HOSTKEY,content,5*1000)
+            cache.set(HOSTKEY,content)
             return json_response(content)
         else:
             hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all().annotate(num=Count("dbtag")).order_by('-ipaddress')
@@ -82,7 +82,7 @@ class HostView(View):
                                   "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
                                   'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
 
-            cache.set(DBKEY,content,5*1000)
+            cache.set(DBKEY,content)
             return json_response(content)
 
 
@@ -435,7 +435,7 @@ class MultiDbView(View):
                                   "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
                                   "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
                                   "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
-            cache.set(DBMultiKEY,content,5*1000)
+            cache.set(DBMultiKEY,content)
             return json_response(content)
         else:
             hosts = MultiDBUser.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all()
@@ -457,7 +457,7 @@ class MultiDbView(View):
                                   "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
                                   'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
 
-            cache.set(DBMultiKEY,content,5*1000)
+            cache.set(DBMultiKEY,content)
             return json_response(content)
 
 
