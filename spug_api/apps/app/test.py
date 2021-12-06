@@ -962,11 +962,31 @@ class Mytest(unittest.TestCase):
     #         m.save()
 
     def test(self):
-        kwargs = {
-            # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
-            "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234",
-            "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"}
-        }
-        res = RequestApiAgent().list(**kwargs)
-        list = json.loads(res.content)
-        print(json.dumps(list))
+        # kwargs = {
+        #     # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
+        #     "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/configMaps/spug:spugtest",
+        #     "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"},
+        #     "data": json.dumps({
+        #         "type":"configMap",
+        #         "data":{"a": "666"},
+        #         "labels":{},
+        #         "id": "spug:spugtest",
+        #         "namespaceId": "spug"
+        #     })
+        # }
+        # res = RequestApiAgent().put(**kwargs)
+        # print(res)
+        # list = json.loads(res.content)
+        # print(list)
+        # print(json.dumps(list))
+        # a = RancherSvcPubStandby.objects.get(id=40)
+        # data = {}
+        # for x in ast.literal_eval(a.configMap):
+        #     data[x["k"]] =x["v"]
+        # print(data)
+        ts = ProjectService.objects.get(id=88)
+        b = ts.to_dict()
+        del b['id']
+        print(b)
+
+

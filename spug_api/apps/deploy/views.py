@@ -8,9 +8,9 @@ from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
 
 from apps.config.models import RancherApiConfig
-from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent
+from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent,cmapargs
 from apps.deploy.models import DeployRequest
-from apps.app.models import Deploy, DeployExtend2,App,RancherSvcPubStandby,RancherProject,RancherNamespace,App,ProjectService,ProjectServiceApprovalNotice
+from apps.app.models import *
 from apps.deploy.utils import deploy_dispatch, Helper
 from apps.account.models import User
 from apps.host.models import Host
@@ -18,7 +18,7 @@ from collections import defaultdict
 from threading import Thread
 from datetime import datetime
 from apps.app.tasks import send_mail_task
-
+import ast
 import subprocess
 import json
 import uuid
@@ -195,20 +195,87 @@ class RancherPublishView(View):
                         kwargs["headers"]["Authorization"] = Action.token
                         kwargs["url"] = (Action.url).format(publish_args['project_id'], publish_args['deployid'])
                         res = RequestApiAgent().create(**kwargs)
+                        print(res)
                         logger.info(msg="#####rancher redploy dev call:###### " + str(res.status_code))
                         if res.status_code != 200:
                             logger.error(msg="#####rancher redploy dev call:###### " + str(res))
                             return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3)
-                # if form.env_id == 2:
-                #     Action = RancherApiConfig.objects.filter(env_id=2, label="REDOSVC").first()
-                #     kwargs["headers"]["Authorization"] = Action.token
-                #     kwargs["url"] = (Action.url).format(form.project_id, form.deployid)
-                #     res = RequestApiAgent().create(**kwargs)
-                #     logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
-                #     if res.status_code != 200:
-                #         logger.error(msg="#####rancher redploy prod call:###### " + str(res))
-                #         return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                elif form.env_id == 2:
+                    Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                    kwargs["headers"]["Authorization"] = Action.token
+                    kwargs["url"] = publish_args['statuslinks']
+                    oldres = RequestApiAgent().list(**kwargs)
+                    oldcd = json.loads(oldres.content)
+                    if publish_args["update_img"] == 0:
+                        oldcd["containers"][0]['image'] =publish_args['img']
+                        kwargs['data'] = json.dumps(oldcd)
+                        imgres = RequestApiAgent().put(**kwargs)
+                        if imgres.status_code != 200:
+                            DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
+                            logger.error("### pubish redeploy rancher ## error->" + str(imgres))
+                            return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                        imgdd = json.loads(imgres.content)
+
+                        ts = ProjectService.objects.get(id=publish_args['service_id'])
+                        t = ts.to_dict()
+                        del t["id"]
+                        RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
+                        ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'])
+                        DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+
+                    if publish_args["update_cmap"] == 0:
+                        Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP").first()
+                        kwargs["headers"]["Authorization"] = Action.token
+                        kwargs["url"] = (Action.url).format(publish_args['pjid'], publish_args['configId'])
+                        dataargs = cmapargs()
+                        dd = {}
+                        for x in ast.literal_eval(publish_args['configMap']):
+                            dd[x["k"]] = x["v"]
+                        dataargs["data"] = dd
+                        dataargs["namespaceId"] = publish_args["nsid"]
+                        dataargs["id"] = publish_args["configId"]
+
+                        kwargs['data'] = json.dumps(dataargs)
+                        cres = RequestApiAgent().put(**kwargs)
+                        cred = json.loads(cres.content)
+                        if cres.status_code != 200:
+                            DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
+                            logger.error(msg="#####rancher update  configmap call:###### " + str(cres))
+                            return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                        try:
+                            Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP").first()
+                            kwargs["headers"]["Authorization"] = Action.token
+                            kwargs["url"] =  publish_args['rdplinks']
+                            rdp = RequestApiAgent().create(**kwargs)
+                            if rdp.status_code != 200:
+                                DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3",opsstatus=-3)
+                                logger.error("### pubish redeploy rancher ## error->"+ str(rdp) )
+                                return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+
+                        except Exception as e :
+                            DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
+                            logger.error(msg="### pubish redeploy rancher ## error->"+ str(e))
+                            return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                        kvtmp = []
+                        for k,v in dict.items(cred["data"]):
+                            kvtmp.append({"k":k,"v":v})
+                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'] ,configId=cred['id'], configName=cred['name']).update(configMap=kvtmp)
+                        ts = ProjectService.objects.get(id=publish_args['service_id'])
+                        t = ts.to_dict()
+                        del t["id"]
+                        RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
+                        ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp)
+                        DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+
+
+                    # res = RequestApiAgent().create(**kwargs)
+                    # print(res)
+                    # logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
+                    # if res.status_code != 200:
+                    #     logger.error(msg="#####rancher redploy prod call:###### " + str(res))
+                    #     return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                    # DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3)
             except Exception as  e:
                 print(e)
                 logger.error("#######redeploy pod faild: ########" + str(e))
@@ -244,9 +311,20 @@ class RequestRancherDeployView(View):
             Argument('top_project', help='top_project',required=False),
             Argument('toppjid', help='toppjid',required=False),
             Argument('update_img', help='update_img',required=False),
+            Argument('update_cmap', help='update_cmap',required=False),
             Argument('v_mount', help='v_mount',required=False),
             Argument('verifyurl', help='verifyurl',required=False),
             Argument('volumes', help='volumes',required=False),
+
+            Argument('rollbacklinks', help='rollbacklinks', required=False),
+            Argument('statuslinks', help='statuslinks', required=False),
+            Argument('updatelinks', help='updatelinks', required=False),
+            Argument('rollbacklinks', help='rollbacklinks', required=False),
+            Argument('revisionslinks', help='revisionslinks', required=False),
+            Argument('rdplinks', help='rdplinks', required=False),
+            Argument('pauselinks', help='pauselinks', required=False),
+            Argument('removelinks', help='removelinks', required=False),
+            Argument('cports', help='cports', required=False),
         ).parse(request.body)
         if error is None:
             deploy_app = App.objects.filter(key=form.app_name).first()
@@ -280,7 +358,7 @@ class RequestRancherDeployView(View):
             RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
-                service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,img=form.img).first(),
+                service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,dpid=form.dpid).first(),
                 **form
             )
         pblist = RancherSvcPubStandby.objects.filter(state=0).all()
@@ -288,12 +366,12 @@ class RequestRancherDeployView(View):
             if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
                 notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
                 to_email=[ item["notice_user__email"] for item in notice]
-                send_mail_task.delay(subject="%s%s应用发布审核申请"%(form.top_project,form.dpname), content="{}项目{}应用发布审核申请".format(form.top_project,form.dpname),
+                send_mail_task.delay(subject="%s%s应用发布审核申请"%(form.top_project,form.dpname), content="{}项目{}应用发布审核申请,查看 {}".format(form.top_project,form.dpname,form.verifyurl),
                                      from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
             else:
-                to_email = [item["notice_user__email"] for item in User.objects.filter(role_id=1).values("email").all()]
+                to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
                 send_mail_task.delay(subject="%s%s应用发布审核申请" % (form.top_project, form.dpname),
-                                 content="{}项目{}应用发布审核申请".format(form.top_project, form.dpname),
+                                 content="{}项目{}应用发布审核申请, 查看: {}".format(form.top_project, form.dpname,form.verifyurl),
                                  from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
 
         return json_response(error=error)

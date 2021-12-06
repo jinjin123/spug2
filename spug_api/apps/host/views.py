@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.views.generic import View
-from django.db.models import F,Count
+from django.db.models import F,Count,Q
 from django.http.response import HttpResponseBadRequest
 from libs import json_response, JsonParser, Argument
 from apps.setting.utils import AppSetting
@@ -63,7 +63,7 @@ class HostView(View):
             cache.set(HOSTKEY,content)
             return json_response(content)
         else:
-            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all().annotate(num=Count("dbtag")).order_by('-ipaddress')
+            hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).exclude(ipaddress="").all().annotate(num=Count("dbtag")).order_by('-ipaddress')
             zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
             tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
             ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct()]
@@ -438,7 +438,7 @@ class MultiDbView(View):
             cache.set(DBMultiKEY,content)
             return json_response(content)
         else:
-            hosts = MultiDBUser.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).all()
+            hosts = MultiDBUser.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).exclude(ipaddress="").all()
             zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
             tp = [x['top_project'] for x in hosts.order_by('top_project').values('top_project').distinct()]
             ostp = [x["ostp"] for x in hosts.order_by('ostp').values('ostp').distinct()]

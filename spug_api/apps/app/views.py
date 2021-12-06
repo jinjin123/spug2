@@ -539,7 +539,7 @@ class RancherSvcOpView(View):
                 env_id=2,
                 cbox_env=tmpenv,
                 v_mount=red['containers'][0].get('volumeMounts',[]),
-                volumes=red['volumes'],
+                volumes=red.get('volumes',None),
                 cports=red['containers'][0].get('ports',[]),
                 pauselinks=red['actions']['pause'],
                 rdplinks=red['actions']['redeploy'],
