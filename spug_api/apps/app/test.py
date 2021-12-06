@@ -984,9 +984,9 @@ class Mytest(unittest.TestCase):
         # for x in ast.literal_eval(a.configMap):
         #     data[x["k"]] =x["v"]
         # print(data)
-        ts = ProjectService.objects.get(id=88)
-        b = ts.to_dict()
-        del b['id']
-        print(b)
+        t = Host.objects.values("top_project", "child_project").all()
+        for x in t:
+            for xx in ast.literal_eval(x['top_project']):
+                print(type(xx))
 
 

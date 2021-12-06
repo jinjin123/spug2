@@ -467,6 +467,15 @@ class ProjectView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("top_project", "child_project").all()
+            for x in t:
+                for xx in ast.literal_eval(x['top_project']):
+                    if xx != "" and  xx is not None and xx == form.id:
+                        return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
+                for xx in ast.literal_eval(x['child_project']):
+                    if xx != "" and  xx is not None and xx == form.id:
+                        return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
+
             ProjectConfig.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -504,6 +513,12 @@ class Cluster(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("cluster").all()
+            for x in t:
+                for xx in ast.literal_eval(x['cluster']):
+                    if xx != "" and xx is not None and xx == form.id:
+                        return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
+
             ClusterConfig.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -539,6 +554,11 @@ class Work_Zone(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("work_zone").all()
+            for x in t:
+                if x != "" and x is not None and x == form.id:
+                    return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
+
             WorkZone.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -577,6 +597,11 @@ class ZoneConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("zone").all()
+            for x in t:
+                for xx in ast.literal_eval(x['zone']):
+                    if xx != "" and xx is not None and xx == form.id:
+                        return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
             Zone.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -616,6 +641,12 @@ class ServicebagConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("service_pack").all()
+            for x in t:
+                for xx in ast.literal_eval(x['service_pack']):
+                    if xx != "" and xx is not None and xx == form.id:
+                        return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
+
             Servicebag.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -734,6 +765,10 @@ class DevicePoConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("provider").all()
+            for x in t:
+                if x != "" and x is not None and x == form.id:
+                    return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
             DevicePositon.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -772,6 +807,10 @@ class ConnctUserConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("username").all()
+            for x in t:
+                if x != "" and x is not None and x == form.id:
+                    return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
             ConnctUser.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -811,6 +850,10 @@ class ResourceTConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            t = Host.objects.values("resource_type").all()
+            for x in t:
+                if x != "" and x is not None and x == form.id:
+                    return json_response(error='主机已存在关联的配置信息，请删除相关配置后再尝试删除')
             ResourceType.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
