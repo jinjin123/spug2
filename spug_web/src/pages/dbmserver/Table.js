@@ -38,7 +38,7 @@ class ComTable extends React.Component {
       title: '回收确认',
       content: `确定要回收【${text['ipaddress']}】?`,
       onOk: () => {
-        return http.delete('/api/host/dbresource/host/', {params: {id: text.id}})
+        return http.delete('/api/host/dbresource/db/', {params: {id: text.id}})
           .then(() => {
             message.success('待回收成功');
             store.fetchRecords()
@@ -67,9 +67,9 @@ class ComTable extends React.Component {
         break;
         ;;
       case 2:
-        window.open(`/ssh/${info.id}`)
+        this.handleDelete(info)
         this.setState({
-          moreAction : [{"id": info.id,"v":"终端"}]
+          moreAction : [{"id": info.id,"v":"删除"}]
         })
         setTimeout(() => {
           this.setState({
@@ -98,7 +98,7 @@ class ComTable extends React.Component {
       render: (info,index) => {
         return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
           <Select.Option key={index} value={1}>编辑</Select.Option>
-          {/* <Select.Option value={2}>终端</Select.Option> */}
+          <Select.Option value={2}>删除</Select.Option>
           <Select.Option key={index} value={3}>待回收</Select.Option>
         </Select>
       }

@@ -126,7 +126,11 @@ class DeployForm extends React.Component {
     formData["scale"] = this.state.input_value
     formData["image"] = this.state.tmpimgV
     formData["ports"] = store.rancherport
-    formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
+    if(this.state.cmapid != null){
+      formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
+    }else{
+      formData["cmapid"] = null
+    }
     formData["cname"] = this.state.cmapid
 
     store.rancherVolume.map(item=>(

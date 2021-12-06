@@ -100,8 +100,11 @@ class ComTable extends React.Component {
         return <Tag color="green">{info['status_alias']}</Tag>
       } else if (info.status === '-3') {
         return <Tag color="red">{info['status_alias']}</Tag>
+      } else if (info.status === '1' ) {
+        return <Tag color="magenta" >{info['status_alias']}</Tag>
       } else {
-        return <Tag>{info['status_alias']}</Tag>
+        return <Tag >{info['status_alias']}</Tag>
+
       }
     }
   }, 
@@ -127,8 +130,11 @@ class ComTable extends React.Component {
         return <Tag color="green">{info['opsstatus_alias']}</Tag>
       } else if (info.opsstatus === -3) {
         return <Tag color="red">{info['opsstatus_alias']}</Tag>
+      } else if (info.opsstatus === 1 ){
+        return <Tag color="magenta">{info['opsstatus_alias']}</Tag>
       } else {
-        return <Tag>{info['opsstatus_alias']}</Tag>
+        return <Tag >{info['opsstatus_alias']}</Tag>
+
       }
     }
   },

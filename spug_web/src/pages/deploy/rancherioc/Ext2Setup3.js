@@ -83,9 +83,10 @@ class Ext2Setup3 extends React.Component {
     store.record["state"] = false
     // console.log(store.record)
     http.post('/api/deploy/request/rancher/', store.record)
-      .then(res => {
+      .then( ()=> {
         message.success('建立发布审批单成功！');
         store.ext2Visible = false;
+        store.addRancherVisible = false;
       }, () => this.setState({loading: false}))
   };
 
