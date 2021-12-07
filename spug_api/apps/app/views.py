@@ -574,3 +574,47 @@ class RancherSvcOpView(View):
 
         return json_response(error=error)
 
+
+
+class RancherRollbackView(View):
+    def get(self,request,id):
+        if RancherSvcPubStandby.objects.filter(app_id=id).exists():
+            try:
+                t = RancherSvcPubStandby.objects.get(app_id=id)
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                kwargs = {
+                    "url": t.revisionslinks,
+                    "headers": {"Authorization": "", "Content-Type": "application/json"}
+                }
+                kwargs["headers"]["Authorization"] = Action.token
+                res = RequestApiAgent().list(**kwargs)
+                red = (json.loads(res.content))['data']
+                return json_response({"data": red})
+            except Exception as e :
+                logger.error("获取回滚版本失败->"+ str(e))
+        return json_response(error="获取回滚版本失败")
+
+
+    def post(self, request,id):
+        form, error = JsonParser(
+            Argument('data', required=True,type=dict, help='replicaSetId'),
+            # Argument('id', required=True, type=int, help='replicaSetId'),
+        ).parse(request.body)
+        if error is None:
+            if RancherSvcPubStandby.objects.filter(app_id=id).exists():
+                t = RancherSvcPubStandby.objects.get(app_id=id)
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                kwargs = {
+                    "url": t.rollbacklinks,
+                    "headers": {"Authorization": "", "Content-Type": "application/json"}
+                }
+                kwargs["headers"]["Authorization"] = Action.token
+                kwargs["data"] = json.dumps(form.data)
+                res = RequestApiAgent().create(**kwargs)
+                if res.status_code != 200:
+                   return json_response(error="回滚失败")
+                #todo: 请求当前服务得信息 更新old的svc 在吧old的svc copy到hisotry里
+                return json_response(error=error)
+
+        return json_response(error="回滚资源不存在")
+

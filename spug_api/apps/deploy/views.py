@@ -485,3 +485,24 @@ def do_upload(request):
     # messageobj = serializers.serialize('json', message)
     # if send:
     #     send_mail_task.delay()
+
+class RequestChangeDetailView(View):
+    def get(self, request, id):
+        if RancherSvcPubStandby.objects.filter(app_id=id).exists():
+            t = RancherSvcPubStandby.objects.get(app_id=id)
+            old = ProjectService.objects.get(id=t.service_id)
+            tmp = []
+            oldtmp = []
+            for x in ast.literal_eval(t.configMap):
+                tmp.append({x["k"]:x["v"]})
+            for x in ast.literal_eval(old.configMap):
+                oldtmp.append({x["k"]:x["v"]})
+
+            if t.update_img == 0 and t.update_cmap == 0:
+                return json_response({"data": [{"img":t.img,"cmap":tmp,"tag":"new"},{"img":old.img, "cmap":oldtmp,"tag":"old"}], "update_img": t.update_img,"update_cmap": t.update_cmap })
+            elif t.update_img == 0:
+                return json_response({"data": [{"img":t.img,"tag":"new"},{"img":old.img, "tag":"old"}], "update_img": t.update_img ,"update_cmap": t.update_cmap})
+            elif t.update_cmap == 0:
+                return json_response({"data": [{"cmap":tmp,"tag":"new"},{"cmap":oldtmp,"tag":"old"}], "update_cmap": t.update_cmap,"update_img": t.update_img})
+
+        return json_response(error='无变动')
