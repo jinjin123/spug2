@@ -29,16 +29,20 @@ class Ext2Setup2 extends React.Component {
     store.record["update_cmap"] = true
   }
   handleSubmit = () => {
-    this.setState({loading: true});
-    store.record["pbtype"] = store.pbtype
-    store.record["state"] = false
-    // console.log(store.record)
-    http.post('/api/deploy/request/rancher/', store.record)
-      .then( ()=> {
-        message.success('建立发布审批单成功！');
-        store.ext2Visible = false;
-        store.addRancherVisible = false;
-      }, () => this.setState({loading: false}))
+    this.props.form.validateFields((err, formData) => {
+        if(!err){
+          this.setState({loading: true});
+          store.record["pbtype"] = store.pbtype
+          store.record["state"] = false
+          // console.log(store.record)
+          http.post('/api/deploy/request/rancher/', store.record)
+            .then( ()=> {
+              message.success('建立发布审批单成功！');
+              store.ext2Visible = false;
+              store.addRancherVisible = false;
+            }, () => this.setState({loading: false}))
+        }
+    })
   };
 
   render() {
@@ -48,8 +52,10 @@ class Ext2Setup2 extends React.Component {
     const {getFieldDecorator} = this.props.form;
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
-        <Form.Item required label="发布版本命名唯一">
+        <Form.Item required label="发布版本命名唯一" >
+            {getFieldDecorator('app_name', {rules: [{required: true, message: '必填发布名 '}]})(
               <Input placeholder="填写发版命名唯一方便追溯" onChange={e => info.app_name = e.target.value} />
+            )}
         </Form.Item>
         <Form.Item required label="实体项目">
             {getFieldDecorator('top_project', {initialValue: info['top_project']})(

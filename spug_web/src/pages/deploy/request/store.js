@@ -18,7 +18,18 @@ class Store {
   @observable addVisible = false;
   @observable ext1Visible = false;
   @observable ext2Visible = false;
+  @observable rollVisible = false;
+
   @observable approveVisible = false;
+  @observable diffdata = []
+  @observable updateimg = null
+  @observable updatecmap = null
+  @observable diffVisble = false;
+  @observable tmp_rollid = null;
+  // @observable delta=null;
+  // @observable tmp1 = null;
+  // @observable tmp2 = null;
+  @observable rollbackv = [];
 
   @observable f_status = 'all';
   @observable f_app_id;
@@ -72,6 +83,29 @@ class Store {
       this.ext2Visible = true
     }
   };
+  showChange = (info) => {
+    this.isLoading = true;
+    this.diffVisble = true;
+    let diffdata
+    let tmp1
+    let tmp2
+    let delta
+    var jsondiffpatch = require('jsondiffpatch')
+    return http.get('/api/deploy/request/change/'+ info.app_id)
+    .then(({data,update_img,update_cmap})=>{
+      diffdata = data;
+      this.updatecmap = update_cmap;
+      this.updateimg  = update_img;
+      diffdata.map((item)=>(
+          item["tag"] === "old" ? tmp1 = item : tmp2 = item
+      ))
+      delta = jsondiffpatch.diff(tmp1,tmp2)
+      let tmp = jsondiffpatch.formatters.html.format(delta, tmp1)
+      document.getElementById('visual').innerHTML = tmp.replaceAll(/\\n/ig,"<br/>");
+    })
+    .finally(() => this.isLoading = false)
+    
+  }
 
   showApprove = (info) => {
     this.record = info;

@@ -12,6 +12,7 @@ import rancherfangyi from './rancherfangyi';
 import notice from './notice';
 import doExt1Index from './do/Ext1Index';
 import doExt2Index from './do/Ext2Index';
+import doExt2Rancher from './do/Ext2Rancher';
 
 
 export default [
@@ -25,4 +26,6 @@ export default [
   makeRoute('/do/ext2/:id', doExt2Index),
   makeRoute('/do/ext1/:id/:log', doExt1Index),
   makeRoute('/do/ext2/:id/:log', doExt2Index),
+  makeRoute('/do/rancher/:id/:log', doExt2Rancher),
+
 ]

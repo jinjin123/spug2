@@ -17,6 +17,8 @@ import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store'
 import store from './store';
 import moment from 'moment';
+import DiffForm from './DiffForm';
+import RollbackForm from './RollbackForm';
 
 @observer
 class Index extends React.Component {
@@ -123,6 +125,10 @@ class Index extends React.Component {
         {store.addVisible && <SelectApp/>}
         {store.ext1Visible && <Ext1Form/>}
         {store.ext2Visible && <Ext2Form/>}
+        {store.diffVisble && <DiffForm/>}
+        {store.rollVisible && <RollbackForm/>}
+
+
         {store.approveVisible && <Approve/>}
       </AuthCard>
     )

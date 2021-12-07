@@ -133,6 +133,13 @@ class ComTable extends React.Component {
         }
         break;
           ;;
+      case 6:
+        break;;
+      case 7:
+        
+        console.log(info)
+        break;;
+
     }
 
   };

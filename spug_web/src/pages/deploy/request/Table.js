@@ -6,7 +6,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { Table, Modal, Icon, Popover, Tag, message } from 'antd';
-import { http, hasPermission } from 'libs';
+import { http, hasPermission,formatDate } from 'libs';
 import { Action } from "components";
 import store from './store';
 
@@ -168,14 +168,18 @@ class ComTable extends React.Component {
           </Action>;
         case '3':
           return <Action>
-            <Action.Link
-              auth="deploy.request.do"
-              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
-            <Action.Button
-              auth="deploy.request.do"
-              disabled={info.type === '2'}
-              loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+            {info["pub_tag"] === '2'?  
+                <Action.Link
+                auth="deploy.request.do"
+                to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link>
+              : <Action.Link
+                auth="deploy.request.do"
+                to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
+            }
+                <Action.Button
+                auth="deploy.request.do"
+                disabled={info.type === '2'}
+                onClick={() => this.handleRollback(info)}>回滚</Action.Button>
           </Action>;
         case '-1':
           return <Action>
@@ -185,7 +189,7 @@ class ComTable extends React.Component {
         case '0':
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</Action.Button>
-            <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
+            <Action.Button auth="deploy.request.edit" onClick={() => store.showChange(info)}>查看变更</Action.Button>
             <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
           </Action>;
         case '1':
@@ -218,22 +222,39 @@ class ComTable extends React.Component {
   };
 
   handleRollback = (info) => {
+    console.log(info)
     this.setState({loading: true});
-    http.put('/api/deploy/request/', {id: info.id, action: 'check'})
-      .then(res => {
-        Modal.confirm({
-          title: '回滚确认',
-          content: `确定要回滚至 ${res['date']} 创建的名称为【${res['name']}】的发布申请版本?`,
-          onOk: () => {
-            return http.put('/api/deploy/request/', {id: info.id, action: 'do'})
-              .then(() => {
-                message.success('回滚申请创建成功');
-                store.fetchRecords()
-              })
-          }
-        })
-      })
-      .finally(() => this.setState({loading: false}))
+    store.tmp_rollid = info.app_id
+    let rivision = []
+    let t
+    return http.get('/api/app/svc/rollback/'+ info.app_id +'/')
+    .then(({data})=>{
+      data.map((item)=>(
+        t = formatDate(item["createdTS"],"yyyy-MM-dd hh:mm"),
+        rivision.push({"id":item["id"], "time":item["id"]+" "+ (t),"tag":item["createdTS"]})
+      ))
+      console.log(rivision)
+    })
+    .finally(() => (
+      this.isLoading = false,
+      store.rollbackv = rivision.sort((a,b)=> b.tag-a.tag),
+      store.rollVisible = true
+    ))
+    // http.put('/api/deploy/request/', {id: info.id, action: 'check'})
+    //   .then(res => {
+    //     Modal.confirm({
+    //       title: '回滚确认',
+    //       content: `确定要回滚至 ${res['date']} 创建的名称为【${res['name']}】的发布申请版本?`,
+    //       onOk: () => {
+    //         return http.put('/api/deploy/request/', {id: info.id, action: 'do'})
+    //           .then(() => {
+    //             message.success('回滚申请创建成功');
+    //             store.fetchRecords()
+    //           })
+    //       }
+    //     })
+    //   })
+    //   .finally(() => this.setState({loading: false}))
   };
 
   handleDelete = (info) => {
@@ -252,6 +273,7 @@ class ComTable extends React.Component {
 
   render() {
     let data = store.records;
+    console.log(store.diffdata)
     if (store.f_app_id) {
       data = data.filter(item => item['app_id'] === store.f_app_id)
     }
