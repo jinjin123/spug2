@@ -2,6 +2,7 @@ from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
 from apps.app.models import *
+from django.db.models import Q
 from apps.config.models import RancherApiConfig
 import unittest
 from django.core.mail import send_mail
@@ -974,10 +975,10 @@ class Mytest(unittest.TestCase):
             #     "namespaceId": "spug"
             # })
         }
-        res = RequestApiAgent().list(**kwargs)
-        # print(res)
-        list = json.loads(res.content)
-        print(list)
+        # res = RequestApiAgent().list(**kwargs)
+        # # print(res)
+        # list = json.loads(res.content)
+        # print(list)
         # print(json.dumps(list))
         # a = RancherSvcPubStandby.objects.get(id=40)
         # data = {}
@@ -988,5 +989,10 @@ class Mytest(unittest.TestCase):
         # for x in t:
         #     for xx in ast.literal_eval(x['top_project']):
         #         print(type(xx))
+
+
+
+
+
 
 

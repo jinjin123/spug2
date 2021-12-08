@@ -9,7 +9,6 @@ from apps.app.models import *
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 from apps.account.models import User
-from apps.app.tasks import after_get_svcdata
 import subprocess
 import json
 import os

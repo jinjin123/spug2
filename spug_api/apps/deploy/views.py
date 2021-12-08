@@ -223,6 +223,7 @@ class RancherPublishView(View):
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
                         ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'])
                         DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                        RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
 
                     if publish_args["update_cmap"] == 0:
                         Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP").first()
@@ -267,6 +268,7 @@ class RancherPublishView(View):
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
                         ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp)
                         DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                        RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
 
 
                     # res = RequestApiAgent().create(**kwargs)
@@ -357,7 +359,7 @@ class RequestRancherDeployView(View):
                 deploy=Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first(),
                 desccomment=form.desccomment,
             )
-            form.pop("desccomment")
+            tmpdes = form.pop("desccomment")
             RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
@@ -369,12 +371,12 @@ class RequestRancherDeployView(View):
             if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
                 notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
                 to_email=[ item["notice_user__email"] for item in notice]
-                send_mail_task.delay(subject="%s%s应用发布审核申请"%(form.top_project,form.dpname), content="{}项目{}应用发布审核申请,查看 {}".format(form.top_project,form.dpname,form.verifyurl),
+                send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="{}项目{}应用发布审核申请,发布功能:{},查看 {}".format(form.top_project,form.dpname,tmpdes,form.verifyurl),
                                      from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
             else:
                 to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
-                send_mail_task.delay(subject="%s%s应用发布审核申请" % (form.top_project, form.dpname),
-                                 content="{}项目{}应用发布审核申请, 查看: {}".format(form.top_project, form.dpname,form.verifyurl),
+                send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
+                                 content="{}项目{}应用发布审核申请,发布功能:{}, 查看: {}".format(form.top_project, form.dpname,tmpdes,form.verifyurl),
                                  from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
 
         return json_response(error=error)

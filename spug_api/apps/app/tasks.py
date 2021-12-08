@@ -3,6 +3,7 @@
 from spug.celery import app
 from libs.utils import RequestApiAgent
 from django.conf import settings
+from django.db.models import Q
 import json
 from apps.app.models import *
 from apps.config.models import RancherApiConfig
@@ -90,23 +91,21 @@ def send_mail_task(subject,content,from_mail,to_email):
         logger.error('send_mail_task_error', exc_info=True)
 
 @app.task
-def after_get_svcdata(dpid,url, envid):
+def check_svc_status():
     try:
-        newUrl = url + "/"+ dpid
-        kwargs = {
-            "url": "",
-            "headers": {"Authorization": "", "Content-Type": "application/json"}
-        }
-        Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC").first()
-        kwargs["headers"]["Authorization"] = Action.token
-        kwargs["url"] = newUrl
-        res = RequestApiAgent().list(**kwargs)
-        logger.info(msg="#####rancher create svc call:###### " + str(res.status_code))
-        red = json.loads(res.content)
-        m = ProjectService.objects.create(
+        t = ProjectService.objects.filter(~Q(state="active")).values("id","statuslinks")
+        for x in t:
+            if x["statuslinks"] is not None and (x["statuslinks"]).find("ioc.com") > -1:
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                kwargs = {
+                    "url":  x["statuslinks"],
+                    "headers": {"Authorization": Action.token, "Content-Type": "application/json"},
+                }
+                res = RequestApiAgent().list(**kwargs)
+                red = json.loads(res.content)
+                if res.status_code != 200:
+                    logger.error(msg="request rancher svc api status code !200 ")
+                ProjectService.objects.filter(id=x["id"]).update(state=red['state'])
 
-        )
-        m.save()
     except Exception as e:
-        logger.error('########get svcdata fail #######--->',e)
-
+        logger.error('########get svcdata fail #######--->', e)
