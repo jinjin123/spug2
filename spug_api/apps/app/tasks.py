@@ -106,6 +106,18 @@ def check_svc_status():
                 if res.status_code != 200:
                     logger.error(msg="request rancher svc api status code !200 ")
                 ProjectService.objects.filter(id=x["id"]).update(state=red['state'])
+            else:
+                if x["statuslinks"] is not None and (x["statuslinks"]).find("feiyan.com") > -1:
+                    Action = RancherApiConfig.objects.filter(env_id=3, label="GETSVC").first()
+                    kwargs = {
+                        "url": x["statuslinks"],
+                        "headers": {"Authorization": Action.token, "Content-Type": "application/json"},
+                    }
+                    res = RequestApiAgent().list(**kwargs)
+                    red = json.loads(res.content)
+                    if res.status_code != 200:
+                        logger.error(msg="request rancher svc api status code !200 ")
+                    ProjectService.objects.filter(id=x["id"]).update(state=red['state'])
 
     except Exception as e:
         logger.error('########get svcdata fail #######--->', e)
