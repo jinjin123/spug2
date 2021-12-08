@@ -325,6 +325,7 @@ class RequestRancherDeployView(View):
             Argument('pauselinks', help='pauselinks', required=False),
             Argument('removelinks', help='removelinks', required=False),
             Argument('cports', help='cports', required=False),
+            Argument('desccomment', help='desccomment', required=False),
         ).parse(request.body)
         if error is None:
             deploy_app = App.objects.filter(key=form.app_name).first()
@@ -354,7 +355,9 @@ class RequestRancherDeployView(View):
                 host_ids='[]',
                 status=0,
                 deploy=Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first(),
+                desccomment=form.desccomment,
             )
+            form.pop("desccomment")
             RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
@@ -378,34 +381,50 @@ class RequestRancherDeployView(View):
 
 
 class RequestDetailView(View):
-    def get(self, request, r_id):
+    def get(self, request,envid, r_id):
         req = DeployRequest.objects.filter(pk=r_id).first()
         if not req:
             return json_response(error='未找到指定发布申请')
-        hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
-        server_actions, host_actions, outputs = [], [], []
-        if req.deploy.extend == '2':
-            server_actions = json.loads(req.deploy.extend_obj.server_actions)
-            host_actions = json.loads(req.deploy.extend_obj.host_actions)
-        if request.GET.get('log'):
-            rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
-            data = rds.lrange(key, counter, counter + 9)
-            while data:
-                counter += 10
-                outputs.extend(x.decode() for x in data)
-                data = rds.lrange(key, counter, counter + 9)
-        return json_response({
-            'app_name': req.deploy.app.name,
-            'env_name': req.deploy.env.name,
-            'status': req.status,
-            'type': req.type,
-            'status_alias': req.get_status_display(),
-            'targets': targets,
-            'server_actions': server_actions,
-            'host_actions': host_actions,
-            'outputs': outputs
-        })
+        d = DeployRequest.objects.get(pk=r_id)
+        r = RancherSvcPubStandby.objects.get(app_id=Deploy.objects.get(pk=d.deploy_id).app_id)
+        Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC").first()
+        kwargs = {
+            "url": r.statuslinks,
+            "headers": {"Authorization": "", "Content-Type": "application/json"}
+        }
+        kwargs["headers"]["Authorization"] = Action.token
+        res = RequestApiAgent().list(**kwargs)
+        if res.status_code != 200:
+            return json_response(error="rancher结果返回失败")
+
+        red = json.loads(res.content)
+        return json_response({"data":red})
+
+
+        # hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
+        # targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
+        # server_actions, host_actions, outputs = [], [], []
+        # if req.deploy.extend == '2':
+        #     server_actions = json.loads(req.deploy.extend_obj.server_actions)
+        #     host_actions = json.loads(req.deploy.extend_obj.host_actions)
+        # if request.GET.get('log'):
+        #     rds, key, counter = get_redis_connection(), f'{settings.REQUEST_KEY}:{r_id}', 0
+        #     data = rds.lrange(key, counter, counter + 9)
+        #     while data:
+        #         counter += 10
+        #         outputs.extend(x.decode() for x in data)
+        #         data = rds.lrange(key, counter, counter + 9)
+        # return json_response({
+        #     'app_name': req.deploy.app.name,
+        #     'env_name': req.deploy.env.name,
+        #     'status': req.status,
+        #     'type': req.type,
+        #     'status_alias': req.get_status_display(),
+        #     'targets': targets,
+        #     'server_actions': server_actions,
+        #     'host_actions': host_actions,
+        #     'outputs': outputs
+        # })
 
     def post(self, request, r_id):
         query = {'pk': r_id}

@@ -9,6 +9,7 @@ urlpatterns = [
     path('', AppView.as_view()),
     path('deploy/', DeployView.as_view()),
     path('deploy/svc/<str:tag>/', RancherSvcView.as_view()),
+    path('deploy/svc/hsversion/<int:id>/', RancherSvcVersionView.as_view()),
     path('svc/rollback/<int:id>/', RancherRollbackView.as_view()),
     path('deploy/pvcop/', RancherPvcOpView.as_view()),
     path('deploy/svcop/', RancherSvcOpView.as_view()),
@@ -17,4 +18,5 @@ urlpatterns = [
     # path('deployns/', DeployRancherNsView.as_view()),
     # path('deployconf/', DeployRancherConfView.as_view()),
     path('deploy/<int:d_id>/versions/', get_versions),
+
 ]

@@ -598,7 +598,6 @@ class RancherRollbackView(View):
     def post(self, request,id):
         form, error = JsonParser(
             Argument('data', required=True,type=dict, help='replicaSetId'),
-            # Argument('id', required=True, type=int, help='replicaSetId'),
         ).parse(request.body)
         if error is None:
             if RancherSvcPubStandby.objects.filter(app_id=id).exists():
@@ -613,8 +612,27 @@ class RancherRollbackView(View):
                 res = RequestApiAgent().create(**kwargs)
                 if res.status_code != 200:
                    return json_response(error="回滚失败")
-                #todo: 请求当前服务得信息 更新old的svc 在吧old的svc copy到hisotry里
+
+                ts = ProjectService.objects.get(id=t.service_id)
+                tt = ts.to_dict()
+                del tt["id"]
+                RancherPublishHistory.objects.create(service_id=t.service_id, **tt)
+
+                ProjectService.objects.filter(id=t.service_id).update(img=t.img,configMap=t.configMap)
+
+
                 return json_response(error=error)
 
         return json_response(error="回滚资源不存在")
 
+
+class RancherSvcVersionView(View):
+    def get(self,request,id):
+        if RancherPublishHistory.objects.filter(service_id=id).exists():
+            try:
+                data = RancherPublishHistory.objects.filter(service_id=id).all()
+                return json_response({"data":  [x.to_dict() for x in data]})
+            except Exception as e :
+
+                logger.error("获取回滚版本失败->"+ str(e))
+        return json_response(error="无历史版本")

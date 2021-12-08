@@ -591,6 +591,11 @@ class RancherPublishHistory(models.Model, ModelMixin):
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)
+        t = []
+        for x in ast.literal_eval(self.configMap):
+            t.append(x)
+        tmp["configMap"] = t
+
         return tmp
 
     class Meta:

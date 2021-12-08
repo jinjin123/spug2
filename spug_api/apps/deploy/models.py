@@ -58,6 +58,7 @@ class DeployRequest(models.Model, ModelMixin):
     leaderhandler = models.CharField(max_length=15,verbose_name='leader审核人', null=True)
     leaderstatus = models.IntegerField(choices=STATUS_CHOOSE, default=0, verbose_name='leader审核状态', null=True)
     approval_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='审核时间')
+    desccomment = models.CharField(max_length=1500,null=True)
 
     def __repr__(self):
         return f'<DeployRequest name={self.name}>'

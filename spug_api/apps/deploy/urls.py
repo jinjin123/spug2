@@ -10,6 +10,6 @@ urlpatterns = [
     path('request/change/<int:id>', RequestChangeDetailView.as_view()),
     path('request/rancher/', RequestRancherDeployView.as_view()),
     path('request/upload/', do_upload),
-    path('request/<int:r_id>/', RequestDetailView.as_view()),
+    path('request/<int:envid>/<int:r_id>/', RequestDetailView.as_view()),
     path('request/rancher/publish', RancherPublishView.as_view()),
 ]
