@@ -81,7 +81,7 @@ class Ext2Setup3 extends React.Component {
     // info['server_actions'] = info['server_actions'].filter(x => x.title && x.data);
     store.record["pbtype"] = store.pbtype
     store.record["state"] = false
-    // console.log(store.record)
+    store.record["desccomment"] = store.desccomment
     http.post('/api/deploy/request/rancher/', store.record)
       .then( ()=> {
         message.success('建立发布审批单成功！');

@@ -384,7 +384,13 @@ class ComTable extends React.Component {
       ))
     }
     if (store.f_ip) {
-      data = data.filter(item => item['ipaddress'].toLowerCase().includes(store.f_ip.toLowerCase()))
+      let tt = []
+      let tmp,tmp1,tmp2
+      tmp = data.filter(item => item['ipaddress'].toLowerCase().includes(store.f_ip.toLowerCase()))
+      tmp1 = data.filter(item => item['outter_ip'] != null? item['outter_ip'].toLowerCase().includes(store.f_ip.toLowerCase()) : null)
+      tmp2 = data.filter(item => item['v_ip'] != null ? item['v_ip'].toLowerCase().includes(store.f_ip.toLowerCase()): null)
+      data = tt.concat(tmp,tmp1,tmp2)
+      data = [...new Set(data)]
     }
 
     if (store.otp) {

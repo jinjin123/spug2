@@ -273,7 +273,6 @@ class ComTable extends React.Component {
 
   render() {
     let data = store.records;
-    console.log(store.diffdata)
     if (store.f_app_id) {
       data = data.filter(item => item['app_id'] === store.f_app_id)
     }
@@ -297,6 +296,7 @@ class ComTable extends React.Component {
       <Table
         rowKey="id"
         rowSelection={this.rowSelection}
+        expandedRowRender={data => <p style={{ margin: 0 }}>{data.desccomment}</p>}
         loading={store.isFetching}
         dataSource={data}
         pagination={{

@@ -7,13 +7,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { observer } from 'mobx-react';
-import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon } from 'antd';
+import { Steps, Collapse, PageHeader, Spin, Tag, Button, Icon,Input } from 'antd';
 import { http, history, X_TOKEN } from 'libs';
-import { AuthDiv } from 'components';
+import { AuthDiv, SearchForm } from 'components';
 import OutView from './OutView';
 import styles from './index.module.css';
 import store from './store';
-import lds from 'lodash';
+import lds, { times } from 'lodash';
 
 @observer
 class Ext2Rancher extends React.Component {
@@ -25,14 +25,15 @@ class Ext2Rancher extends React.Component {
     this.state = {
       fetching: true,
       loading: false,
-      iFrameHeight: '0px'
-
+      iFrameHeight: '0px',
+      tmplog: null,
+      status:null
     }
   }
 
-  // componentDidMount() {
-  //   this.fetch()
-  // }
+  componentDidMount() {
+    this.fetch()
+  }
 
   // componentWillUnmount() {
   //   if (this.socket) this.socket.close();
@@ -44,23 +45,15 @@ class Ext2Rancher extends React.Component {
 
   fetch = () => {
     if (!this.timer) this.setState({fetching: true});
-    http.get(`/api/deploy/request/${this.id}/`, {params: {log: this.log}})
-      .then(res => {
-        store.request = res;
-        const outputs = {};
-        while (res.outputs.length) {
-          const msg = JSON.parse(res.outputs.pop());
-          if (!outputs.hasOwnProperty(msg.key)) {
-            const data = msg.key === 'local' ? ['读取数据...        '] : [];
-            outputs[msg.key] = {data}
-          }
-          this._parse_message(msg, outputs)
-        }
-        store.outputs = outputs;
-        if (store.request.status === '2') {
-          this.timer = setTimeout(this.fetch, 2000)
-        } else {
-          this.timer = null
+    http.get(`/api/deploy/request/2/${this.id}/`)
+      .then((data) => {
+        this.state.tmplog = JSON.stringify(data.data,undefined, 4)
+        var s = (this.state.tmplog).search(/"state": "active"/g)
+        if(s == 0){
+          this.state.status = "red"
+        }else{
+          this.state.status = "#52c41a"
+
         }
       })
       .finally(() => this.setState({fetching: false}))
@@ -76,61 +69,25 @@ class Ext2Rancher extends React.Component {
     if (status !== undefined) outputs[key]['status'] = status;
   };
 
-  handleDeploy = () => {
-    this.setState({loading: true});
-    http.post(`/api/deploy/request/${this.id}/`)
-      .then(({token, outputs}) => {
-        store.request.status = '2';
-        store.outputs = outputs;
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.socket = new WebSocket(`${protocol}//${window.location.host}/api/ws/exec/${token}/?x-token=${X_TOKEN}`);
-        this.socket.onopen = () => {
-          this.socket.send('ok');
-        };
-        this.socket.onmessage = e => {
-          if (e.data === 'pong') {
-            this.socket.send('ping')
-          } else {
-            this._parse_message(JSON.parse(e.data))
-          }
-        }
-      })
-      .finally(() => this.setState({loading: false}))
-  };
-
-  getStatus = (key, n) => {
-    const step = lds.get(store.outputs, `${key}.step`, -1);
-    const isError = lds.get(store.outputs, `${key}.status`) === 'error';
-    const icon = <Icon type="loading"/>;
-    if (n > step) {
-      return {key: n, status: 'wait'}
-    } else if (n === step) {
-      return isError ? {key: n, status: 'error'} : {key: n, status: 'process', icon}
-    } else {
-      return {key: n, status: 'finish'}
-    }
-  };
-
-  getStatusAlias = () => {
-    if (Object.keys(store.outputs).length !== 0) {
-      const {targets, host_actions} = store.request;
-      for (let item of [{id: 'local'}, ...(host_actions.length > 0 ? targets : [])]) {
-        if (lds.get(store.outputs, `${item.id}.status`) === 'error') {
-          return <Tag color="red">发布异常</Tag>
-        } else if (lds.get(store.outputs, `${item.id}.step`, -1) < 100) {
-          return <Tag color="blue">发布中</Tag>
-        }
-      }
-      return <Tag color="green">发布成功</Tag>
-    } else {
-      return <Tag>{store.request['status_alias'] || '...'}</Tag>
-    }
-  };
-
   render() {
-    // const {app_name, env_name, status, server_actions, host_actions} = store.request;
+    const { TextArea } = Input;
+    const { tmplog,status } = this.state;
     return (
-        <div>aa</div>
+      <>
+              <SearchForm>
+                  <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+                    <Button type="primary" icon="sync" onClick={()=>this.fetch()}>刷新重新获取结果</Button>
+                  </SearchForm.Item>
+                <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+                      发布结果：<Icon type="check-circle" theme="twoTone" twoToneColor={status} />
+                </SearchForm.Item>
+              </SearchForm>
+              <TextArea 
+              value={tmplog}
+              
+              placeholder="Autosize height based on content lines" autoSize />
+
+      </>
     )
   }
 }

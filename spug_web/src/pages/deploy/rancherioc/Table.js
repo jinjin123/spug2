@@ -136,8 +136,19 @@ class ComTable extends React.Component {
       case 6:
         break;;
       case 7:
-        
-        console.log(info)
+        this.setState({
+          moreAction : [{"id": info.id,"v":"历史版本"}]
+
+        })
+        store.historyVisible = true;
+        setTimeout(() => {
+          this.setState({
+            moreAction : "更多操作...."
+          })
+        },1500)
+        http.get('/api/app/deploy/svc/hsversion/' + info.id+ "/")
+        .then((data) => store.versiontmp = data.data)
+        .finally(() => store.isFetching = false)
         break;;
 
     }
@@ -218,13 +229,14 @@ class ComTable extends React.Component {
               {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                 <Column title="操作" fixed="right" render={info => (
                   <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"svc")}  style={{ width: 100 }} >
-                    <Option value={1}>编辑</Option>
-                    <Option value={2}>删除</Option>
-                    <Option value={3}>伸缩</Option>
-                    <Option value={4}>终端</Option>
+                    {/* <Option value={1}>编辑</Option> */}
+                    {/* <Option value={2}>删除</Option> */}
+                    {/* <Option value={3}>伸缩</Option> */}
+                    {/* <Option value={4}>终端</Option> */}
                     <Option value={5}>申请发布</Option>
-                    <Option value={6}>重新部署</Option>
-                    <Option value={7}>回滚</Option>
+                    {/* <Option value={6}>重新部署</Option> */}
+                    <Option value={7}>历史版本</Option>
+
                   </Select>
                   
                 )}/>

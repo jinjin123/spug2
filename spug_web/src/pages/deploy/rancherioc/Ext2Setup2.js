@@ -34,7 +34,8 @@ class Ext2Setup2 extends React.Component {
           this.setState({loading: true});
           store.record["pbtype"] = store.pbtype
           store.record["state"] = false
-          // console.log(store.record)
+          store.record["desccomment"] = store.desccomment
+          
           http.post('/api/deploy/request/rancher/', store.record)
             .then( ()=> {
               message.success('建立发布审批单成功！');
@@ -48,7 +49,6 @@ class Ext2Setup2 extends React.Component {
   render() {
     const info = store.record;
     const envs = [info.env_id];
-    console.log(info)
     const {getFieldDecorator} = this.props.form;
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>

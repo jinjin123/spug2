@@ -31,7 +31,10 @@ class Store {
   @observable cmpForm =false;
   @observable codeRead = false;
   // @observable fullmode=[];
+  @observable historyVisible = false;
+  @observable historyDetailVisible = false;
 
+  @observable versiontmp = [];
   @observable f_name;
   @observable f_desc;
   @observable project;
@@ -48,6 +51,7 @@ class Store {
   @observable pbtype = 1;
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
+  @observable desccomment;
 
   @observable ranchercmp=[{"k":"","v":""}];
   @observable rancherenv=[];
@@ -55,6 +59,7 @@ class Store {
   @observable rancherVolume=[];
   @observable rancherCallhost=[];
   @observable cmaprecord = {};
+  @observable historytmpdetail = {};
 
   // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
   // {"itemid":2,"itemdata":
@@ -120,6 +125,15 @@ class Store {
       this.fullmode[index]=false
     }
   }
+  showForm = (info,status = {}) => {
+    console.log(info)
+    this.historyDetailVisible = true;
+    this.historytmpdetail = info;
+    this.codeRead = !status ? false : true;
+  }
+  onChange = ({ target: { value } }) => {
+    this.desccomment =  value ;
+  };
 }
 
 export default new Store()
