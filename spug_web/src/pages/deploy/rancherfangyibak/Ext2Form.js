@@ -23,7 +23,7 @@ class Ext2From extends React.Component {
         width={900}
         maskClosable={false}
         title={title}
-        onCancel={() => {store.ext2Visible = false;store.page=0}}
+        onCancel={() => store.ext2Visible = false}
         footer={null}>
         <Steps current={store.page} className={styles.steps}>
           <Steps.Step key={0} title="基本配置"/>

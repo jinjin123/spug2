@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import { Switch, Col, Form, Select, Button,Input } from "antd";
 import store from './store';
 import noticeStore from '../notice/store';
-const { TextArea } = Input;
 
 export default observer(function Ext2Setup1() {
   const [envs, setEnvs] = useState([]);
@@ -28,6 +27,7 @@ export default observer(function Ext2Setup1() {
   // }, [])
 
   const info = store.record;
+  console.log(info["dpname"])
   let call_us = noticeStore.records
   call_us = call_us.filter(item => item["dpname"].toLowerCase().includes(info["dpname"].toLowerCase()))
   const call_tmp = []
@@ -36,7 +36,7 @@ export default observer(function Ext2Setup1() {
         call_tmp.push(item["nickname"])
     })
   }
-
+  console.log(call_us)
   return (
     <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
       <Form.Item required label="发布环境">
@@ -70,11 +70,6 @@ export default observer(function Ext2Setup1() {
             <Select.Option  value={3} key={3}>紧急发布</Select.Option>
             {/* <Select.Option  value={4} key={4}>回滚发布</Select.Option> */}
           </Select>
-        </Col>
-      </Form.Item>
-      <Form.Item required label="发布功能描述">
-        <Col span={16}>
-            <TextArea   onChange={store.onChange} placeholder="" autoSize />
         </Col>
       </Form.Item>
       {/* <Form.Item label="消息通知" extra={<span>

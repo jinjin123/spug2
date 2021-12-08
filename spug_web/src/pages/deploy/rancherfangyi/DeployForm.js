@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,Radio,Select,Card,Icon} from 'antd';
+import {Modal, Form, Input, Checkbox,  Row, Col, message,Button,Radio,Select,Card,Icon,Tag} from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 // import historystore from '../rancherconfhisotry/store';
@@ -21,12 +21,22 @@ class DeployForm extends React.Component {
         value: 1,
         hostvalue: 2,
         input_value: 1,
+        tmpns: [],
+        tmpimg: [],
+        tmppvc:[],
+        tmpcmp:[],
+        tmpimgs:{},
+        tmpimgV:null,
+        vol:0,
+        cmapid: null,
+        // rancherBL:{},
         moreAction: [{"id":0,"v":"添加卷..."}]
 
     }
   }
   // componentDidMount() {
-  //   historystore.fetchRecords();
+  //   // historystore.fetchRecords();
+    
   // }
 
   handleDelete = (text) => {
@@ -56,15 +66,30 @@ class DeployForm extends React.Component {
     if(e.target.value === 1){
       store.rancherCallhost = []
       store.rancherCallhost.push({
-        "itemid":1,"iteminput":"", 
+        "type":"host","itemid":0,"itemdata": null, 
       })
     }else{
       store.rancherCallhost = []
       store.rancherCallhost.push(
-        {"itemid":1,"itemtitle":"必须","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
-        {"itemid":2,"itemtitle":"最好","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
-        {"itemid":3,"itemtitle":"首选","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]}
+        {"type":"requireAll","itemid":1,"itemtitle":"必须","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"type":"requireAny","itemid":2,"itemtitle":"最好","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]},
+        {"type":"preferred","itemid":3,"itemtitle":"首选","itemdata":[{"itemk":"","itemtype":"=","itemv":""}]}
       )
+    }
+  }
+  onCallImgChange = e => {
+    console.log('radio checked', e.target.value);
+    // this.setState({
+    //   hostvalue: e.target.value,
+    // });
+    if(e.target.value === 1){
+      this.setState({
+        tmpimgs: {"tag":"select"},
+      });
+    }else{
+      this.setState({
+        tmpimgs: {"tag":"input"},
+      });
     }
   }
   onCallHostClick = e => {
@@ -91,15 +116,118 @@ class DeployForm extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    console.log(formData,this.state.input_value,store.rancherport,store.rancherenv, store.rancherCallhost)
+    const tmp = {}
+    const requireAll = []
+    const requireAny = []
+    const preferred = []
+    const node ={}
+    const volumes = []
+    const volumeMounts = []
+    formData["scale"] = this.state.input_value
+    formData["image"] = this.state.tmpimgV
+    formData["ports"] = store.rancherport
+    if(this.state.cmapid != null){
+      formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
+    }else{
+      formData["cmapid"] = null
+    }
+    formData["cname"] = this.state.cmapid
+
+    store.rancherVolume.map(item=>(
+      item["tt"] === 0  ?
+        (volumes.push({"type":"volume","name": item["vol"],"hostPath":{"type":"hostPathVolumeSource","kind":null,"path":item["hostPath"]}}),
+        volumeMounts.push({
+          "readOnly":false,
+          "type":"volumeMount",
+          "mountPath":item["mountPath"],
+          "name":item["vol"]
+      },))
+      : item["tt"] === 1 ?
+        (volumes.push({"type":"volume","name": item["vol"], "persistentVolumeClaim": {
+          "readOnly":false,
+          "type":"persistentVolumeClaimVolumeSource",
+          "persistentVolumeClaimId": formData["namespaceId"]+":"+item["pvc"]
+        }}),
+        volumeMounts.push({
+          "readOnly":false,
+          "type":"volumeMount",
+          "mountPath":item["mountPath"],
+          "subPath":item["subPath"],
+          "name":item["vol"]
+      },))
+      : item["tt"] === 2 ?
+          (volumes.push({"type":"volume","name": item["vol"], "configMap":{
+              "type":"configMapVolumeSource",
+              "defaultMode":256,
+              "name":item["config"],
+              "optional":false
+          }}),
+          volumeMounts.push({
+            "readOnly":false,
+            "type":"volumeMount",
+            "mountPath":item["mountPath"],
+            "subPath":item["subPath"],
+            "name":item["vol"]
+        }))
+      : null
+    ))
+    formData["volumes"] = volumes
+    formData["volumeMounts"] = volumeMounts
+
+
+    store.rancherenv.map((item,index)=>(
+      // tmp['"' + item['k'] + '"']= item["v"]
+      tmp[item['k']]= item["v"]
+
+    ))
+    formData["environment"] = tmp
+    if(store.rancherCallhost.length > 2  ){
+      store.rancherCallhost.map((item,index)=>(
+          item['itemdata'].map((td)=>(
+            td['itemk'] != "" 
+            ? 
+              item["itemid"] === 1 ? requireAll.push(td["itemk"]+" "+td["itemtype"]+" "+td["itemv"]) : 
+              item["itemid"] === 2 ? requireAny.push(td["itemk"]+" "+td["itemtype"]+" "+td["itemv"]) :
+              item["itemid"] === 3 ? preferred.push(td["itemk"]+" "+td["itemtype"]+" "+td["itemv"]): null
+            :
+            null
+          ))
+      ))
+    }else if (store.rancherCallhost.length === 1){
+      store.rancherCallhost.map(item=>(
+        node["nodeId"] = item["itemdata"]
+      ))
+    }
+    if (requireAll.length > 0) {
+      node["requireAll"] = requireAll
+    }
+    if (requireAny.length > 0) {
+      node["requireAny"] = requireAny
+    }
+    if (preferred.length > 0) {
+      node["preferred"] = preferred
+    }
+    formData["scheduling"] = {"node": node}
+    http.post('/api/app/deploy/svcop/', {"data":formData,"env":3,"tag":"ioc"})
+    .then(() => {
+        message.success('操作成功');
+        store.deployForm = false;
+        store.fetchRecords()
+      
+    }, () => this.setState({loading: false}))
+    console.log(formData)
+    store.rancherVolume = []
   };
 
   onVolumeChange = (action) => {
+    let counter = this.state.vol
+    console.log(counter)
     switch(action){
       case "host":
-        store.rancherVolume.push({"k":"映射主机目录" })
+        store.rancherVolume.push({"t":"映射主机目录","tt":0,"tag":"host","vol":"vol"+(counter).toString(),"mode":256,"hostPath":"","mountPath":"","subPath":""})
         this.setState({
-          moreAction : [{"id": 1,"v":"映射主机目录"}]
+          moreAction : [{"id": 1,"v":"映射主机目录"}],
+          vol: counter +=1
         })
         setTimeout(() => {
           this.setState({
@@ -108,35 +236,39 @@ class DeployForm extends React.Component {
         },500)
         break;
       case "oldpvc":
-        store.rancherVolume.push({"k":"使用现有的PVC" })
+        store.rancherVolume.push({"t":"使用现有的PVC","tt":1,"tag":"oldpvc","vol":"vol"+(counter).toString(),"mode":256,"pvc":"","mountPath":"","subPath":"" })
         this.setState({
           moreAction : [{"id": 2,"v":"使用现有的PVC"}]
         })
         setTimeout(() => {
           this.setState({
-            moreAction : "添加卷..."
+            moreAction : "添加卷...",
+            vol: counter +=1
           })
         },500)
         break;
       case "newpvc":
-          store.rancherVolume.push({"k":"添加新的PVC" })
+          store.pvcForm = true;
+          store.rancherVolume.push({"t":"添加新的PVC"})
           this.setState({
             moreAction : [{"id": 3,"v":"使用新的的PVC"}]
           })
           setTimeout(() => {
             this.setState({
-              moreAction : "添加卷..."
+              moreAction : "添加卷...",
+              vol: counter +=1
             })
           },500)
           break;
       case "config":
-        store.rancherVolume.push({"k":"配置映射卷"})
+        store.rancherVolume.push({"t":"配置映射卷","tt":2,"tag":"config","vol":"vol"+(counter).toString(),"mode":256,"config":"","mountPath":"","subPath":"" })
         this.setState({
-          moreAction : [{"id": 4,"v":"配置映射卷"}]
+          moreAction : [{"id": 4,"v":"配置映射卷" }]
         })
         setTimeout(() => {
           this.setState({
-            moreAction : "添加卷..."
+            moreAction : "添加卷...",
+            vol: counter +=1
           })
         },500)
         break;
@@ -168,6 +300,43 @@ class DeployForm extends React.Component {
       input_value: e.target.value,
     });
   };
+  onRjChange = v => {
+    this.setState({
+      tmpns: [],
+      tmpimg: [],
+      tmppvc: [],
+      tmpcmp:[]
+    }) 
+    let tmp = []
+    let tmpimg = []
+    let pvc = []
+    let cmap = []
+    let t = store.records.filter(item => item['pjname'] === v)
+    t.map(item => {
+        let newArr = store.pvcrecords.filter(x=>x['nsname'] === item['nsname'])
+        newArr.map(dd =>{
+          pvc.push(dd['pvcname'])
+        })
+        let newBrr = store.cmaprecords.filter(x=>x['nsname'] === item['nsname'])
+        newBrr.map (de =>{
+            cmap.push(de["configName"])
+        })
+
+      }
+    )
+    t.map(item =>(
+        tmp.push(item["nsname"]),
+        tmpimg.push(item['img'])
+    ))
+    this.setState({
+      tmpns: [... new Set(tmp)],
+      tmpimg: [... new Set(tmpimg)],
+      tmppvc: [... new Set(pvc)],
+      tmpcmp: [... new Set(cmap)]
+    }) 
+    
+  }
+
   render() {
     // let data = store.vrecords;
     const {value} = this.state;
@@ -191,10 +360,10 @@ class DeployForm extends React.Component {
         >
           <Form  layout="inline" wrapperCol={{ span: 24 }}>
               <Form.Item required label="名称"  rules={[{ required: true, message: '必填部署名' }]}>
-                  {getFieldDecorator('task_name')(
+                  {getFieldDecorator('name')(
                     <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
                   )}
-              </Form.Item>
+              </Form.Item>  
               <Form.Item required label="工作负载类型"  rules={[{ required: true, message: '工作负载数量' }]}>
                   {getFieldDecorator('workloadnum')(
                     <Radio.Group onChange={this.onChange} >
@@ -208,68 +377,107 @@ class DeployForm extends React.Component {
                     </Radio.Group>
                   )}
               </Form.Item>
-          
-                <Form.Item required label="Docker镜像" rules={[{ required: true, message: '必填镜像名' }]}>
-                    {getFieldDecorator('image')(
-                      <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                <Form.Item required label="rancher项目" rules={[{ required: true, message: '必填项目' }]}>
+                    {getFieldDecorator('pjname')(
+                      <Select  onChange={v=> this.onRjChange(v)} style={{ width: 200 }} >
+                          {store.rancherpj.map((item,index)=>(
+                              <Option key={item} value={item}>{item}</Option>
+                            
+                          ))}
+                      </Select>
                     )}
                 </Form.Item>
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
-                    {getFieldDecorator('namespace')(
-                      <Input placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                    {getFieldDecorator('namespaceId')(
+                          <Select   style={{ width: 300 }} >
+                            {this.state.tmpns.map((item,index)=>(
+                                <Option key={index} value={item}>{item}</Option>              
+                            ))}
+                          </Select>
                     )}
                 </Form.Item>
-              
+                <Form.Item required label="Docker镜像" rules={[{ required: true, message: '必填镜像名' }]}>
+                    {getFieldDecorator('image')(
+                      <Radio.Group   onChange={this.onCallImgChange} > 
+                        <Radio  value={1}>默认自带：
+                          {this.state.tmpimgs["tag"] =="select"
+                            ?
+                            <Select  
+                            showSearch
+                            filterOption={(input, option) =>
+                              option.props.children.indexOf(input)  >= 0
+                            }
+                            filterSort={(optionA, optionB) =>
+                              optionA.props.children.localeCompare(optionB.props.children)
+                            }
+                            onChange={v=>{this.setState({tmpimgV:v})}} style={{ width: 600 }} >
+                                {this.state.tmpimg.map((item,index)=>(
+                                    <Option key={item} value={item}>{item}</Option>
+                                ))}
+                            </Select>
+                            :null
+                          }
+                          </Radio>
+                          <Radio  value={2}>更新镜像：
+                          {this.state.tmpimgs["tag"] =="input"
+                            ?
+                              <Input onChange={e =>{this.setState({tmpimgV:e.target.value})}} placeholder="e.g. myapp" style={{ width: 410, marginLeft: 10 }}/>
+                            :null
+                          }
+                          </Radio>
+                        </Radio.Group>
+                    )}
+                </Form.Item>
                   <Form.Item  label="端口映射" >
-                    {store.rancherport.map((item,index)=>(
+                    {store.rancherport.length > 0 ? store.rancherport.map((item,index)=>(
                       <div key={index}>
                         <Col style={{ display:'flex'}}>
                           <Form.Item>
-                                <Input placeholder="例如:tcp8080" defaultValue={item["portname"]}  onChange={e => item['portname'] = e.target.value} style={{ width: 150, marginLeft: 10 }}/>
+                                <Input placeholder="例如:tcp8080" defaultValue={item["name"]}  onChange={e => item['name'] = e.target.value} style={{ width: 100, marginLeft: 5 }}/>
                           </Form.Item>
                           <Form.Item>
-                                <Input placeholder="容器端口" defaultValue={item["containerport"]} onChange={e => item['containerport'] = e.target.value}  style={{ width: 150, marginLeft: 10 }}/>
+                                <Input placeholder="容器端口" defaultValue={item["containerPort"]} onChange={e => item['containerPort'] = parseInt(e.target.value)}  style={{ width: 100, marginLeft: 5 }}/>
                           </Form.Item>
                           <Form.Item>
-                                <Select defaultValue={item["potocol"]!= null ? item["potocol"]: "TCP"}  onChange={v => item['potocol'] = v} style={{ width: 100 }} >
+                                <Select defaultValue={"TCP"}  onChange={v => item['protocol'] = v} style={{ width: 100 }} >
                                   <Option value="TCP">TCP</Option>
                                   <Option value="UDP">UDP</Option>
                                 </Select>
                           </Form.Item>
                           <Form.Item>
-                                  <Select defaultValue={item["policy"] !=null ? item["policy"] : "NodePort" } onChange={v => item['policy'] = v}  style={{ width: 280 }} >
+                                  <Select defaultValue={"NodePort"} onChange={v => item['kind'] = v}  style={{ width: 250 }} >
                                     <Option value="NodePort">NodePort (所有主机端口均可访问)</Option>
                                     <Option value="HostPort">HostPort (仅 Pod 所在主机端口可访问)</Option>
                                     <Option value="ClusterIP">集群 IP(集群内部访问)</Option>
                                   </Select>
                           </Form.Item>
                           <Form.Item>
-                                <Input defaultValue={item["targetport"]!=null ? item["targetport"]: null}  onChange={e => item['targetport'] = e.target.value} placeholder="默认NodePort随机端口30000-32768" style={{ width: 250, marginLeft: 10 }}/>
+                                <Input  onChange={e => item['sourcePort'] = parseInt(e.target.value)} placeholder="随机30000-32768主机监听端口默认NodePort" style={{ width: 320, marginLeft: 5 }}/>
                           </Form.Item>
                             <div  onClick={() => store.rancherport.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
                             </div>
                           </Col>
                         </div>
-                      ))}
+                      )) : null}
                     <Button  type="dashed" block  
-                      onClick={() => {store.rancherport.push({"portname":"","containerport":"","potocol":"","policy":"NodePort","targetport":""})}}>
+                      onClick={() => {store.rancherport.push({"name":"","containerPort":null,"protocol":"TCP","kind":"NodePort","sourcePort":0,"type":"containerPort","hostPort":0})}}>
                             <i type="plus">添加端口映射</i>
                     </Button>
                   </Form.Item>
                   <Form.Item label="环境变量" >
-                    {store.rancherenv.map((item,index)=>(
+                    {store.rancherenv.length > 0 ? store.rancherenv.map((item,index)=>(
                       <div key={index}>
                         <Col style={{ display:'flex'}}>
-                          <Input   placeholder="键"  defaultValue={item["k"]} onChange={e => item['k'] = e.target.value}   style={{ width: 300}}/> 
-                          = 
+                          <Input   placeholder="键"  defaultValue={item["k"]} onChange={e => item['k'] = e.target.value}   style={{marginRight:10, width: 300}}/> 
+                          <Tag style={{ height:32}}>=</Tag>
                           <Input  defaultValue={item["v"]} onChange={e => item['v'] = e.target.value} placeholder="值" style={{ width: 300}}/>
                           <div  onClick={() => store.rancherenv.splice(index, 1)}>
                               <Icon type="minus-circle"/>移除
                           </div>
                         </Col>
                       </div>
-                    ))}
+                    )) : null}
                     <Button  type="dashed" block  
                       onClick={() => {store.rancherenv.push({"k":"","v":""})}}>
                             <i type="plus">添加环境变量</i>
@@ -279,11 +487,32 @@ class DeployForm extends React.Component {
                   <Form.Item  label="主机调度" rules={[{ required: true, message: '请选择调度方式!' }]}>
                         <Radio.Group onChange={this.onCallHostChange} > 
                               <Radio  value={1}>指定主机运行所有 Pods
-                                  {store.rancherCallhost.length <2
+                                  {store.rancherCallhost.length ===1
                                   ?
-                                    store.rancherCallhost.map((item,index)=>(
-                                      <Input  key={index} defaultValue={item["iteminput"]} onChange={e => item['iteminput'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
-                                    ))
+                                      <Select 
+                                      showSearch
+                                      filterOption={(input, option) =>
+                                        option.props.children.indexOf(input)  >= 0
+                                      }
+                                      filterSort={(optionA, optionB) =>
+                                        optionA.props.children.localeCompare(optionB.props.children)
+                                      }
+                                      onChange={v => store.rancherCallhost[0]["itemdata"] = v} style={{ width: 200, marginLeft: 10 }}>
+                                        {store.noderecords.map((t,tindex)=>(
+                                              <Option key={tindex} value={t["nodeid"]}>{t["ipaddress"]}</Option>   
+                                        ))
+                                        }
+                                      </Select>
+                                      // <Input  key={index}  onChange={e =>{this.setState({rancherBL:{"type": "host", "data":e.target.value}})}} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                      // <Input  key={index}  onChange={e => item['itemdata'] = e.target.value} placeholder="1.1.1.1" style={{ width: 200, marginLeft: 10 }}/>
+                                        
+                                      //   <Select    onChange={v => item['itemdata'] = v}  style={{ width: 250 }} >
+                                      //       {item["itemdata"].map((t,tindex) => (
+                                      //             <Option key={tindex} value={t["nodeid"]}>{t["ipaddress"]}</Option>   
+                                      //       ))}
+                                          
+                                      // </Select>
+                                    
                                   : null}
                               </Radio>
                               <Radio value={2}>每个 Pod 自动匹配主机
@@ -322,19 +551,49 @@ class DeployForm extends React.Component {
 
                   <Form.Item  label="数据卷" >
                         <Select value={this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "添加卷..."} style={{ width: 250 }} onChange={this.onVolumeChange.bind(this)} >
-                          <Option value="newpvc">添加新的PVC</Option>
+                          {/* <Option value="newpvc">添加新的PVC</Option> */}
                           <Option value="oldpvc">使用现有PVC</Option>
                           <Option value="host">映射主机目录</Option>
                           <Option value="config">配置映射卷</Option>
                         </Select>
                         {store.rancherVolume.map((item,index)=>(
                           <div key={index} style={{ display:'flex'}}>
-                            <Card title={item["k"]} style={{ width: 400 }}>
-                                  <Input  placeholder="默认卷名vol2" value={"vol"+index} style={{ width: 350}}/>
-                                  <Input  placeholder="默认权限模式" defaultValue="400" style={{ width: 350}}/>
-                                  <Input   placeholder="主机路径" style={{ width: 350}}/>
-                                  <Input   placeholder="容器路径" style={{ width: 350}}/>
-                                  <Input   placeholder="子路径" style={{ width: 350}}/>
+                            <Card title={item["t"]} style={{ width: 400 }}>
+                                  {item['tt'] === 0 ?
+                                      <div>
+                                        <Input onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol0" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()} style={{ width: 350}}/>
+                                        <Input onChange={e => item['mode'] = e.target.value}   placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
+                                        <Input onChange={e => item['hostPath'] = e.target.value}    placeholder="主机路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['mountPath'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subPath'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
+                                      </div>
+                                  : null}
+                                  {item['tt'] === 1  ?
+                                      <div>
+                                        <Input onChange={e => item['vol'] = e.target.value} placeholder="默认卷名vol1" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
+                                        <Input onChange={e => item['mode'] = e.target.value}  placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
+                                        <Select onChange={v => item['pvc'] = v} >
+                                          {this.state.tmppvc.map((item,index) =>(
+                                              <Option key={index} value={item}>{item}</Option>
+                                          ))}
+                                        </Select>
+                                        <Input onChange={e => item['mountPath'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subPath'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
+                                      </div>
+                                  : null} 
+                                  {item['tt'] === 2  ?
+                                      <div>
+                                        <Input  onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
+                                        <Input  onChange={e => item['mode'] = e.target.value} placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
+                                        <Select onChange={v => {item['config'] = v;this.setState({"cmapid": v}) }} >
+                                          {this.state.tmpcmp.map(item =>(
+                                              <Option key={item} value={item}>{item}</Option>
+                                          ))}
+                                        </Select>
+                                        <Input onChange={e => item['mountPath'] = e.target.value}   placeholder="容器路径" style={{ width: 350}}/>
+                                        <Input onChange={e => item['subPath'] = e.target.value}   placeholder="子路径" style={{ width: 350}}/>
+                                      </div>
+                                  : null}
                                   
                             </Card>
                             <div  onClick={() => store.rancherVolume.splice(index, 1)}>

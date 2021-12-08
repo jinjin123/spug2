@@ -7,7 +7,7 @@ import { makeRoute } from "../../libs/router";
 import app from './app';
 import request from './request';
 import rancherioc from './rancherioc';
-import rancherfangyi from './rancherfangyi';
+import rancherfangyi from './rancherfangyibak';
 
 import notice from './notice';
 import doExt1Index from './do/Ext1Index';

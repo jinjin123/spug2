@@ -10,8 +10,6 @@ class Store {
   @observable records = [];
   @observable cmaprecords = [];
   @observable pvcrecords = [];
-  @observable noderecords = [];
-
   @observable toppj = [];
   @observable rancherpj = [];
   @observable nsname = [];
@@ -27,21 +25,11 @@ class Store {
   @observable ext1Visible = false;
   @observable ext2Visible = false;
   @observable deployForm =false;
-  @observable pvcForm =false;
-  @observable cmpForm =false;
-  @observable codeRead = false;
-  // @observable fullmode=[];
-  @observable historyVisible = false;
-  @observable historyDetailVisible = false;
-
-  @observable versiontmp = [];
   @observable f_name;
   @observable f_desc;
   @observable project;
   @observable ns;
   @observable app;
-  @observable cmapsearch;
-  @observable pvcsearch;
   @observable fullmode=[false];
   @observable fullmode_flag=0;
   @observable envname;
@@ -51,16 +39,11 @@ class Store {
   @observable pbtype = 1;
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
-  @observable desccomment;
 
-  @observable ranchercmp=[{"k":"","v":""}];
-  @observable rancherenv=[];
-  @observable rancherport=[];
+  @observable rancherenv=[{}];
+  @observable rancherport=[{}];
   @observable rancherVolume=[];
   @observable rancherCallhost=[];
-  @observable cmaprecord = {};
-  @observable historytmpdetail = {};
-
   // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
   // {"itemid":2,"itemdata":
   // [{"itemid":1,"itemtitle":"必须","itemk":"","itemtype":"","itemv":""},
@@ -73,7 +56,7 @@ class Store {
   fetchRecords = () => {
     this.isFetching = true;
     return http.get('/api/app/deploy/svc/fangyi/')
-      .then(({pj,svc,rj,ns,app,cmap,pvc,nodes})=>{
+      .then(({pj,svc,rj,ns,app,cmap,pvc})=>{
         this.records = svc;
         this.toppj = pj;
         this.rancherpj = rj;
@@ -81,22 +64,12 @@ class Store {
         this.apps = app;
         this.cmaprecords =  cmap;
         this.pvcrecords =  pvc;
-        this.noderecords = nodes
       })
       .finally(() => this.isFetching = false)
   };
 
   showAddForm = () => {
     this.deployForm = true;
-  }
-  showAddPvcForm = () => {
-    this.pvcForm = true;
-  }
-  showAddCmpForm = () => {
-    this.cmpForm = true;
-    this.cmaprecord = {};
-    this.fullmode=[false];
-    this.ranchercmp=[{"k":"","v":""}]
   }
   showRancerExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
     if (e) e.stopPropagation();
@@ -125,15 +98,6 @@ class Store {
       this.fullmode[index]=false
     }
   }
-  showForm = (info,status = {}) => {
-    console.log(info)
-    this.historyDetailVisible = true;
-    this.historytmpdetail = info;
-    this.codeRead = !status ? false : true;
-  }
-  onChange = ({ target: { value } }) => {
-    this.desccomment =  value ;
-  };
 }
 
 export default new Store()

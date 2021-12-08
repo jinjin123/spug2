@@ -75,13 +75,3 @@
 .RadioVisbale{
     display: grid;
 }
-
-.fullscreen {
-    z-index: 100;
-    position: absolute !important;
-    left: 870px;
-}
-/*  bug cannot set fixed the width  */
-/* :global .cmpeditor > div> .CodeMirror{
-    width: 550px
-} */

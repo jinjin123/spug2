@@ -5,13 +5,15 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Table,  Tag,  message,Select,Tabs } from 'antd';
+import { Table,  Tag,  message,Select,Tabs,Input,Modal } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import noticStore from '../notice/store';
+import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
 // import { Action } from "components";
 const { Column } = Table;
 const { TabPane } = Tabs;
+
 @observer
 class ComTable extends React.Component {
   constructor(props) {
@@ -54,15 +56,62 @@ class ComTable extends React.Component {
     }, 4000);
   };
 
-  onChange = (info, action) => {
-    console.log(info,action);
-    switch(action){
+  onChange = (info, action,tag) => {
+    console.log(info,action,tag);
+    switch(tag){
       case 1:
+        switch(action){
+          case "cmap":
+            store.cmaprecord = info;
+            store.cmpForm = true;
+            console.log(action)
+            break;;
+          case "svc":
+            break;;
+          case "pvc":
+            break;;
+        }
         break;
-        ;;
+      
       case 2:
+        switch(action){
+          case "cmap":
+            // store.cmaprecord = info;
+            // store.cmpForm = true;
+            this.setState({loading: true});
+            Modal.confirm({
+              title: '删除确认',
+              content: `确定要删除【${info['configName']}】?`,
+              onOk: () => {
+                return http.delete('/api/app/deploy/cmapop/', {params: {id: info.id, env: 2}})
+                  .then(() => {
+                    message.success('删除成功');
+                    store.fetchRecords()
+                  })
+              }
+            })
+            console.log(action)
+            break;;
+          case "svc":
+            break;;
+          case "pvc":
+            this.setState({loading: true});
+            Modal.confirm({
+              title: '删除确认',
+              content: `确定要删除【${info['pvcname']}】?`,
+              onOk: () => {
+                return http.delete('/api/app/deploy/pvcop/', {params: {id: info.id, env: 2}})
+                  .then(() => {
+                    message.success('删除成功');
+                    store.fetchRecords()
+                  })
+              }
+            })
+            console.log(info.id)
+            break;;
+        }
         break;
-      ;;
+      ;
       case 3:
         ;;
       case 4:
@@ -84,6 +133,24 @@ class ComTable extends React.Component {
         }
         break;
           ;;
+      case 6:
+        break;;
+      case 7:
+        this.setState({
+          moreAction : [{"id": info.id,"v":"历史版本"}]
+
+        })
+        store.historyVisible = true;
+        setTimeout(() => {
+          this.setState({
+            moreAction : "更多操作...."
+          })
+        },1500)
+        http.get('/api/app/deploy/svc/hsversion/' + info.id+ "/")
+        .then((data) => store.versiontmp = data.data)
+        .finally(() => store.isFetching = false)
+        break;;
+
     }
 
   };
@@ -108,105 +175,132 @@ class ComTable extends React.Component {
     if (store.app) {
       data = data.filter(item => item['dpname'].toLowerCase().includes(store.app.toLowerCase()))
     }
+    if(store.cmapsearch) {
+      cmapdata = cmapdata.filter(item => item['configName'].toLowerCase().includes(store.cmapsearch.toLowerCase()))
+    }
+    if(store.pvcsearch) {
+      pvcdata = pvcdata.filter(item => item['pvcname'].toLowerCase().includes(store.pvcsearch.toLowerCase()))
+    }
     // if (store.envname) {
     //   data = data.filter(item => item['envname'].toLowerCase().includes(store.envname.toLowerCase()))
     // }
     // if (store.volume) {
     //   data = data.filter(item => item['volumes'].toLowerCase().includes(store.volume.toLowerCase()))
     // }
-    return (      
+    return (  
       <Tabs >
         <TabPane tab="服务列表" key="1">
-          <Table
-          rowKey="id"
-          loading={store.isFetching}
-          dataSource={data}
-          scroll={{ x: '110%' }}
-          expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
-          pagination={{
-            showSizeChanger: true,
-            showLessItems: true,
-            hideOnSinglePage: true,
-            showTotal: total => `共 ${total} 条`,
-            pageSizeOptions: ['10', '20', '50', '100']
-          }}>
-            <Column title="实体项目" dataIndex="top_project"/>
-            <Column title="rancher细分项目" dataIndex="pjname"/>
-            <Column title="命名空间" dataIndex="nsname"/>
-            <Column title="应用" dataIndex="dpname"/>
-            <Column title="镜像" dataIndex="img" width={300}/>
-            {/* <Column title="环境" dataIndex="envname"/> */}
-            <Column title="配置映射卷" dataIndex="configName"/>
-            {/* <Column title="挂载卷详情" dataIndex="volumes_detail" width={200} ellipsis={{"showTitle":false}} /> */}
-            <Column
-              title="状态"
-              dataIndex="state"
-              key="state"
-              render={(state) => (
-                <Tag color={state === "active" ? "green":"volcano"} key={state}>
-                {state}
-              </Tag>
+            <Table
+            rowKey="id"
+            loading={store.isFetching}
+            dataSource={data}
+            scroll={{ x: '110%' }}
+            expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
+            pagination={{
+              showSizeChanger: true,
+              showLessItems: true,
+              hideOnSinglePage: true,
+              showTotal: total => `共 ${total} 条`,
+              pageSizeOptions: ['10', '20', '50', '100']
+            }}>
+              <Column title="实体项目" dataIndex="top_project"/>
+              <Column title="rancher细分项目" dataIndex="pjname"/>
+              <Column title="命名空间" dataIndex="nsname"/>
+              <Column title="应用" dataIndex="dpname"/>
+              <Column title="镜像" dataIndex="img" width={300}/>
+              {/* <Column title="环境" dataIndex="envname"/> */}
+              <Column title="配置映射卷" dataIndex="configName"/>
+              {/* <Column title="挂载卷详情" dataIndex="volumes_detail" width={200} ellipsis={{"showTitle":false}} /> */}
+              <Column
+                title="状态"
+                dataIndex="state"
+                key="state"
+                render={(state) => (
+                  <Tag color={state === "active" ? "green":"volcano"} key={state}>
+                  {state}
+                </Tag>
+                )}
+              />
+              {/* <Column title="暴露服务信息" dataIndex="pubsvc" width={200} ellipsis={{"showTitle":false}} /> */}
+              <Column title="副本" dataIndex="replica"/>
+              <Column title="创建人" dataIndex="create_by"/>
+              <Column title="创建时间" dataIndex="create_time"/>
+
+              {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
+                <Column title="操作" fixed="right" render={info => (
+                  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"svc")}  style={{ width: 100 }} >
+                    {/* <Option value={1}>编辑</Option> */}
+                    {/* <Option value={2}>删除</Option> */}
+                    {/* <Option value={3}>伸缩</Option> */}
+                    {/* <Option value={4}>终端</Option> */}
+                    <Option value={5}>申请发布</Option>
+                    {/* <Option value={6}>重新部署</Option> */}
+                    <Option value={7}>历史版本</Option>
+
+                  </Select>
+                  
+                )}/>
               )}
-            />
-            {/* <Column title="暴露服务信息" dataIndex="pubsvc" width={200} ellipsis={{"showTitle":false}} /> */}
-            <Column title="副本" dataIndex="replica"/>
-            <Column title="创建人" dataIndex="create_by"/>
-            {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
-              <Column title="操作" fixed="right" render={info => (
-                // <Action>
-                //   <Action.Button auth="deploy.src.edit" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)}>重新部署</Action.Button>
-                //   <Action.Button auth="deploy.src.del" >回滚</Action.Button>
-                //   <Action.Button auth="deploy.src.edit" >伸缩</Action.Button>
-                //   <Action.Button auth="deploy.src.edit" >终端</Action.Button>
-                // </Action>
-                
-                <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-                  <Option value={1}>重新部署</Option>
-                  <Option value={2}>回滚</Option>
-                  <Option value={3}>伸缩</Option>
-                  <Option value={4}>终端</Option>
-                  <Option value={5}>申请发布</Option>
-                  <Option value={6}>编辑</Option>
-                </Select>
-                
-              )}/>
-            )}
-        </Table>
+          </Table>
         </TabPane>
         <TabPane tab="配置映射" key="2">
+          <AuthCard auth="deploy.rancher.view">
+                <SearchForm>
+                  <SearchForm.Item span={4} style={{textAlign: 'left'}}>
+                    <AuthButton auth="deploy.rancher.edit_config" 
+                                type="primary" icon="plus" onClick={() => store.showAddCmpForm()}>添加配置映射</AuthButton>
+                  </SearchForm.Item>
+                  <SearchForm.Item span={4} title="配置映射文件名">
+                    <Input  style={{width: 200, position: "absolute"}} allowClear value={store.cmapsearch} onChange={e => store.cmapsearch = (e.target.value).trim()} placeholder="请输入"/>
+                  </SearchForm.Item>
+              </SearchForm>
+            </AuthCard>
           <Table
-                rowKey="id"
-                loading={store.isFetching}
-                dataSource={cmapdata}
-                scroll={{ x: '100%' }}
-                // expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
-                pagination={{
-                  showSizeChanger: true,
-                  showLessItems: true,
-                  hideOnSinglePage: true,
-                  showTotal: total => `共 ${total} 条`,
-                  pageSizeOptions: ['10', '20', '50', '100']
-                }}>
-                  <Column title="配置卷名称" dataIndex="configName"/>
-                  <Column title="命名空间" dataIndex="nsname"/>
-                  <Column title="创建人" dataIndex="create_by"/>
-                  {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
-                    <Column title="操作" fixed="right" render={info => (          
-                      <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-                        <Option value={1}>编辑</Option>
-                        <Option value={2}>删除</Option>
-                      </Select>
-                    )}/>
-                  )}
-              </Table>
+              rowKey="id"
+              loading={store.isFetching}
+              dataSource={cmapdata}
+              scroll={{ x: '100%' }}
+              expandedRowRender={cmapdata => <a href={cmapdata.verifyurl} target="_blank" style={{ margin: 0 }}>{cmapdata.verifyurl}</a>}
+              pagination={{
+                showSizeChanger: true,
+                showLessItems: true,
+                hideOnSinglePage: true,
+                showTotal: total => `共 ${total} 条`,
+                pageSizeOptions: ['10', '20', '50', '100']
+              }}>
+                <Column title="配置卷名称" dataIndex="configName"/>
+                <Column title="命名空间" dataIndex="nsname"/>
+                <Column title="创建人" dataIndex="create_by"/>
+                <Column title="创建时间" dataIndex="create_time"/>
+
+                {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
+                  <Column title="操作" fixed="right" render={info => (          
+                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"cmap")}  style={{ width: 100 }} >
+                      <Option value={1}>编辑</Option>
+                      <Option value={2}>删除</Option>
+                    </Select>
+                  )}/>
+                )}
+            </Table>
         </TabPane>
         <TabPane tab="PVC" key="3">
-          <Table
+            <AuthCard auth="deploy.rancher.view">
+                <SearchForm>
+                  <SearchForm.Item span={4} style={{textAlign: 'left'}}>
+                    <AuthButton auth="deploy.rancher.edit_config" 
+                                type="primary" icon="plus" onClick={() => store.showAddPvcForm()}>添加 PVC</AuthButton>
+                  </SearchForm.Item>
+                  <SearchForm.Item span={4} title="pvc卷名">
+                    <Input  style={{width: 200, position: "absolute"}} allowClear value={store.pvcsearch} onChange={e => store.pvcsearch = (e.target.value).trim()} placeholder="请输入"/>
+                  </SearchForm.Item>
+              </SearchForm>
+            </AuthCard>
+            <Table
               rowKey="id"
               loading={store.isFetching}
               dataSource={pvcdata}
               scroll={{ x: '100%' }}
-              // expandedRowRender={data => <a href={data.verifyurl} target="_blank" style={{ margin: 0 }}>{data.verifyurl}</a>}
+              expandedRowRender={pvcdata => <a href={pvcdata.verifyurl} target="_blank" style={{ margin: 0 }}>{pvcdata.verifyurl}</a>}
               pagination={{
                 showSizeChanger: true,
                 showLessItems: true,
@@ -221,10 +315,11 @@ class ComTable extends React.Component {
                 <Column title="pvid" dataIndex="volumeid"/>
                 <Column title="存储类" dataIndex="storageid"/>
                 <Column title="创建人" dataIndex="create_by"/>
+                <Column title="创建时间" dataIndex="create_time"/>
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
-                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
-                      <Option value={1}>编辑</Option>
+                    <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >
+                      {/* <Option value={1}>编辑</Option> */}
                       <Option value={2}>删除</Option>
                     </Select>
                   )}/>
