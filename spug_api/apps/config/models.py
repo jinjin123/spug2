@@ -41,6 +41,7 @@ class RancherApiConfig(models.Model,ModelMixin):
     env = models.ForeignKey(Environment, on_delete=models.PROTECT,db_index=True,verbose_name="dev/prod")
     token = models.CharField(max_length=255,null=True,db_index=True,verbose_name="token/default test")
     label = models.CharField(max_length=80,db_index=True,verbose_name="action tag")
+    tag  = models.CharField(max_length=30,db_index=True,null=True)
 
     class Meta:
         db_table = 'rancher_api'

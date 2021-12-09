@@ -96,7 +96,7 @@ def check_svc_status():
         t = ProjectService.objects.filter(~Q(state="active")).values("id","statuslinks")
         for x in t:
             if x["statuslinks"] is not None and (x["statuslinks"]).find("ioc.com") > -1:
-                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC", tag="ioc").first()
                 kwargs = {
                     "url":  x["statuslinks"],
                     "headers": {"Authorization": Action.token, "Content-Type": "application/json"},
@@ -108,7 +108,7 @@ def check_svc_status():
                 ProjectService.objects.filter(id=x["id"]).update(state=red['state'])
             else:
                 if x["statuslinks"] is not None and (x["statuslinks"]).find("feiyan.com") > -1:
-                    Action = RancherApiConfig.objects.filter(env_id=3, label="GETSVC").first()
+                    Action = RancherApiConfig.objects.filter(env_id=3, label="GETSVC",tag="feiyan").first()
                     kwargs = {
                         "url": x["statuslinks"],
                         "headers": {"Authorization": Action.token, "Content-Type": "application/json"},

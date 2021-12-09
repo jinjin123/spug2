@@ -2,7 +2,7 @@ from libs.utils import RequestApiAgent
 from django.conf import settings
 import json
 from apps.app.models import *
-from django.db.models import Q
+from django.db.models import Q,Count
 from apps.config.models import RancherApiConfig
 import unittest
 from django.core.mail import send_mail
@@ -185,11 +185,11 @@ class Mytest(unittest.TestCase):
     #     # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
     #     # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
     #     # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
-    #     pj = RancherApiConfig.objects.filter(env_id=4, label="GETPROJECT").first()
-    #     ns = RancherApiConfig.objects.filter(env_id=4, label="GETNS").first()
-    #     cmap = RancherApiConfig.objects.filter(env_id=4, label="GETCONFIGMAP").first()
-    #     svc = RancherApiConfig.objects.filter(env_id=4, label="GETSVC").first()
-    #     pvc = RancherApiConfig.objects.filter(env_id=4, label="GETPVC").first()
+    #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="ioc").first()
+    #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="ioc").first()
+    #     cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="ioc").first()
+    #     svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()
+    #     pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="ioc").first()
     #     url = pj.url
     #     token = pj.token
     #     kwargs = {
@@ -204,15 +204,15 @@ class Mytest(unittest.TestCase):
     #         # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
     #         # if x["id"] == "local:p-cvfqn":
     #         #-----
-    #         # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
-    #         #     pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目","toppjid":"dgdataheadioc"})
-    #         # if x["id"] == "local:p-t48wr":
-    #         #     pjnew.append({"pjid": x["id"], "pjname": x["name"], "top_project": "疫情地图项目","toppjid": "dgcovidmap"})
+    #         if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
+    #             pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目","toppjid":"dgdataheadioc"})
+    #         if x["id"] == "local:p-t48wr":
+    #             pjnew.append({"pjid": x["id"], "pjname": x["name"], "top_project": "疫情地图项目","toppjid": "dgcovidmap"})
     #         #------
-    #         if x['id']  == 'c-5tk6p:p-55knm':
-    #                 pjnew.append({"pjid": x['id'], "pjname":x['name'],"top_project": "test","toppjid": "test"})
+    #         # if x['id']  == 'c-5tk6p:p-55knm':
+    #         #         pjnew.append({"pjid": x['id'], "pjname":x['name'],"top_project": "test","toppjid": "test"})
     #         # print(x["id"],x["name"])
-    #     # print(len(pjnew))
+    #     print(len(pjnew))
     #     url = ns.url
     #     token = ns.token
     #     kwargs = {
@@ -223,10 +223,11 @@ class Mytest(unittest.TestCase):
     #     nsdatalist = (json.loads(res.content))["data"]
     #     nsnew = []
     #     for x in nsdatalist:
-    #         if x['id'] == 'spug':
-    #             nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
+    #         #------
+    #         # if x['id'] == 'spug':
+    #         #     nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
     #         #-------
-    #         # nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
+    #         nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
     #         # print(x["projectId"],x["id"], x["name"])
     #     # print(nsnew)
     #     nspj = []
@@ -235,7 +236,7 @@ class Mytest(unittest.TestCase):
     #             if x["pjid"] == xx["pjid"]:
     #                 x.update({"pjname": xx["pjname"],"top_project":xx["top_project"],"toppjid":xx["toppjid"]})
     #                 nspj.append(x)
-    #     # print(len(nspj))
+    #     print(len(nspj))
     #     # print(nspj)
     #     # -----------------------------------------------------------------------------
     #     url = svc.url
@@ -251,13 +252,14 @@ class Mytest(unittest.TestCase):
     #         for svcdict in svcdatalist:
     #             # for xxx in nspj:
     #             if svcdict["projectId"].strip() == sx["pjid"].strip() and svcdict["namespaceId"].strip() == sx["nsid"]:
-    #                 global img, v_name, pubsvc, cbox_env, v_mount, volumes_v
+    #                 global img, v_name, pubsvc, cbox_env, v_mount, volumes_v,cports
     #                 img = []
     #                 if svcdict.get("containers"):
     #                     cbox = svcdict.get("containers")
     #                     img = [cc["image"] for cc in cbox]
     #                     cbox_env = [cenv["environment"] for cenv in cbox if cenv.get("environment", "")]
-    #                     v_mount = [vm["volumeMounts"] for vm in cbox]
+    #                     v_mount = [vm["volumeMounts"] for vm in cbox if vm.get("volumeMounts",[])]
+    #                     cports = [vm["ports"] for vm in cbox if vm.get("ports",[])]
     #
     #                 if svcdict.get("volumes"):
     #                     volumes_v = svcdict["volumes"]
@@ -280,12 +282,14 @@ class Mytest(unittest.TestCase):
     #                                 "dpid": svcdict["id"], "dpname": svcdict["name"],
     #                                 "img": img[0], "replica": svcdict.get("scale",0), "state":svcdict["state"] ,
     #                                 # "configName": v_name,"configId":"","configMap":"","pvcid": pvcid ,"rancher_url":"https://rancher.ioc.com/","pubsvc": pubsvc})
-    #                                 "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount": v_mount[0],"cbox_env": cbox_env,
-    #                                "rancher_url": "https://rancher.ioc.com/", "pubsvc": pubsvc,"verifyurl": "https://rancher.ioc.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"]})
+    #                                 "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount": v_mount[0] if len(v_mount) >0 else [],"cbox_env": cbox_env,
+    #                                "rancher_url": "https://rancher.ioc.com/", "pubsvc": pubsvc,"verifyurl": "https://rancher.ioc.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"],
+    #                                 "cports": cports,"pauselinks":svcdict['actions']['pause'],"rdplinks":svcdict['actions']['redeploy'],"rollbacklinks":svcdict['actions']['rollback'],"updatelinks":svcdict['links']['update'],
+    #                                 "removelinks":svcdict['links']['remove'],"revisionslinks":svcdict['links']['revisions'],
+    #                                "statuslinks":((RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()).url).format(svcdict['projectId']) + "/" +svcdict['id']})
     #             # else:
     #                 # print(svcdict["projectId"],sx["pjid"])
     #                 # pass
-    #     # print(len(svcnew))
     #
     #     url = cmap.url
     #     token = cmap.token
@@ -313,7 +317,9 @@ class Mytest(unittest.TestCase):
     #                                             "configName": cx["configName"],"configId": xxx["id"],"configMap":kvtmp,
     #                                             # "pvcid": cx["pvcid"],
     #                                             "volumes": cx["volumes"], "v_mount": cx["v_mount"],"cbox_env": cx["cbox_env"],
-    #                                             "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"]
+    #                                             "rancher_url":cx["rancher_url"],"pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"], "env_id":2,
+    #                                             "cports": cx["cports"],"pauselinks":cx["pauselinks"],"rdplinks":cx["rdplinks"],"rollbacklinks": cx["rollbacklinks"], "updatelinks": cx["updatelinks"],
+    #                                             "removelinks": cx["removelinks"], "revisionslinks": cx["revisionslinks"],"statuslinks":cx["statuslinks"]
     #                                             }))
     #         if cx["configName"].strip() =="":
     #             cx.update({"configMap": "[]"})
@@ -380,11 +386,11 @@ class Mytest(unittest.TestCase):
     #         # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
     #         # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
     #         # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
-    #         pj = RancherApiConfig.objects.filter(env_id=3, label="GETPROJECT").first()
-    #         ns = RancherApiConfig.objects.filter(env_id=3, label="GETNS").first()
-    #         cmap = RancherApiConfig.objects.filter(env_id=3, label="GETCONFIGMAP").first()
-    #         svc = RancherApiConfig.objects.filter(env_id=3, label="GETSVC").first()
-    #         pvc = RancherApiConfig.objects.filter(env_id=3, label="GETPVC").first()
+    #         pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="feiyan").first()
+    #         ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="feiyan").first()
+    #         cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="feiyan").first()
+    #         svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()
+    #         pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="feiyan").first()
     #         url = pj.url
     #         token = pj.token
     #         kwargs = {
@@ -440,13 +446,14 @@ class Mytest(unittest.TestCase):
     #                 # for xxx in nspj:
     #                 if svcdict["projectId"].strip() == sx["pjid"].strip() and svcdict["namespaceId"].strip() == sx[
     #                     "nsid"]:
-    #                     global img, v_name,  pubsvc,cbox_env,v_mount,volumes_v
+    #                     global img, v_name,  pubsvc,cbox_env,v_mount,volumes_v,cports
     #                     img = []
     #                     if svcdict.get("containers"):
     #                         cbox = svcdict.get("containers")
     #                         img = [cc["image"] for cc in cbox]
     #                         cbox_env = [cenv["environment"] for cenv in cbox  if cenv.get("environment","")]
-    #                         v_mount = [vm["volumeMounts"] for vm in cbox]
+    #                         v_mount = [vm["volumeMounts"] for vm in cbox if vm.get("volumeMounts",[])]
+    #                         cports = [vm["ports"] for vm in cbox if vm.get("ports",[])]
     #
     #                     if svcdict.get("volumes"):
     #                         volumes_v = svcdict["volumes"]
@@ -461,8 +468,7 @@ class Mytest(unittest.TestCase):
     #                         # pvcid = ",".join(tmppvcid)
     #                     if svcdict.get("publicEndpoints"):
     #                         pp = svcdict.get("publicEndpoints")
-    #                         pubsvc = [{"address": x["addresses"], "port": x["port"], "svcname": x["serviceId"]} for x in
-    #                                   pp]
+    #                         pubsvc = [{"address": x["addresses"], "port": x["port"], "svcname": x["serviceId"]} for x in pp]
     #                     else:
     #                         pubsvc = ""
     #                     svcnew.append({"top_project":sx["top_project"],"toppjid":sx["toppjid"],"pjid": svcdict["projectId"], "pjname": sx["pjname"],
@@ -470,12 +476,21 @@ class Mytest(unittest.TestCase):
     #                                    "dpid": svcdict["id"], "dpname": svcdict["name"],
     #                                    "img": img[0], "replica": svcdict.get("scale", 0),"state":svcdict["state"],
     #                                    # "configName": v_name, "configId": "", "configMap": "", "pvcid": pvcid,
-    #                                    "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount": v_mount[0],"cbox_env": cbox_env,
-    #                                    "rancher_url": "https://rancher.feiyan.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"]})
+    #                                    "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount":v_mount[0] if len(v_mount) >0 else [],"cbox_env": cbox_env,
+    #                                    "rancher_url": "https://rancher.feiyan.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"],
+    #                                    "cports": cports, "pauselinks": svcdict['actions']['pause'],
+    #                                    "env_id": 2,
+    #                                    "rdplinks": svcdict['actions']['redeploy'],
+    #                                    "rollbacklinks": svcdict['actions']['rollback'],
+    #                                    "updatelinks": svcdict['links']['update'],
+    #                                    "removelinks": svcdict['links']['remove'],
+    #                                    "revisionslinks": svcdict['links']['revisions'],
+    #                                    "statuslinks": ((RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()).url).format(svcdict['projectId']) + "/" + svcdict['id']
+    #                                    })
     #                 # else:
     #                 # print(svcdict["projectId"],sx["pjid"])
     #                 # pass
-    #         print(len(svcnew))
+    #         # print(len(svcnew))
     #
     #         url = cmap.url
     #         token = cmap.token
@@ -504,7 +519,9 @@ class Mytest(unittest.TestCase):
     #                                                 "configMap": kvtmp,
     #                                                 "volumes": cx["volumes"],"v_mount": cx["v_mount"],"cbox_env": cx["cbox_env"],
     #                                                 # "pvcid": cx["pvcid"],
-    #                                                 "rancher_url": cx["rancher_url"], "pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"]
+    #                                                 "rancher_url": cx["rancher_url"], "pubsvc": cx["pubsvc"],"verifyurl": cx["verifyurl"],"env_id":2,
+    #                                             "cports": cx["cports"],"pauselinks":cx["pauselinks"],"rdplinks":cx["rdplinks"],"rollbacklinks": cx["rollbacklinks"], "updatelinks": cx["updatelinks"],
+    #                                             "removelinks": cx["removelinks"], "revisionslinks": cx["revisionslinks"],"statuslinks":cx["statuslinks"]
     #                                                 }))
     #             if cx["configName"].strip() == "":
     #                 cx.update({"configMap": "[]"})
@@ -571,8 +588,6 @@ class Mytest(unittest.TestCase):
             # print(pvcnew[:1])
 
             # def test_pb_approval(self):
-            #     from apps.app.models import ProjectService,ProjectConfigMap,ProjectPvc
-            #     from django.db.models import Count
                 # a = ProjectService.objects.filter(pjname="ioc-platform").values('pjid').first()
                 # a=ProjectService.objects.get(pjname='ioc-platform').
                 # print(a)
@@ -654,7 +669,7 @@ class Mytest(unittest.TestCase):
                 #             m.save()
                 #---------------------------------------------------------
                 # get fangyi  configmap
-                # pj = RancherApiConfig.objects.filter(env_id=3, label="GETCONFIGMAP").first()
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="feiyan").first()
                 # token = pj.token
                 # a = ProjectService.objects.filter(rancher_url__contains="feiyan").values("pjid").annotate(
                 #     counts=Count("pjid"))
@@ -681,12 +696,14 @@ class Mytest(unittest.TestCase):
                 #             selflinks=xx['links']['self'],
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
-                #             tag='feiyan'
+                #             tag='feiyan',
+                #             verifyurl = "https://rancher.feiyan.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
-                #-------------------------------------------------------------
-                # get fangyi pvc
-                # pj = RancherApiConfig.objects.filter(env_id=3, label="GETPVC").first()
+                # #-------------------------------------------------------------
+                # # get fangyi pvc
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="feiyan").first()
                 # token = pj.token
                 # a = ProjectService.objects.filter(rancher_url__contains="feiyan").values("pjid").annotate(
                 #     counts=Count("pjid"))
@@ -714,11 +731,13 @@ class Mytest(unittest.TestCase):
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
                 #             tag='feiyan',
+                #             verifyurl = "https://rancher.feiyan.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
                 #-------------------------------------------------------
                 #get ioc pvc
-                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="ioc").first()
                 # token = pj.token
                 # a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
                 #     counts=Count("pjid"))
@@ -746,11 +765,13 @@ class Mytest(unittest.TestCase):
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
                 #             tag='ioc',
+                #               verifyurl = "https://rancher.ioc.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
-                #---------------------------------------------------------------
-                # get  ioc configmap
-                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
+                # #---------------------------------------------------------------
+                # # get  ioc configmap
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="ioc").first()
                 # token = pj.token
                 # a = ProjectService.objects.filter(rancher_url__contains="ioc").values("pjid").annotate(
                 #     counts=Count("pjid"))
@@ -777,7 +798,9 @@ class Mytest(unittest.TestCase):
                 #             selflinks=xx['links']['self'],
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
-                #             tag='ioc'
+                #             tag='ioc',
+                #             verifyurl="https://rancher.ioc.com/p/"+xx["projectId"]+"/config-maps/"+xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
 
@@ -963,18 +986,18 @@ class Mytest(unittest.TestCase):
     #         m.save()
 
     def test(self):
-        kwargs = {
-            # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
-            "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:testcmap",
-            "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"},
-            # "data": json.dumps({
-            #     "type":"configMap",
-            #     "data":{"a": "666"},
-            #     "labels":{},
-            #     "id": "spug:spugtest",
-            #     "namespaceId": "spug"
-            # })
-        }
+    #     kwargs = {
+    #         # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
+    #         "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:testcmap",
+    #         "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"},
+    #         # "data": json.dumps({
+    #         #     "type":"configMap",
+    #         #     "data":{"a": "666"},
+    #         #     "labels":{},
+    #         #     "id": "spug:spugtest",
+    #         #     "namespaceId": "spug"
+    #         # })
+    #     }
         # res = RequestApiAgent().list(**kwargs)
         # # print(res)
         # list = json.loads(res.content)
@@ -990,8 +1013,7 @@ class Mytest(unittest.TestCase):
         #     for xx in ast.literal_eval(x['top_project']):
         #         print(type(xx))
 
-
-
+        return 
 
 
 

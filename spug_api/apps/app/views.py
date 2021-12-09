@@ -263,7 +263,8 @@ class RancherSvcView(View):
                         logger.error(msg="#####rancher redploy dev call:###### " + str(res))
                         return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                 if form.env_id == 2:
-                    Action = RancherApiConfig.objects.filter(env_id=2, label="REDOSVC").first()
+                    #todo change api
+                    Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = (Action.url).format(form.project_id,form.deployid)
                     res = RequestApiAgent().create(**kwargs)
@@ -333,7 +334,7 @@ class RancherPvcOpView(View):
             if ex.exists():
                 d = ex.first()
                 global pvarg
-                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
+                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC",tag=form.tag ).first()
                 kwargs["headers"]["Authorization"] = Action.token
                 kwargs["url"] = (Action.url).format(d['pjid'])
                 if (form.data).get("storageClassId"):
@@ -381,6 +382,7 @@ class RancherPvcOpView(View):
         form, error = JsonParser(
             Argument('id', type=int, help='id'),
             Argument('env',type=int, help='env'),
+            Argument('tag', type=str, help='tag'),
         ).parse(request.GET)
         if error is None:
             kwargs = {
@@ -388,7 +390,7 @@ class RancherPvcOpView(View):
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
             m = ProjectPvc.objects.filter(id=form.id).first()
-            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC",tag=form.tag).first()
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = m.dellinks
             res = RequestApiAgent().delete(**kwargs)
@@ -415,7 +417,7 @@ class RancherCmapOpView(View):
             cmap['data'] = (form.data)['data']
             cmap['name']=  (form.data)['name']
             cmap['namespaceId']= (form.data)['namespaceId']
-            Action = RancherApiConfig.objects.filter(env_id=form.env, label="ADDCONFIGMAP").first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="ADDCONFIGMAP",tag=form.tag).first()
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = (Action.url).format((ProjectConfigMap.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
             kwargs['data'] = json.dumps(cmap)
@@ -450,6 +452,7 @@ class RancherCmapOpView(View):
         form, error = JsonParser(
             Argument('id', type=int, help='id'),
             Argument('env', type=int, help='env'),
+            Argument('tag', required=False, type=str, help='tag'),
         ).parse(request.GET)
         if error is None:
             kwargs = {
@@ -457,7 +460,7 @@ class RancherCmapOpView(View):
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
             m = ProjectConfigMap.objects.filter(id=form.id).first()
-            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC").first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETPVC",tag=form.tag).first()
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = m.dellinks
             res = RequestApiAgent().delete(**kwargs)
@@ -492,7 +495,7 @@ class RancherSvcOpView(View):
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
-            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC").first()
+            Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC", tag=form.tag).first()
             newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = newUrl
@@ -501,7 +504,6 @@ class RancherSvcOpView(View):
             res = RequestApiAgent().create(**kwargs)
             logger.info(msg="#####rancher create deployment call:###### " + str(res.status_code))
             red = json.loads(res.content)
-            print(red)
             if res.status_code != 201:
                 logger.error(msg="#####rancher create deployment call:###### " + str(res))
                 return json_response(error="重新部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
@@ -546,13 +548,13 @@ class RancherSvcOpView(View):
                 updatelinks=red['links']['update'],
                 removelinks=red['links']['remove'],
                 revisionslinks=red['links']['revisions'],
-                statuslinks=((RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC").first()).url).format(red['projectId']) + "/" +red['id'] ,
+                statuslinks=((RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC", tag=form.tag).first()).url).format(red['projectId']) + "/" +red['id'] ,
                 verifyurl="https://rancher.ioc.com/p/"+ red['projectId'] + "/workload/" + red['id']  if red["actions"]["resume"].find("rancher.ioc")  > 0 else  "https://rancher.feiyan.com/p/"+ red['projectId'] + "/workload/" + red['id']
 
             )
             m.save()
             if (form.data)['cmapid'] is not None:
-                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGCMAP").first()
+                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGCMAP",tag=form.tag).first()
                 newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid,(form.data)['cmapid'])
                 kwargs = {
                     "url": newUrl,
@@ -568,9 +570,6 @@ class RancherSvcOpView(View):
                 ProjectService.objects.filter(dpid=red['id']).update(configId=cred['id'],configName=cred['name'], configMap=kvtmp)
 
 
-
-            # after_get_svcdata(red['id'],newUrl,form.env)
-
         return json_response(error=error)
 
 
@@ -580,7 +579,13 @@ class RancherRollbackView(View):
         if RancherSvcPubStandby.objects.filter(app_id=id).exists():
             try:
                 t = RancherSvcPubStandby.objects.get(app_id=id)
-                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                global tt
+                if (t.revisionslinks).find("ioc.com")>-1:
+                    tt="ioc"
+                else:
+                    tt="feiyan"
+
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=tt).first()
                 kwargs = {
                     "url": t.revisionslinks,
                     "headers": {"Authorization": "", "Content-Type": "application/json"}
@@ -601,7 +606,12 @@ class RancherRollbackView(View):
         if error is None:
             if RancherSvcPubStandby.objects.filter(app_id=id).exists():
                 t = RancherSvcPubStandby.objects.get(app_id=id)
-                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                global ttt
+                if (t.rollbacklinks).find("ioc.com")>-1:
+                    ttt="ioc"
+                else:
+                    ttt="feiyan"
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=ttt).first()
                 kwargs = {
                     "url": t.rollbacklinks,
                     "headers": {"Authorization": "", "Content-Type": "application/json"}

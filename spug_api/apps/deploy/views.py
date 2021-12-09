@@ -202,7 +202,10 @@ class RancherPublishView(View):
                             return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3)
                 elif form.env_id == 2:
-                    Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+                    if (publish_args['statuslinks']).find("ioc.com") > -1:
+                        Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()
+                    else:
+                        Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = publish_args['statuslinks']
                     oldres = RequestApiAgent().list(**kwargs)
@@ -226,7 +229,10 @@ class RancherPublishView(View):
                         RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
 
                     if publish_args["update_cmap"] == 0:
-                        Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP").first()
+                        if (publish_args['statuslinks']).find("ioc.com") > -1:
+                            Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
+                        else:
+                            Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyan").first()
                         kwargs["headers"]["Authorization"] = Action.token
                         kwargs["url"] = (Action.url).format(publish_args['pjid'], publish_args['configId'])
                         dataargs = cmapargs()
@@ -245,7 +251,10 @@ class RancherPublishView(View):
                             logger.error(msg="#####rancher update  configmap call:###### " + str(cres))
                             return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         try:
-                            Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP").first()
+                            if (publish_args['statuslinks']).find("ioc.com") > -1:
+                                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
+                            else:
+                                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyan").first()
                             kwargs["headers"]["Authorization"] = Action.token
                             kwargs["url"] =  publish_args['rdplinks']
                             rdp = RequestApiAgent().create(**kwargs)
@@ -389,7 +398,10 @@ class RequestDetailView(View):
             return json_response(error='未找到指定发布申请')
         d = DeployRequest.objects.get(pk=r_id)
         r = RancherSvcPubStandby.objects.get(app_id=Deploy.objects.get(pk=d.deploy_id).app_id)
-        Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC").first()
+        if (r.statuslinks).find("ioc.com") > -1:
+            Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC", tag="ioc").first()
+        else:
+            Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC", tag="feiyan").first()
         kwargs = {
             "url": r.statuslinks,
             "headers": {"Authorization": "", "Content-Type": "application/json"}
