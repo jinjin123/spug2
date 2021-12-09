@@ -9,7 +9,7 @@ import { Table,  Tag,  message,Select,Tabs,Input,Modal } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 import noticStore from '../notice/store';
-import { SearchForm, AuthDiv, AuthCard,AuthButton } from 'components';
+import { SearchForm,  AuthCard,AuthButton } from 'components';
 // import { Action } from "components";
 const { Column } = Table;
 const { TabPane } = Tabs;

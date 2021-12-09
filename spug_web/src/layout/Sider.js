@@ -11,8 +11,9 @@ import history from '../libs/history';
 import styles from './layout.module.css';
 import lodash from 'lodash';
 import menus from '../menus';
-import logo from './logo-spug.png';
-import logoText from './logo-text.png';
+// import logo from './logo-spug.png';
+// import logoText from './logo-text.png';
+import logo from './logo-home.png';
 
 
 class Sider extends React.Component {
@@ -76,8 +77,8 @@ class Sider extends React.Component {
     return (
       <Layout.Sider collapsed={this.props.collapsed} style={{height: '100vh', overflow: 'auto'}}>
         <div className={styles.logo}>
-          <img src={logo} alt="Logo"/>
-          <img src={logoText} alt="logo-text" style={{marginLeft: 25, width: 70}} />
+          <img src={logo} alt="Logo"style={{marginLeft: 25, width: 120}}/>
+          {/* <img src={logoText} alt="logo-text" style={{marginLeft: 25, width: 70}} /> */}
         </div>
         <Menu
           theme="dark"

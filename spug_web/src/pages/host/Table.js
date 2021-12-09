@@ -10,9 +10,9 @@ import { AuthDiv } from 'components';
 import ComForm from './Form';
 import FormWin from './FormWin';
 import ComImport from './Import';
-import { http, hasPermission } from 'libs';
+import { http } from 'libs';
 import store from './store';
-import envStore from 'pages/config/environment/store';
+// import envStore from 'pages/config/environment/store';
 
 
 
