@@ -731,7 +731,7 @@ class Mytest(unittest.TestCase):
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
                 #             tag='feiyan',
-                #             verifyurl = "https://rancher.feiyan.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             verifyurl = "https://rancher.feiyan.com/p/" + xx["projectId"] + "/volumes/" + xx['id'],
                 #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
@@ -765,7 +765,7 @@ class Mytest(unittest.TestCase):
                 #             updatelinks=xx['links']['update'],
                 #             yamllinks=xx['links']['yaml'],
                 #             tag='ioc',
-                #               verifyurl = "https://rancher.ioc.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             verifyurl = "https://rancher.ioc.com/p/" + xx["projectId"] + "/volumes/" + xx['id'],
                 #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
@@ -1012,7 +1012,6 @@ class Mytest(unittest.TestCase):
         # for x in t:
         #     for xx in ast.literal_eval(x['top_project']):
         #         print(type(xx))
-
         return
 
 

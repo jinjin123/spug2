@@ -227,6 +227,11 @@ class RancherSvcView(View):
             cmap = ProjectConfigMap.objects.filter(tag='feiyan').all()
             pvc = ProjectPvc.objects.filter(tag='feiyan').all()
             nodes = RancherNode.objects.filter(tag='feiyan').all()
+        else:
+            svc = ProjectService.objects.all()
+            cmap = ProjectConfigMap.objects.all()
+            pvc = ProjectPvc.objects.all()
+            nodes = RancherNode.objects.all()
         pj = [x['top_project'] for x in svc.order_by('top_project').values('top_project').distinct()]
         rj = [x['pjname'] for x in svc.order_by('pjname').values('pjname').distinct()]
         ns = [x['nsname'] for x in svc.order_by('nsname').values('nsname').distinct()]
