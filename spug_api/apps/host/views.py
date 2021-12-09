@@ -60,7 +60,7 @@ class HostView(View):
                                   "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
                                   "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
                                   "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
-            cache.set(HOSTKEY,content)
+            cache.set(HOSTKEY,content,50*10000)
             return json_response(content)
         else:
             hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).exclude(ipaddress="").all().annotate(num=Count("dbtag")).order_by('-ipaddress')
@@ -82,7 +82,7 @@ class HostView(View):
                                   "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
                                   'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
 
-            cache.set(DBKEY,content)
+            cache.set(DBKEY,content,50*10000)
             return json_response(content)
 
 
@@ -435,7 +435,7 @@ class MultiDbView(View):
                                   "polist":[ x.to_dict()for x in polist],"dvpo":[ x.to_dict()for x in dvpo],
                                   "cuser":[x.to_dict() for x in cuser],"rset": [ x.to_dict() for x in rest],"pj":[x.to_dict() for x in pj],"envs": [x.to_dict() for x in env],
                                   "tp":tp,"ostp":ostp,'provider':provider,'w_z':w_z,'res_t':res_t,'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
-            cache.set(DBMultiKEY,content)
+            cache.set(DBMultiKEY,content,50*10000)
             return json_response(content)
         else:
             hosts = MultiDBUser.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).exclude(ipaddress="").all()
@@ -457,7 +457,7 @@ class MultiDbView(View):
                                   "tp": tp, "ostp": ostp, 'provider': provider, 'w_z': w_z, 'res_t': res_t,
                                   'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms}
 
-            cache.set(DBMultiKEY,content)
+            cache.set(DBMultiKEY,content,50*10000)
             return json_response(content)
 
 
@@ -509,8 +509,8 @@ class MultiDbView(View):
                          pkey=form.pkey) is False:
                 return json_response('auth fail')
             # form.pop("created_by")
-            if tag == "host":
-                cache.delete(DBMultiKEY)
+            # if tag == "host":
+            #     cache.delete(DBMultiKEY)
             if tag == "db":
                 cache.delete(DBMultiKEY)
 

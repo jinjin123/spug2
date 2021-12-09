@@ -1013,7 +1013,7 @@ class Mytest(unittest.TestCase):
         #     for xx in ast.literal_eval(x['top_project']):
         #         print(type(xx))
 
-        return 
+        return
 
 
 
