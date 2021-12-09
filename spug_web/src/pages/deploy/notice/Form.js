@@ -26,8 +26,8 @@ class ComForm extends React.Component {
     if (userStore.records.length === 0) {
       userStore.fetchRecords()
     } 
-    if (svcstore.records.length === 0) {
-      svcstore.fetchRecords()
+    if (store.confrecords.length === 0) {
+      store.fetchConfig()
     } 
   }
 
@@ -68,7 +68,7 @@ class ComForm extends React.Component {
           <Form.Item required label="实体项目">
             <Col span={16}>
               <Select   placeholder="请选择" value={store.topproject} onChange={v => store.topproject = v}>
-                {svcstore.toppj.map((item,index) => (
+                {store.toppj.map((item,index) => (
                   <Select.Option  value={item} key={index}>{item}</Select.Option>
                 ))}
               </Select>
@@ -77,7 +77,7 @@ class ComForm extends React.Component {
           <Form.Item required label="rancher细分项目" >
             <Col span={16}>
               <Select   placeholder="请选择" value={store.rj} onChange={v => store.rj = v}>
-                {svcstore.rancherpj.map((item,index) => (
+                {store.rancherpj.map((item,index) => (
                   <Select.Option  value={item} key={index}>{item}</Select.Option>
                 ))}
               </Select>
@@ -86,7 +86,7 @@ class ComForm extends React.Component {
           <Form.Item required label="命名空间" >
             <Col span={16}>
               <Select   placeholder="请选择" value={store.ns} onChange={v => store.ns = v}>
-                {svcstore.nsname.map((item,index) => (
+                {store.nsname.map((item,index) => (
                   <Select.Option  value={item} key={index}>{item}</Select.Option>
                 ))}
               </Select>
@@ -94,8 +94,16 @@ class ComForm extends React.Component {
           </Form.Item>
           <Form.Item required label="应用" >
             <Col span={16}>
-              <Select   placeholder="请选择" value={store.app} onChange={v => store.app = v}>
-                {svcstore.apps.map((item,index) => (
+              <Select 
+                showSearch
+                filterOption={(input, option) =>
+                  option.props.children.indexOf(input)  >= 0
+                }
+                filterSort={(optionA, optionB) =>
+                  optionA.props.children.localeCompare(optionB.props.children)
+                }
+                placeholder="请选择" value={store.app} onChange={v => store.app = v}>
+                {store.apps.map((item,index) => (
                   <Select.Option  value={item} key={index}>{item}</Select.Option>
                 ))}
               </Select>

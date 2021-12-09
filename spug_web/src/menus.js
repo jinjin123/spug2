@@ -35,7 +35,7 @@ export default [
   },
   {
     icon: 'flag', title: '应用发布', auth: 'deploy.app.view|deploy.request.view|deploy.rancher.view', child: [
-      {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app'},
+      // {title: '应用管理', auth: 'deploy.app.view', path: '/deploy/app'},
       {title: '发布状态', auth: 'deploy.request.view', path: '/deploy/request'},
       {icon: 'flag',title: 'rancher', auth: 'deploy.rancher.view',child: [
           {title: 'ioc', auth: 'deploy.rancher.view', path: '/deploy/rancherioc'},
@@ -51,7 +51,7 @@ export default [
       {title: '环境管理', auth: 'config.env.view', path: '/config/environment'},
       {title: '服务配置', auth: 'config.src.view', path: '/config/service'},
       {title: '应用配置', auth: 'config.app.view', path: '/config/app'},
-      {title: 'rancher数据卷配置', auth: 'config.rancher.view', path: '/config/rancherconf'},
+      // {title: 'rancher数据卷配置', auth: 'config.rancher.view', path: '/config/rancherconf'},
       // {title: '备份配置', auth: 'config.backup.view', path: '/config/backup'},
     ]
   },

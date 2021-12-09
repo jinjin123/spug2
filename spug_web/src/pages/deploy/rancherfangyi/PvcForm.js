@@ -118,7 +118,7 @@ class PvcForm extends React.Component {
           formData["storageClassId"] =  formData['vtype']
           break;
     }
-    http.post('/api/app/deploy/pvcop/', {"data":formData,"env":3,"tag":"ioc"})
+    http.post('/api/app/deploy/pvcop/', {"data":formData,"env":2,"tag":"feiyan"})
     .then(() => {
         message.success('操作成功');
         store.pvcForm = false;

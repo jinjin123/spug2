@@ -83,7 +83,7 @@ class ComTable extends React.Component {
               title: '删除确认',
               content: `确定要删除【${info['configName']}】?`,
               onOk: () => {
-                return http.delete('/api/app/deploy/cmapop/', {params: {id: info.id, env: 2}})
+                return http.delete('/api/app/deploy/cmapop/', {params: {id: info.id, env: 2,tag:"feiyan"}})
                   .then(() => {
                     message.success('删除成功');
                     store.fetchRecords()
@@ -100,7 +100,7 @@ class ComTable extends React.Component {
               title: '删除确认',
               content: `确定要删除【${info['pvcname']}】?`,
               onOk: () => {
-                return http.delete('/api/app/deploy/pvcop/', {params: {id: info.id, env: 2}})
+                return http.delete('/api/app/deploy/pvcop/', {params: {id: info.id, env: 2,tag:"feiyan"}})
                   .then(() => {
                     message.success('删除成功');
                     store.fetchRecords()

@@ -126,7 +126,7 @@ class CmpForm extends React.Component {
     formData["dbdata"] =  store.ranchercmp
     formData["type"] = "configMap"
     formData["labels"] = {}
-    http.post('/api/app/deploy/cmapop/', {"data":formData,"env":3,"tag":"ioc"})
+    http.post('/api/app/deploy/cmapop/', {"data":formData,"env":2,"tag":"feiyan"})
     .then(() => {
         message.success('操作成功');
         store.cmpForm = false;

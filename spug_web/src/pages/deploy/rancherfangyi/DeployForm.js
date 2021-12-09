@@ -208,7 +208,7 @@ class DeployForm extends React.Component {
       node["preferred"] = preferred
     }
     formData["scheduling"] = {"node": node}
-    http.post('/api/app/deploy/svcop/', {"data":formData,"env":3,"tag":"ioc"})
+    http.post('/api/app/deploy/svcop/', {"data":formData,"env":2,"tag":"feiyan"})
     .then(() => {
         message.success('操作成功');
         store.deployForm = false;
