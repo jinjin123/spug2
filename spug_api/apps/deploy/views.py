@@ -57,6 +57,8 @@ class RequestView(View):
             tmp['type'] = item.get_type_display()
             tmp['opshandler'] = item.opshandler
             tmp['opsstatus_alias'] = item.get_opsstatus_display()
+            tmp['testhandler'] = item.testhandler
+            tmp['teststatus_alias'] = item.get_teststatus_display()
             tmp['type'] = item.get_type_display()
             tmp['created_by_user'] = item.created_by_user
             tmp['pub_tag'] = item.pub_tag
@@ -464,9 +466,10 @@ class RequestDetailView(View):
         Thread(target=deploy_dispatch, args=(request, req, token)).start()
         return json_response({'token': token, 'type': req.type, 'outputs': outputs})
 
-    def patch(self, request, r_id):
+    def patch(self, request,envid, r_id):
         form, error = JsonParser(
             Argument('reason', required=False),
+            Argument('author', required=False),
             Argument('is_pass', type=bool, help='参数错误')
         ).parse(request.body)
         if error is None:
@@ -475,13 +478,18 @@ class RequestDetailView(View):
                 return json_response(error='未找到指定申请')
             if not form.is_pass and not form.reason:
                 return json_response(error='请输入驳回原因')
-            if req.status != '0':
-                return json_response(error='该申请当前状态不允许审核')
+            # if req.status != '0':
+            #     return json_response(error='该申请当前状态不允许审核')
             req.approve_at = human_datetime()
             req.approve_by = request.user
-            req.status = '1' if form.is_pass else '-1'
-            req.opsstatus = 1 if form.is_pass else -1
-            req.opshandler = request.user.nickname
+            if form.author == "ops":
+                req.status = '1' if form.is_pass else '-1'
+                req.opsstatus = 1 if form.is_pass else -1
+                req.opshandler = request.user.nickname
+            elif form.author == "test":
+                req.status = '3' if form.is_pass else '-3'
+                req.teststatus = 3 if form.is_pass else -3
+                req.testhandler = request.user.nickname
             req.reason = form.reason
             req.save()
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()

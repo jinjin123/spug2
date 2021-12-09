@@ -179,14 +179,14 @@ class Mytest(unittest.TestCase):
     #     print(tmp)
 
     # def test(self):
-    #     # global img
-    #     # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
-    #     # ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
-    #     # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
-    #     # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
-    #     # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
-    #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="ioc").first()
-    #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="ioc").first()
+    # #     # global img
+    # #     # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
+    # #     # ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
+    # #     # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
+    # #     # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
+    # #     # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
+    #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETSIGPROJECT",tag="ioc").first()
+    #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETSIGNS",tag="ioc").first()
     #     cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="ioc").first()
     #     svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()
     #     pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="ioc").first()
@@ -204,13 +204,13 @@ class Mytest(unittest.TestCase):
     #         # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
     #         # if x["id"] == "local:p-cvfqn":
     #         #-----
-    #         if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
-    #             pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目","toppjid":"dgdataheadioc"})
-    #         if x["id"] == "local:p-t48wr":
-    #             pjnew.append({"pjid": x["id"], "pjname": x["name"], "top_project": "疫情地图项目","toppjid": "dgcovidmap"})
+    #         # if x["id"] == "local:p-9s8fj" or x["id"] == "local:p-f9tqd" or x["id"] == "local:p-8v6qj":
+    #         #     pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市政务数据大脑暨智慧城市IOC运行中心建设项目","toppjid":"dgdataheadioc"})
+    #         # if x["id"] == "local:p-t48wr":
+    #         #     pjnew.append({"pjid": x["id"], "pjname": x["name"], "top_project": "疫情地图项目","toppjid": "dgcovidmap"})
     #         #------
-    #         # if x['id']  == 'c-5tk6p:p-55knm':
-    #         #         pjnew.append({"pjid": x['id'], "pjname":x['name'],"top_project": "test","toppjid": "test"})
+    #         if x['id']  == 'c-5tk6p:p-55knm':
+    #                 pjnew.append({"pjid": x['id'], "pjname":x['name'],"top_project": "test","toppjid": "test"})
     #         # print(x["id"],x["name"])
     #     print(len(pjnew))
     #     url = ns.url
@@ -224,10 +224,10 @@ class Mytest(unittest.TestCase):
     #     nsnew = []
     #     for x in nsdatalist:
     #         #------
-    #         # if x['id'] == 'spug':
-    #         #     nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
+    #         if x['id'] == 'spug':
+    #             nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
     #         #-------
-    #         nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
+    #         # nsnew.append({"pjid": x["projectId"], "nsid": x["id"], "nsname": x["name"]})
     #         # print(x["projectId"],x["id"], x["name"])
     #     # print(nsnew)
     #     nspj = []
@@ -329,7 +329,7 @@ class Mytest(unittest.TestCase):
     #         ProjectService.objects.bulk_create(cmapnew)
     #     except Exception as e:
     #         print(e)
-        #---------------------------------------
+        # ---------------------------------------
         #         print(cx["dpname"])
         #             cmapnew.append({"pjid": cx["pjid"], "pjname": cx["pjname"],
         #                                         "nsid": cx["nsid"], "nsname": cx["nsname"],
