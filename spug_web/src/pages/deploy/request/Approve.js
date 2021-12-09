@@ -21,7 +21,14 @@ class Approve extends React.Component {
   handleSubmit = () => {
     this.setState({loading: true});
     const formData = this.props.form.getFieldsValue();
-    http.patch(`/api/deploy/request/${store.record.id}/`, formData)
+    let tmp
+    if(store.authtag === "测试"){
+      tmp = "test"
+    }else{
+      tmp = "ops"
+    }
+    formData["author"] =  tmp
+    http.patch(`/api/deploy/request/2/${store.record.id}/`, formData)
       .then(res => {
         message.success('操作成功');
         store.approveVisible = false;
@@ -36,7 +43,7 @@ class Approve extends React.Component {
         visible
         width={600}
         maskClosable={false}
-        title="审核发布申请"
+        title={store.authtag+"审核发布"}
         onCancel={() => store.approveVisible = false}
         confirmLoading={this.state.loading}
         onOk={this.handleSubmit}>

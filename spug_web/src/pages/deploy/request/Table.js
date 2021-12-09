@@ -141,6 +141,36 @@ class ComTable extends React.Component {
   {
     title: '运维审核人',
     dataIndex: 'opshandler',
+  },
+  {
+    title: '测试审核状态',
+    // dataIndex: 'opsstatus',
+    render: info => {
+      if (info.teststatus === -1 && info.reason) {
+        return <Popover title="驳回原因:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['teststatus_alias']}</span>
+        </Popover>
+      } else if (info.teststatus === 1 && info.reason) {
+        return <Popover title="审核意见:" content={info.reason}>
+          <span style={{color: '#1890ff'}}>{info['teststatus_alias']}</span>
+        </Popover>
+      } else if (info.teststatus === 2) {
+        return <Tag color="blue">{info['teststatus_alias']}</Tag>
+      } else if (info.teststatus === 3) {
+        return <Tag color="green">{info['teststatus_alias']}</Tag>
+      } else if (info.teststatus === -3) {
+        return <Tag color="red">{info['teststatus_alias']}</Tag>
+      } else if (info.teststatus === 1 ){
+        return <Tag color="magenta">{info['teststatus_alias']}</Tag>
+      } else {
+        return <Tag >{info['teststatus_alias']}</Tag>
+
+      }
+    }
+  },
+  {
+    title: '测试审核人',
+    dataIndex: 'testhandler',
   },  
   {
     title: '申请人',
@@ -153,25 +183,27 @@ class ComTable extends React.Component {
     title: '操作',
     className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
     render: info => {
+      const {loadings} = this.state
+
       switch (info.status) {
+
         case '-3':
           return <Action>
-            <Action.Link
-              auth="deploy.request.do"
-              to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
-            <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>发布</Action.Link>
-            <Action.Button
-              auth="deploy.request.do"
-              disabled={info.type === '2'}
-              loading={this.state.loading}
-              onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+            {info["pub_tag"] === '2'?  
+                <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
+            :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
+            }
+            {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
         case '3':
           return <Action>
             {info["pub_tag"] === '2'?  
-                <Action.Link
-                auth="deploy.request.do"
-                to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link>
+                <Action>
+                  <Action.Link
+                  auth="deploy.request.do"
+                  to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link> 
+                  <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"测试")}>测试审核</Action.Button>
+                </Action>
               : <Action.Link
                 auth="deploy.request.do"
                 to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
@@ -184,22 +216,22 @@ class ComTable extends React.Component {
         case '-1':
           return <Action>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showForm(info)}>编辑</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
         case '0':
           return <Action>
-            <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info)}>审核</Action.Button>
+            <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"运维")}>审核</Action.Button>
             <Action.Button auth="deploy.request.edit" onClick={() => store.showChange(info)}>查看变更</Action.Button>
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
         case '1':
-          const {loadings} = this.state
+          // const {loadings} = this.state
           return <Action>
             {info["pub_tag"] === '2'?  
                 <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
             :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
             }
-            <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button>
+            {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
         case '2':
           return <Action>

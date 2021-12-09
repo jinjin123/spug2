@@ -36,6 +36,7 @@ class Store {
   @observable f_env_id;
   @observable f_s_date;
   @observable f_e_date;
+  @observable authtag;
 
   fetchRecords = () => {
     this.isFetching = true;
@@ -107,7 +108,8 @@ class Store {
     
   }
 
-  showApprove = (info) => {
+  showApprove = (info,tag) => {
+    this.authtag = tag;
     this.record = info;
     this.approveVisible = true;
   }
