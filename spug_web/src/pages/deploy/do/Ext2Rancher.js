@@ -49,10 +49,10 @@ class Ext2Rancher extends React.Component {
       .then((data) => {
         this.state.tmplog = JSON.stringify(data.data,undefined, 4)
         var s = (this.state.tmplog).search(/"state": "active"/g)
-        if(s == 0){
-          this.state.status = "red"
-        }else{
+        if(s != -1){
           this.state.status = "#52c41a"
+        }else{
+          this.state.status = "red"
 
         }
       })
@@ -78,7 +78,7 @@ class Ext2Rancher extends React.Component {
                   <SearchForm.Item span={4} style={{textAlign: 'right'}}>
                     <Button type="primary" icon="sync" onClick={()=>this.fetch()}>刷新重新获取结果</Button>
                   </SearchForm.Item>
-                <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+                <SearchForm.Item span={4} style={{textAlign: 'right'}}>          
                       发布结果：<Icon type="check-circle" theme="twoTone" twoToneColor={status} />
                 </SearchForm.Item>
               </SearchForm>
