@@ -79,7 +79,7 @@ class LoginIndex extends React.Component {
     return (
       <div className={styles.container}>
         <div className={styles.titleContainer}>
-          <div><img className={styles.logo} src={logo} alt="logo"/></div>
+          <div><img className={styles.logo} src={logo} alt="logo" style={{width: 250,height:100}}/></div>
           <div className={styles.desc}>灵活、强大、功能全面的开源运维平台</div>
         </div>
         <div className={styles.formContainer}>
