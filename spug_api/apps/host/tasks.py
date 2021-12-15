@@ -6,6 +6,7 @@ from apps.message.tasklog import tasksave
 import ast
 import math
 import logging
+import socket
 logger = logging.getLogger('spug_log')
 @app.task
 def update_hostinfo(ip,user='root'):
@@ -143,6 +144,21 @@ def update_pwd(ip, user):
         logger.error("##update password faild## %s", (e))
         tasksave('update_pwd', stdout_dict, 1)
 
+
+@app.task
+def check_db_port():
+    try:
+        hosts = Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id).values("ipaddress", "port").all().exclude(ipaddress="")
+        for x in hosts:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            d = s.connect_ex((x['ipaddress'],x['port']))
+            if d == 0:
+                Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id,ipaddress=x['ipaddress'],port=x['port']).update(status=0)
+            else:
+                Host.objects.filter(resource_type=(ResourceType.objects.get(name='数据库')).id,ipaddress=x['ipaddress'],port=x['port']).update(status=1)
+    except:
+        pass
 
 
 

@@ -10,6 +10,7 @@ from apps.config.models import RancherApiConfig
 from django.core.mail import send_mail
 from apps.message.models import EmailRecord
 import logging
+import socket
 logger = logging.getLogger('spug_info')
 
 @app.task
