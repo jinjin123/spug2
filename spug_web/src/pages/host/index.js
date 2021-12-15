@@ -36,7 +36,9 @@ export default observer(function () {
         <SearchForm.Item span={6} title="资源类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v} mode="multiple">
             {store.zz.map(item => (
+              (item.name).includes("机")?
               <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+              :null
             ))}
           </Select>
         </SearchForm.Item>
@@ -62,7 +64,7 @@ export default observer(function () {
             ))}
           </Select>
         </SearchForm.Item>
-        <SearchForm.Item span={4} title="所属集群">
+        <SearchForm.Item span={6} title="所属集群">
           <Select allowClear autoClearSearchValue placeholder="请选择" value={store.csst} onChange={v => store.csst = v} mode="multiple" >
             {store.cs.map(item => (
               <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
@@ -102,7 +104,7 @@ export default observer(function () {
         {/* <SearchForm.Item span={6} title="主机别名">
           <Input allowClear value={store.f_name} onChange={e => store.f_name = e.target.value} placeholder="请输入"/>
         </SearchForm.Item> */}
-        <SearchForm.Item span={5} title="IP">
+        <SearchForm.Item span={4} title="IP">
           <Input allowClear value={store.f_ip} onChange={e => store.f_ip = e.target.value} placeholder="请输入"/>
         </SearchForm.Item>
         <SearchForm.Item span={6}>
