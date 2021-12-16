@@ -157,7 +157,7 @@ class FormWin extends React.Component {
         maskClosable={false}
         title={store.record.id ? '编辑Windows类型数据库' : '新建Windows类型数据库'}
         okText="提交"
-        onCancel={() => store.formVisible = false}
+        onCancel={() => store.winformVisible = false}
         confirmLoading={loading}
         onOk={this.handleSubmit}>
         <Form labelCol={{span: 5}} wrapperCol={{span: 17}}>
