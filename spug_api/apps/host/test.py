@@ -173,20 +173,21 @@ class Mytest(unittest.TestCase):
                         global count, datasize,syssize
                         count = Decimal(str(0.0))
                         # count = 0
-                        # syssize=[]
-                        # datasize=[]
+                        # syssize = None
+                        # datasize = None
 
                         for xx in ser["ansible_facts"]["ansible_devices"]:
-                            if sysdisk !="" and sysdisk is not None and len(sysdisk) > 0 and sysdisk[0]["name"].find(xx)!=-1:
+                            if sysdisk !="" and sysdisk is not None and len(sysdisk) > 0 and sysdisk[0]["mount"] == "/" and not xx.startswith(("dm","sr0")):
                                 syssize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                print(str(syssize.split(" ")[0]) + syssize.split(" ")[1], xx, 'sysdisk')
                                 # print(str(syssize.split(" ")[0]) + syssize.split(" ")[1],xx, 'sysdisk')
                             else:
-                                if not xx.startswith(("dm","sr0")):
+                                if not xx.startswith(("dm","sr0")) and sysdisk[0]["mount"] != "/":
                                     datasize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                    print(datasize,xx)
                                     # print(datasize.split(" ")[0],xx, )
                                     count +=Decimal(str(datasize.split(" ")[0]))
-                        print(str(syssize.split(" ")[0]) + syssize.split(" ")[1],xx, 'sysdisk')
-                        print(str(count) + datasize.split(" ")[1],xx, 'datadisk')
+                                    print(str(count) + datasize.split(" ")[1],xx, 'datadisk')
                         # count = Decimal(str(0.0))
 
 

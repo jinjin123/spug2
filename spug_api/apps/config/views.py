@@ -16,6 +16,7 @@ logger = logging.getLogger('spug_log')
 from django.core.cache import cache
 HOSTKEY = 'host_all'
 DBKEY = 'db_all'
+DBMultiKEY = 'dbmulti'
 
 class RancherNsView(View):
     def get(self, request):
@@ -62,6 +63,7 @@ class EnvironmentView(View):
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             if form.id:
                 Environment.objects.filter(pk=form.id).update(**form)
             else:
@@ -77,6 +79,7 @@ class EnvironmentView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             if Config.objects.filter(env_id=form.id).exists():
                 return json_response(error='该环境已存在关联的配置信息，请删除相关配置后再尝试删除')
             if Deploy.objects.filter(env_id=form.id).exists():
@@ -99,6 +102,7 @@ class ServiceView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             service = Service.objects.filter(key=form.key).first()
             if service and service.id != form.id:
                 return json_response(error=f'唯一标识符 {form.key} 已存在，请更改后重试')
@@ -115,6 +119,7 @@ class ServiceView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             if Config.objects.filter(type='src', o_id=form.id).exists():
                 return json_response(error='该服务已存在关联的配置信息，请删除相关配置后再尝试删除')
             Service.objects.filter(pk=form.id).delete()
@@ -271,6 +276,7 @@ class ConfigView(View):
             form.updated_at = human_datetime()
             form.updated_by = request.user
             envs = form.pop('envs')
+            cache.delete(DBMultiKEY)
             for env_id in envs:
                 Config.objects.create(env_id=env_id, **form)
                 ConfigHistory.objects.create(action='1', env_id=env_id, **form)
@@ -286,6 +292,7 @@ class ConfigView(View):
         if error is None:
             form.value = form.value.strip()
             config = Config.objects.filter(pk=form.id).first()
+            cache.delete(DBMultiKEY)
             if not config:
                 return json_response(error='未找到指定对象')
             config.desc = form.desc
@@ -317,7 +324,7 @@ class ConfigView(View):
                     updated_by=request.user,
                     **config.to_dict(excludes=('id', 'value', 'updated_at', 'updated_by_id'))
                 )
-                config.delete()
+                cache.delete(DBMultiKEY)
         return json_response(error=error)
 
 
@@ -449,6 +456,7 @@ class ProjectView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = ProjectConfig.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -467,6 +475,7 @@ class ProjectView(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             t = Host.objects.values("top_project", "child_project").all()
             for x in t:
                 for xx in ast.literal_eval(x['top_project']):
@@ -495,6 +504,7 @@ class Cluster(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = ClusterConfig.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -513,6 +523,7 @@ class Cluster(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             t = Host.objects.values("cluster").all()
             for x in t:
                 for xx in ast.literal_eval(x['cluster']):
@@ -536,6 +547,7 @@ class Work_Zone(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = WorkZone.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -554,6 +566,7 @@ class Work_Zone(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             t = Host.objects.values("work_zone").all()
             for x in t:
                 if x != "" and x is not None and x == form.id:
@@ -579,6 +592,7 @@ class ZoneConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = Zone.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -597,6 +611,7 @@ class ZoneConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             t = Host.objects.values("zone").all()
             for x in t:
                 for xx in ast.literal_eval(x['zone']):
@@ -623,6 +638,7 @@ class ServicebagConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = Servicebag.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -640,6 +656,7 @@ class ServicebagConfig(View):
         ).parse(request.GET)
         if error is None:
             cache.delete(HOSTKEY)
+            cache.delete(DBMultiKEY)
             cache.delete(DBKEY)
             t = Host.objects.values("service_pack").all()
             for x in t:
@@ -668,6 +685,7 @@ class PortlistConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = Portlist.objects.filter(ipaddress=form.ipaddress).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.ipaddress} 已存在，请更改后重试')
@@ -686,6 +704,7 @@ class PortlistConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             Portlist.objects.filter(pk=form.id).delete()
         return json_response(error=error)
 
@@ -708,6 +727,7 @@ class DomainConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = Domainlist.objects.filter(domain=form.domain).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.domain} 已存在，请更改后重试')
@@ -725,6 +745,7 @@ class DomainConfig(View):
         ).parse(request.GET)
         if error is None:
             cache.delete(HOSTKEY)
+            cache.delete(DBMultiKEY)
             cache.delete(DBKEY)
             Portlist.objects.filter(pk=form.id).delete()
         return json_response(error=error)
@@ -747,6 +768,7 @@ class DevicePoConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = DevicePositon.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -765,6 +787,7 @@ class DevicePoConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             t = Host.objects.values("provider").all()
             for x in t:
                 if x != "" and x is not None and x == form.id:
@@ -789,6 +812,7 @@ class ConnctUserConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
             env = ConnctUser.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -807,6 +831,8 @@ class ConnctUserConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
+
             t = Host.objects.values("username").all()
             for x in t:
                 if x != "" and x is not None and x == form.id:
@@ -832,6 +858,8 @@ class ResourceTConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
+
             env = ResourceType.objects.filter(name=form.name).first()
             if env and env.id != form.id:
                 return json_response(error=f'唯一标识符 {form.name} 已存在，请更改后重试')
@@ -850,6 +878,8 @@ class ResourceTConfig(View):
         if error is None:
             cache.delete(HOSTKEY)
             cache.delete(DBKEY)
+            cache.delete(DBMultiKEY)
+
             t = Host.objects.values("resource_type").all()
             for x in t:
                 if x != "" and x is not None and x == form.id:
