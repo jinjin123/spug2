@@ -45,7 +45,7 @@ class FormWin extends React.Component {
     http.post('/api/host/resource/db/', formData)
       .then(res => {
           message.success('操作成功');
-          store.formVisible = false;
+          store.winformVisible = false;
           store.fetchRecords()
       }, () => this.setState({loading: false}))
   };

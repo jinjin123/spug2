@@ -99,7 +99,7 @@ class ComTable extends React.Component {
         return  <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." } autoClearSearchValue	allowClear={true} onChange={this.onChange.bind(this,info)}  style={{ width: 100 }} >
           <Select.Option key={index} value={1}>编辑</Select.Option>
           <Select.Option value={2}>删除</Select.Option>
-          <Select.Option key={index} value={3}>待回收</Select.Option>
+          {/* <Select.Option key={index} value={3}>待回收</Select.Option> */}
         </Select>
       }
     },
@@ -207,6 +207,12 @@ class ComTable extends React.Component {
       title: '端口',
       dataIndex: 'port',
       key:'port',
+
+    },
+    {
+      title: '实例',
+      dataIndex: 'shili',
+      key:'shili',
 
     },
     {

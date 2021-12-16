@@ -397,6 +397,11 @@ class ComForm extends React.Component {
                   prefix={<Icon type="lock" />}/>
               )}
             </Form.Item>
+            <Form.Item required label="实例">
+              {getFieldDecorator('shili', {rules: [{required: true, message: '请输入实例'}]})(
+                <Input allowClear  placeholder="实例"/>
+              )}
+            </Form.Item>
             {/* <Form.Item required label="密码过期天数" >
                 {getFieldDecorator('password_expire', {initialValue: info['password_expire'],rules: [{required: true, message: '密码过期天数'}]})(
                       <InputNumber />

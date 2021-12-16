@@ -107,7 +107,7 @@ class Store {
   downExcel = () => {
     let formData={}
     formData["data"] = this.tmpExcel
-
+    this.isFetching = true
     return http.post(
         '/api/file/dbmexcel/host', formData,
         {responseType:'blob'},)

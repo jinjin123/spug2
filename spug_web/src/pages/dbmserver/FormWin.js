@@ -45,7 +45,7 @@ class FormWin extends React.Component {
     http.post('/api/host/dbresource/db/', formData)
       .then(res => {
           message.success('操作成功');
-          store.formVisible = false;
+          store.winformVisible = false;
           store.fetchRecords()
       }, () => this.setState({loading: false}))
   };
@@ -155,7 +155,7 @@ class FormWin extends React.Component {
         visible
         width={800}
         maskClosable={false}
-        title={store.record.id ? '编辑Linux类型数据库' : '新建Linux类型数据库'}
+        title={store.record.id ? '编辑Windows类型数据库' : '新建Windows类型数据库'}
         okText="提交"
         onCancel={() => store.formVisible = false}
         confirmLoading={loading}
@@ -403,6 +403,11 @@ class FormWin extends React.Component {
                   placeholder="请输入密码"
                   allowClear
                   prefix={<Icon type="lock" />}/>
+              )}
+            </Form.Item>
+            <Form.Item required label="实例">
+              {getFieldDecorator('shili', {rules: [{required: true, message: '请输入实例'}]})(
+                <Input allowClear  placeholder="实例"/>
               )}
             </Form.Item>
             {/* <Form.Item required label="密码过期天数" >
