@@ -500,6 +500,7 @@ class MultiDbView(View):
             Argument('sys_disk', handler=str.strip, required=False),
             Argument('data_disk', handler=str.strip, required=False),
             Argument('sys_data', handler=str.strip, required=False),
+            Argument('shili', handler=str.strip, required=True, help="实例"),
 
         ).parse(request.body)
         if error is None:
@@ -755,7 +756,7 @@ class MultiDbView(View):
             trelease = MultiDBUser.objects.filter(pk=form.id,zone="待回收").exists()
             if trelease:
                 return json_response(error=f'主机已待回收')
-            if tag == "dbm":
+            if tag == "db":
                 cache.delete(DBMultiKEY)
             t = MultiDBUser.objects.filter(pk=form.id).first()
             MultiDBUser.objects.filter(pk=form.id).update(

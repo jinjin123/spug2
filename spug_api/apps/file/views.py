@@ -3,7 +3,7 @@
 # Released under the AGPL-3.0 License.
 import xlwt
 from django.shortcuts import HttpResponse
-from libs.utils import host_select_args,host_select_cns,get_data
+from libs.utils import host_select_args,host_select_cns,get_data, dbm_select_cns,dbm_select_args
 from django.views.generic import View
 from django_redis import get_redis_connection
 from apps.host.models import *
@@ -211,12 +211,12 @@ class DbmExceldown(View):
                     if not os.path.exists('./upload/'):
                         os.makedirs('./upload/')
                     connecbase = ','
-                    connecstr = connecbase.join(host_select_args)
+                    connecstr = connecbase.join(dbm_select_args)
                     response = HttpResponse()
                     response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode(
                         'gb2312')
-                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from multidb  where id in {}".format(','.join('({})'.format(t) for t in tmp)), host_select_args,
-                                        host_select_cns)
+                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from multidb  where id in {}".format(','.join('({})'.format(t) for t in tmp)), dbm_select_args,
+                                        dbm_select_cns)
                     full_path = os.path.join('./upload/', "资产信息汇总" + '.xls')
                     if os.path.exists(full_path):
                         response['Content-Length'] = os.path.getsize(full_path)  # 可不加
@@ -230,12 +230,12 @@ class DbmExceldown(View):
                     if not os.path.exists('./upload/'):
                         os.makedirs('./upload/')
                     connecbase = ','
-                    connecstr = connecbase.join(host_select_args)
+                    connecstr = connecbase.join(dbm_select_args)
                     response = HttpResponse()
                     response['Content-Disposition'] = 'attachment;filename="{0}"'.format("资产信息汇总" + '.xls').encode(
                         'gb2312')
-                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from multidb  where id in {}".format(tuple(tmp)), host_select_args,
-                                        host_select_cns)
+                    write_data_to_excel("./upload/", "资产信息汇总", "select " + connecstr + " from multidb  where id in {}".format(tuple(tmp)), dbm_select_args,
+                                        dbm_select_cns)
                     full_path = os.path.join('./upload/', "资产信息汇总" + '.xls')
                     if os.path.exists(full_path):
                         response['Content-Length'] = os.path.getsize(full_path)  # 可不加
@@ -298,7 +298,10 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 ttt = ""
                 if data_dict[key] != "[]" and data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt.append((ProjectConfig.objects.get(pk=x)).name)
+                        if ProjectConfig.objects.filter(pk=x).exists():
+                            tt.append((ProjectConfig.objects.get(pk=x)).name)
+                        else:
+                            tt = ["无"]
                     ttt = ";".join(tt)
                 sheet.write(i + 1, index, ttt)
             elif key == "child_project":
@@ -306,7 +309,10 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 ttt = ""
                 if data_dict[key] != "[]" and data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt.append((ProjectConfig.objects.get(pk=x)).name)
+                        if ProjectConfig.objects.filter(pk=x).exists():
+                            tt.append((ProjectConfig.objects.get(pk=x)).name)
+                        else:
+                            tt = ["无"]
                     ttt = ";".join(tt)
                 sheet.write(i + 1, index, ttt)
             elif key == "cluster":
@@ -314,7 +320,10 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 ttt = ""
                 if data_dict[key] != "[]" and data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt.append((ClusterConfig.objects.get(pk=x)).name)
+                        if ClusterConfig.objects.filter(pk=x).exists():
+                            tt.append((ClusterConfig.objects.get(pk=x)).name)
+                        else:
+                            tt = ["无"]
                     ttt = ";".join(tt)
                 sheet.write(i + 1, index, ttt)
             elif key == "zone":
@@ -322,7 +331,10 @@ def write_data_to_excel(fpath,name,sql,header,header_cns):
                 ttt = ""
                 if data_dict[key] != "[]" and data_dict[key] is not None:
                     for x in ast.literal_eval(data_dict[key]):
-                        tt.append((Zone.objects.get(pk=x)).name)
+                        if Zone.objects.filter(pk=x).exists():
+                            tt.append((Zone.objects.get(pk=x)).name)
+                        else:
+                            tt = ["无"]
                     ttt = ";".join(tt)
                 sheet.write(i + 1, index, ttt)
             elif key == "service_pack":
