@@ -3,7 +3,7 @@ from django.conf import settings
 import json
 from apps.app.models import RancherNamespace, RancherConfigMap, RancherProject, RancherDeployment, RancherSvcPubStandby
 from apps.config.models import RancherApiConfig
-from apps.host.models import  Host
+from apps.host.models import Host, ResourceType
 import unittest
 import ast
 
@@ -142,6 +142,7 @@ class Mytest(unittest.TestCase):
         from apps.host.models import Host
         import math
         from decimal import Decimal
+        import difflib
         import subprocess
         subp = subprocess.Popen("ls /home/jin/cmdbv3/spug/spug_api/out/root", shell=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
@@ -158,7 +159,8 @@ class Mytest(unittest.TestCase):
         for x in cc:
             tag = ast.literal_eval(x["disk"])
         for x in iplist:
-            if x != "" and x == "19.104.55.102":
+            # if x != "" and x =="19.104.55.102":
+            if x != "" :
                 try:
                     with open("/home/jin/cmdbv3/spug/spug_api/out/root/" + x.strip()) as f:
                         a = f.read()
@@ -168,27 +170,40 @@ class Mytest(unittest.TestCase):
                                 "used": math.ceil((xx.get("size_total",0) - xx.get("block_total",0) - xx.get("size_available",0)) / 1024/1024/1024)}
                         for xx in ser["ansible_facts"]["ansible_mounts"] if not xx["mount"].startswith(('/var','/boot','/home','/media','/usr','/tmp','/mnt','/recovery'))]
 
-                        sysdisk = [x for x in ttmp if x["mount"] =="/" ]
-                        print(sysdisk,x)
-                        global count, datasize,syssize
+                        sysdisk = [x for x in ttmp if x["mount"] =="/"   ]
+                        # print(sysdisk,x)
+                        global count, datasize,syssize,tmpsys, tmpdata
                         count = Decimal(str(0.0))
-                        # count = 0
-                        # syssize = None
-                        # datasize = None
+                        tmpsys = ""
+                        tmpdata = ""
 
                         for xx in ser["ansible_facts"]["ansible_devices"]:
-                            if sysdisk !="" and sysdisk is not None and len(sysdisk) > 0 and sysdisk[0]["mount"] == "/" and not xx.startswith(("dm","sr0")):
-                                syssize = ser["ansible_facts"]["ansible_devices"][xx]['size']
-                                print(str(syssize.split(" ")[0]) + syssize.split(" ")[1], xx, 'sysdisk')
-                                # print(str(syssize.split(" ")[0]) + syssize.split(" ")[1],xx, 'sysdisk')
-                            else:
-                                if not xx.startswith(("dm","sr0")) and sysdisk[0]["mount"] != "/":
-                                    datasize = ser["ansible_facts"]["ansible_devices"][xx]['size']
-                                    print(datasize,xx)
-                                    # print(datasize.split(" ")[0],xx, )
-                                    count +=Decimal(str(datasize.split(" ")[0]))
-                                    print(str(count) + datasize.split(" ")[1],xx, 'datadisk')
-                        # count = Decimal(str(0.0))
+                            if not xx.startswith(("dm","sr0","loop")):
+                                if sysdisk[0]["name"].find('mapper') > -1:
+                                    for k, v in dict.items(ser["ansible_facts"]["ansible_devices"][xx]['partitions']):
+                                        if v.get('holders', []) and len(v['holders']) > 0:
+                                            data = difflib.get_close_matches(sysdisk[0]["name"], v['holders'], 1,cutoff=0.5)
+                                            if len(data) > 0:
+                                                syssize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                                tmpsys = xx
+                                                break
+                                    if xx != tmpsys:
+                                        datasize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                        count += Decimal(str(datasize.split(" ")[0]))
+                                    else:
+                                        continue
+                                else:
+                                    for k,v in dict.items(ser["ansible_facts"]["ansible_devices"][xx]['partitions']):
+                                        if sysdisk[0]["name"].find(k) > -1:
+                                            syssize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                            tmpsys = xx
+                                            break
+                                    if xx != tmpsys :
+                                        datasize = ser["ansible_facts"]["ansible_devices"][xx]['size']
+                                        count += Decimal(str(datasize.split(" ")[0]))
+
+                        print(str(syssize.split(" ")[0]) + syssize.split(" ")[1] +"+"+ str(count) + datasize.split(" ")[1])
+                        Host.objects.filter(resource_type=(ResourceType.objects.get(name='主机')).id,ipaddress=x).update(sys_data=(str(syssize.split(" ")[0]) + syssize.split(" ")[1] +"+"+ str(count) + datasize.split(" ")[1]))
 
 
                 except Exception as e :
