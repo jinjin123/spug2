@@ -190,7 +190,13 @@ class ComTable extends React.Component {
         case '-3':
           return <Action>
             {info["pub_tag"] === '2'?  
+                <Action>
                 <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
+                <Action.Button
+                auth="deploy.request.do"
+                disabled={info.type === '2'}
+                onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+                </Action>
             :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
             }
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
@@ -228,7 +234,13 @@ class ComTable extends React.Component {
           // const {loadings} = this.state
           return <Action>
             {info["pub_tag"] === '2'?  
-                <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
+                <Action>
+                  <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
+                  {/* <Action.Button
+                    auth="deploy.request.do"
+                    disabled={info.type === '2'}
+                    onClick={() => this.handleRollback(info)}>回滚</Action.Button> */}
+                </Action>
             :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
             }
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
