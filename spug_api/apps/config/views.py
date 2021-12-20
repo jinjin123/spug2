@@ -44,9 +44,10 @@ class RancherAggMap(View):
 class EnvironmentView(View):
     def get(self, request):
         query = {}
-        if not request.user.is_supper:
-            query['id__in'] = request.user.deploy_perms['envs']
-        envs = Environment.objects.filter(**query)
+        # if not request.user.is_supper:
+        #     query['id__in'] = request.user.deploy_perms['envs']
+        # envs = Environment.objects.filter(**query)
+        envs = Environment.objects.all()
         return json_response(envs)
 
     def post(self, request):

@@ -31,10 +31,10 @@ logger = logging.getLogger('spug_log')
 class RequestView(View):
     def get(self, request):
         data, query = [], {}
-        if not request.user.is_supper:
-            perms = request.user.deploy_perms
-            query['deploy__app_id__in'] = perms['apps']
-            query['deploy__env_id__in'] = perms['envs']
+        # if not request.user.is_supper:
+        #     perms = request.user.deploy_perms
+        #     query['deploy__app_id__in'] = perms['apps']
+        query['deploy__env_id__in'] = [1,2]
         for item in DeployRequest.objects.filter(**query).annotate(
                 env_id=F('deploy__env_id'),
                 env_name=F('deploy__env__name'),
@@ -197,7 +197,6 @@ class RancherPublishView(View):
                         kwargs["headers"]["Authorization"] = Action.token
                         kwargs["url"] = (Action.url).format(publish_args['project_id'], publish_args['deployid'])
                         res = RequestApiAgent().create(**kwargs)
-                        print(res)
                         logger.info(msg="#####rancher redploy dev call:###### " + str(res.status_code))
                         if res.status_code != 200:
                             logger.error(msg="#####rancher redploy dev call:###### " + str(res))
@@ -211,8 +210,9 @@ class RancherPublishView(View):
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = publish_args['statuslinks']
                     oldres = RequestApiAgent().list(**kwargs)
+
                     oldcd = json.loads(oldres.content)
-                    if publish_args["update_img"] == 0:
+                    if publish_args["update_img"]:
                         oldcd["containers"][0]['image'] =publish_args['img']
                         kwargs['data'] = json.dumps(oldcd)
                         imgres = RequestApiAgent().put(**kwargs)
@@ -230,13 +230,14 @@ class RancherPublishView(View):
                         DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
                         RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
 
-                    if publish_args["update_cmap"] == 0:
+                    if publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
                             Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
                         else:
                             Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyan").first()
                         kwargs["headers"]["Authorization"] = Action.token
                         kwargs["url"] = (Action.url).format(publish_args['pjid'], publish_args['configId'])
+
                         dataargs = cmapargs()
                         dd = {}
                         for x in ast.literal_eval(publish_args['configMap']):
@@ -248,6 +249,7 @@ class RancherPublishView(View):
                         kwargs['data'] = json.dumps(dataargs)
                         cres = RequestApiAgent().put(**kwargs)
                         cred = json.loads(cres.content)
+
                         if cres.status_code != 200:
                             DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
                             logger.error(msg="#####rancher update  configmap call:###### " + str(cres))
