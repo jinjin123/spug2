@@ -45,6 +45,7 @@ class DiffForm extends React.Component {
         width={800}
         maskClosable={false}
         title="发布变更查看"
+        onOk={() => store.diffVisble = false}
         onCancel={() => store.diffVisble = false}
         confirmLoading={this.state.loading}
         >

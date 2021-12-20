@@ -112,13 +112,13 @@ class Index extends React.Component {
             <AuthFragment auth="deploy.request.del">
               <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
             </AuthFragment>
-            <AuthFragment auth="deploy.request.add">
+            {/* <AuthFragment auth="deploy.request.add">
               <Button
                 type="primary"
                 icon="plus"
                 onClick={() => store.addVisible = true}
                 style={{marginLeft: 20}}>新建发布申请</Button>
-            </AuthFragment>
+            </AuthFragment> */}
           </Col>
         </Row>
         <ComTable/>
