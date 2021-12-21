@@ -196,7 +196,13 @@ class ComTable extends React.Component {
                 auth="deploy.request.do"
                 disabled={info.type === '2'}
                 onClick={() => this.handleRollback(info)}>回滚</Action.Button>
+                  <Action.Link
+                  auth="deploy.request.view"
+                  to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link> 
+                <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
+
                 </Action>
+                
             :  <Action.Link auth="deploy.request.do" to={`/deploy/do/ext${info['app_extend']}/${info.id}`}>主机发布</Action.Link>
             }
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
@@ -206,12 +212,14 @@ class ComTable extends React.Component {
             {info["pub_tag"] === '2'?  
                 <Action>
                   <Action.Link
-                  auth="deploy.request.do"
+                  auth="deploy.request.view"
                   to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link> 
                   <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"测试")}>测试审核</Action.Button>
+                  <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
+
                 </Action>
               : <Action.Link
-                auth="deploy.request.do"
+                auth="deploy.request.view"
                 to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
             }
                 <Action.Button
@@ -227,7 +235,7 @@ class ComTable extends React.Component {
         case '0':
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"运维")}>审核</Action.Button>
-            <Action.Button auth="deploy.request.edit" onClick={() => store.showChange(info)}>查看变更</Action.Button>
+            <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
         case '1':
@@ -235,6 +243,7 @@ class ComTable extends React.Component {
           return <Action>
             {info["pub_tag"] === '2'?  
                 <Action>
+                              <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
                   <Action.Button auth="deploy.request.do" loading={info.id == loadings["id"] ? loadings["load"] :false}  onClick={() =>this.enterLoading(info,2)} > rancher发布</Action.Button>
                   {/* <Action.Button
                     auth="deploy.request.do"
@@ -248,7 +257,7 @@ class ComTable extends React.Component {
         case '2':
           return <Action>
             <Action.Link
-              auth="deploy.request.do"
+              auth="deploy.request.view"
               to={`/deploy/do/ext${info['app_extend']}/${info.id}/1`}>查看</Action.Link>
           </Action>;
         default:
