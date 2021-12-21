@@ -227,6 +227,11 @@ class RancherSvcView(View):
             cmap = ProjectConfigMap.objects.filter(tag='feiyan').all()
             pvc = ProjectPvc.objects.filter(tag='feiyan').all()
             nodes = RancherNode.objects.filter(tag='feiyan').all()
+        elif tag == "fangyiuos":
+            svc = ProjectService.objects.filter(rancher_url__contains="feiyan.uos").all()
+            cmap = ProjectConfigMap.objects.filter(tag='feiyanuos').all()
+            pvc = ProjectPvc.objects.filter(tag='feiyanuos').all()
+            nodes = RancherNode.objects.filter(tag='feiyanuos').all()
         else:
             svc = ProjectService.objects.all()
             cmap = ProjectConfigMap.objects.all()
@@ -360,6 +365,13 @@ class RancherPvcOpView(View):
                 if res.status_code != 201:
                     logger.error(msg="#####rancher redploy dev call:###### " + str(res))
                     return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                vfurl = ""
+                if form.tag == "ioc":
+                    vfurl = "https://rancher.ioc.com/p/"+red['projectId']+'/volumes/'+ red['id']
+                elif form.tag == "feiyan":
+                    vfurl = "https://rancher.feiyan.com/p/"+red['projectId']+'/volumes/'+ red['id']
+                elif form.tag == "feiyanuos":
+                    vfurl = "https://rancher.feiyan.uos.com/p/"+red['projectId']+'/volumes/'+ red['id']
                 m = ProjectPvc.objects.create(
                     pjid=red['projectId'],
                     nsname=red['namespaceId'],
@@ -375,7 +387,7 @@ class RancherPvcOpView(View):
                     updatelinks=red["links"]["update"],
                     yamllinks=red["links"]["yaml"],
                     tag=form.tag,
-                    verifyurl= "https://rancher.ioc.com/p/"+red['projectId']+'/volumes/'+ red['id'] if form.tag == "ioc" else "https://rancher.feiyan.com/p/"+red['projectId']+'/volumes/'+ red['id'] ,
+                    verifyurl=vfurl,
                     create_by=request.user,
                     pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname
                 )
@@ -432,6 +444,13 @@ class RancherCmapOpView(View):
             if res.status_code != 201:
                 logger.error(msg="#####rancher create configmap call:###### " + str(res))
                 return json_response(error="重新部署rancher configmap api 出现异常，请重试一次！如还有问题请联系运维！")
+            vfurl = ""
+            if form.tag == "ioc" :
+                vfurl = "https://rancher.ioc.com/p/"+red['projectId']+'/config-maps/'+ red['id']
+            elif form.tag == "feiyan":
+                vfurl = "https://rancher.feiyan.com/p/"+red['projectId']+'/config-maps/'+ red['id']
+            elif form.tag == "feiyanuos":
+                vfurl = "https://rancher.feiyan.uos.com/p/" + red['projectId'] + '/config-maps/' + red['id']
             m = ProjectConfigMap.objects.create(
                 pjid=red['projectId'],
                 configId=red['id'],
@@ -445,7 +464,7 @@ class RancherCmapOpView(View):
                 yamllinks=red["links"]["yaml"],
                 tag=form.tag,
                 create_by=request.user,
-                verifyurl="https://rancher.ioc.com/p/"+red['projectId']+'/config-maps/'+ red['id'] if form.tag == "ioc" else "https://rancher.feiyan.com/p/"+red['projectId']+'/config-maps/'+ red['id'],
+                verifyurl=vfurl,
                 pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname,
             )
             m.save()
@@ -505,7 +524,6 @@ class RancherSvcOpView(View):
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = newUrl
             kwargs['data'] = json.dumps(svc)
-            # print(svc)
             res = RequestApiAgent().create(**kwargs)
             logger.info(msg="#####rancher create deployment call:###### " + str(res.status_code))
             red = json.loads(res.content)
@@ -527,6 +545,20 @@ class RancherSvcOpView(View):
             if red['containers'][0].get('environment'):
                 tmpenv.append(red['containers'][0].get('environment'))
 
+
+            rurl = ""
+            vfurl = ""
+            if form.tag == "ioc" :
+                rurl = "https://rancher.ioc.com/"
+                vfurl = "https://rancher.ioc.com/p/" + red['projectId'] + "/workload/" + red['id']
+            elif form.tag == "feiyan":
+                rurl = "https://rancher.feiyan.com/"
+                vfurl = "https://rancher.feiyan.com/p/"+ red['projectId'] + "/workload/" + red['id']
+            elif form.tag == "feiyanuos":
+                rurl ="https://rancher.feiyan.uos.com/"
+                vfurl = "https://rancher.feiyan.uos.com/p/"+ red['projectId'] + "/workload/" + red['id']
+
+
             m = ProjectService.objects.create(
                 top_project=(ProjectService.objects.filter(pjid=red['projectId']).first()).top_project,
                 toppjid=(ProjectService.objects.filter(pjid=red['projectId']).first()).toppjid,
@@ -538,7 +570,7 @@ class RancherSvcOpView(View):
                 dpid=red['id'],
                 img=red['containers'][0]['image'],
                 replica=red['scale'],
-                rancher_url= "https://rancher.ioc.com/" if red["actions"]["resume"].find("rancher.ioc")  > 0 else "https://rancher.feiyan.com/",
+                rancher_url= rurl,
                 state=red['state'],
                 pubsvc=red.get('publicEndpoints',None),
                 create_by=request.user,
@@ -554,8 +586,7 @@ class RancherSvcOpView(View):
                 removelinks=red['links']['remove'],
                 revisionslinks=red['links']['revisions'],
                 statuslinks=((RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC", tag=form.tag).first()).url).format(red['projectId']) + "/" +red['id'] ,
-                verifyurl="https://rancher.ioc.com/p/"+ red['projectId'] + "/workload/" + red['id']  if red["actions"]["resume"].find("rancher.ioc")  > 0 else  "https://rancher.feiyan.com/p/"+ red['projectId'] + "/workload/" + red['id']
-
+                verifyurl=vfurl,
             )
             m.save()
             if (form.data)['cmapid'] is not None:

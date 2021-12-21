@@ -180,13 +180,15 @@ class Mytest(unittest.TestCase):
 
     # def test(self):
     # #     # global img
-    # #     # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
-    # #     # ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
+    # #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT").first()
+    # #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS").first()
     # #     # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
     # #     # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
     # #     # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
     #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETSIGPROJECT",tag="ioc").first()
     #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETSIGNS",tag="ioc").first()
+    # #     pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="ioc").first()
+    # #     ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="ioc").first()
     #     cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="ioc").first()
     #     svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()
     #     pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="ioc").first()
@@ -386,11 +388,18 @@ class Mytest(unittest.TestCase):
     #         # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP").first()
     #         # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC").first()
     #         # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC").first()
-    #         pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="feiyan").first()
-    #         ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="feiyan").first()
-    #         cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="feiyan").first()
-    #         svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()
-    #         pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="feiyan").first()
+    #
+    #         # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT",tag="feiyan").first()
+    #         # ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS",tag="feiyan").first()
+    #         # cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="feiyan").first()
+    #         # svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()
+    #         # pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="feiyan").first()
+    #
+    #         pj = RancherApiConfig.objects.filter(env_id=2, label="GETPROJECT", tag="feiyanuos").first()
+    #         ns = RancherApiConfig.objects.filter(env_id=2, label="GETNS", tag="feiyanuos").first()
+    #         cmap = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP", tag="feiyanuos").first()
+    #         svc = RancherApiConfig.objects.filter(env_id=2, label="GETSVC", tag="feiyanuos").first()
+    #         pvc = RancherApiConfig.objects.filter(env_id=2, label="GETPVC", tag="feiyanuos").first()
     #         url = pj.url
     #         token = pj.token
     #         kwargs = {
@@ -401,11 +410,16 @@ class Mytest(unittest.TestCase):
     #         pjdatalist = (json.loads(res.content))["data"]
     #         pjnew = []
     #         for x in pjdatalist:
-    #             if x["id"] == "local:p-qzsv4":
-    #                 # if x["id"] == "local:p-cvfqn":
+    #             # if x["id"] == "local:p-qzsv4":
+    #             #     pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市跨境货车司机信息管理系统项","toppjid":"dgdriverinfo"})
+    #             # if x["id"] == "local:p-nglhq":
+    #             #     pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市疫情动态查询+防控数据管理平台系统项目","toppjid":"dgdycovidselect"})
+    #             #----------  uos
+    #             if x["id"] == "local:p-b2gkq":
     #                 pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市跨境货车司机信息管理系统项","toppjid":"dgdriverinfo"})
-    #             if x["id"] == "local:p-nglhq":
+    #             if x["id"] == "local:p-vlzv8":
     #                 pjnew.append({"pjid": x["id"], "pjname": x["name"],"top_project":"东莞市疫情动态查询+防控数据管理平台系统项目","toppjid":"dgdycovidselect"})
+    #             #------------
     #             # print(x["id"],x["name"])
     #         # print(len(pjnew))
     #         url = ns.url
@@ -477,7 +491,8 @@ class Mytest(unittest.TestCase):
     #                                    "img": img[0], "replica": svcdict.get("scale", 0),"state":svcdict["state"],
     #                                    # "configName": v_name, "configId": "", "configMap": "", "pvcid": pvcid,
     #                                    "configName": v_name, "configId": "", "configMap": "", "volumes":volumes_v,"v_mount":v_mount[0] if len(v_mount) >0 else [],"cbox_env": cbox_env,
-    #                                    "rancher_url": "https://rancher.feiyan.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"],
+    #                                    # "rancher_url": "https://rancher.feiyan.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"],
+    #                                    "rancher_url": "https://rancher.feiyan.uos.com/", "pubsvc": pubsvc, "verifyurl": "https://rancher.feiyan.uos.com/" + 'p/'+ svcdict["projectId"] + "/workload/"+ svcdict["id"],
     #                                    "cports": cports, "pauselinks": svcdict['actions']['pause'],
     #                                    "env_id": 2,
     #                                    "rdplinks": svcdict['actions']['redeploy'],
@@ -485,7 +500,8 @@ class Mytest(unittest.TestCase):
     #                                    "updatelinks": svcdict['links']['update'],
     #                                    "removelinks": svcdict['links']['remove'],
     #                                    "revisionslinks": svcdict['links']['revisions'],
-    #                                    "statuslinks": ((RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()).url).format(svcdict['projectId']) + "/" + svcdict['id']
+    #                                    # "statuslinks": ((RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()).url).format(svcdict['projectId']) + "/" + svcdict['id']
+    #                                    "statuslinks": ((RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyanuos").first()).url).format(svcdict['projectId']) + "/" + svcdict['id']
     #                                    })
     #                 # else:
     #                 # print(svcdict["projectId"],sx["pjid"])
@@ -732,6 +748,72 @@ class Mytest(unittest.TestCase):
                 #             yamllinks=xx['links']['yaml'],
                 #             tag='feiyan',
                 #             verifyurl = "https://rancher.feiyan.com/p/" + xx["projectId"] + "/volumes/" + xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
+                #         )
+                #         m.save()
+                #-------get fanyi uos configmap
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETCONFIGMAP",tag="feiyanuos").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="feiyan.uos").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         t=[]
+                #         for k, v in dict.items(xx["data"]):
+                #             t.append({"k":k,"v":v})
+                #         m = ProjectConfigMap.objects.create(
+                #             pjid=xx['projectId'],
+                #             configId=xx['id'],
+                #             configName=xx['name'],
+                #             configMap=t,
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='feiyanuos',
+                #             verifyurl = "https://rancher.feiyan.uos.com/p/" + xx["projectId"] + "/config-maps/" + xx['id'],
+                #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
+                #         )
+                #         m.save()
+                #-------------get  fanyi uos pvc
+                # pj = RancherApiConfig.objects.filter(env_id=2, label="GETPVC",tag="feiyanuos").first()
+                # token = pj.token
+                # a = ProjectService.objects.filter(rancher_url__contains="feiyan.uos").values("pjid").annotate(
+                #     counts=Count("pjid"))
+                # for x in a:
+                #     url = (pj.url).format(x['pjid'])
+                #     kwargs = {
+                #         "url": url,
+                #         "headers": {"Authorization": token, "Content-Type": "application/json"}
+                #     }
+                #     res = RequestApiAgent().list(**kwargs)
+                #     pjdatalist = (json.loads(res.content))["data"]
+                #     for xx in pjdatalist:
+                #         m = ProjectPvc.objects.create(
+                #             pjid=xx['projectId'],
+                #             nsname=xx['namespaceId'],
+                #             nsid=xx['namespaceId'],
+                #             pvcid=xx['id'],
+                #             pvcname=xx['name'],
+                #             storageid=xx['storageClassId'],
+                #             capacity=xx['status']['capacity']['storage'],
+                #             accessMode=xx['status']['accessModes'],
+                #             volumeid=xx['volumeId'],
+                #             dellinks=xx['links']['remove'],
+                #             selflinks=xx['links']['self'],
+                #             updatelinks=xx['links']['update'],
+                #             yamllinks=xx['links']['yaml'],
+                #             tag='feiyanuos',
+                #             verifyurl = "https://rancher.feiyan.uos.com/p/" + xx["projectId"] + "/volumes/" + xx['id'],
                 #             pjname=(ProjectService.objects.filter(pjid=xx['projectId']).first()).pjname
                 #         )
                 #         m.save()
