@@ -39,7 +39,9 @@ export default [
       {title: '发布状态', auth: 'deploy.request.view', path: '/deploy/request'},
       {icon: 'flag',title: 'rancher', auth: 'deploy.rancher.view',child: [
           {title: 'ioc', auth: 'deploy.rancher.view', path: '/deploy/rancherioc'},
-          {title: 'fangyi', auth: 'deploy.rancher.view', path: '/deploy/rancherfangyi'},
+          {title: 'feiyan', auth: 'deploy.rancher.view', path: '/deploy/rancherfangyi'},
+          {title: 'feiyanuos', auth: 'deploy.rancher.view', path: '/deploy/rancherfangyiuos'},
+
         ], 
       },
       {title: '应用发布审核关联管理', auth: 'deploy.notice.view', path: '/deploy/rancher/notice'},

@@ -8,6 +8,7 @@ import app from './app';
 import request from './request';
 import rancherioc from './rancherioc';
 import rancherfangyi from './rancherfangyi';
+import rancherfangyiuos from './rancherfangyiuos';
 
 import notice from './notice';
 import doExt1Index from './do/Ext1Index';
@@ -20,6 +21,7 @@ export default [
   makeRoute('/request', request),
   makeRoute('/rancherioc', rancherioc),
   makeRoute('/rancherfangyi', rancherfangyi),
+  makeRoute('/rancherfangyiuos', rancherfangyiuos),
 
   makeRoute('/rancher/notice', notice),
   makeRoute('/do/ext1/:id', doExt1Index),
