@@ -190,6 +190,7 @@ class RancherPublishView(View):
 
             publish_args = (RancherSvcPubStandby.objects.filter(app_id=form.app_id).first()).to_dict()
             try:
+                Action = ""
                 logger.info(msg="#######redeploy pod start ########")
                 if form.env_id == 1:
                     if publish_args['update_img'] : #1 only config update #0 img update
@@ -205,8 +206,10 @@ class RancherPublishView(View):
                 elif form.env_id == 2:
                     if (publish_args['statuslinks']).find("ioc.com") > -1:
                         Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="ioc").first()
-                    else:
+                    elif (publish_args['statuslinks']).find("feiyan.com") > -1:
                         Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyan").first()
+                    elif (publish_args['statuslinks']).find("feiyan.uos.com") > -1:
+                        Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag="feiyanuos").first()
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = publish_args['statuslinks']
                     oldres = RequestApiAgent().list(**kwargs)
@@ -233,8 +236,10 @@ class RancherPublishView(View):
                     if publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
                             Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
-                        else:
+                        elif (publish_args['statuslinks']).find("feiyan.com") > -1:
                             Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyan").first()
+                        elif (publish_args['statuslinks']).find("feiyan.uos.com") > -1:
+                            Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyanuos").first()
                         kwargs["headers"]["Authorization"] = Action.token
                         kwargs["url"] = (Action.url).format(publish_args['pjid'], publish_args['configId'])
 
@@ -257,8 +262,10 @@ class RancherPublishView(View):
                         try:
                             if (publish_args['statuslinks']).find("ioc.com") > -1:
                                 Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
-                            else:
+                            elif (publish_args['statuslinks']).find("feiyan.com") > -1:
                                 Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyan").first()
+                            elif (publish_args['statuslinks']).find("feiyan.uos.com") > -1:
+                                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="feiyanuos").first()
                             kwargs["headers"]["Authorization"] = Action.token
                             kwargs["url"] =  publish_args['rdplinks']
                             rdp = RequestApiAgent().create(**kwargs)
@@ -401,11 +408,14 @@ class RequestDetailView(View):
         if not req:
             return json_response(error='未找到指定发布申请')
         d = DeployRequest.objects.get(pk=r_id)
-        r = RancherSvcPubStandby.objects.get(app_id=Deploy.objects.get(pk=d.deploy_id).app_id)
+        r = RancherSvcPubStandby.objects.filter(app_id=Deploy.objects.get(pk=d.deploy_id).app_id).first()
+        Action =""
         if (r.statuslinks).find("ioc.com") > -1:
             Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC", tag="ioc").first()
-        else:
+        elif (r.statuslinks).find("feiyan.com") > -1:
             Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC", tag="feiyan").first()
+        elif (r.statuslinks).find("feiyan.uos.com") > -1:
+            Action = RancherApiConfig.objects.filter(env_id=envid, label="GETSVC", tag="feiyanuos").first()
         kwargs = {
             "url": r.statuslinks,
             "headers": {"Authorization": "", "Content-Type": "application/json"}
@@ -413,6 +423,7 @@ class RequestDetailView(View):
         kwargs["headers"]["Authorization"] = Action.token
         res = RequestApiAgent().list(**kwargs)
         if res.status_code != 200:
+            logger.error(msg="rancher结果返回失败->>>>"+str(res.content))
             return json_response(error="rancher结果返回失败")
 
         red = json.loads(res.content)
@@ -532,8 +543,8 @@ def do_upload(request):
 class RequestChangeDetailView(View):
     def get(self, request, id):
         if RancherSvcPubStandby.objects.filter(app_id=id).exists():
-            t = RancherSvcPubStandby.objects.get(app_id=id)
-            old = ProjectService.objects.get(id=t.service_id)
+            t = RancherSvcPubStandby.objects.filter(app_id=id).first()
+            old = ProjectService.objects.get(pk=t.service_id)
             tmp = []
             oldtmp = []
             for x in ast.literal_eval(t.configMap):

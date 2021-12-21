@@ -614,13 +614,14 @@ class RancherRollbackView(View):
     def get(self,request,id):
         if RancherSvcPubStandby.objects.filter(app_id=id).exists():
             try:
-                t = RancherSvcPubStandby.objects.get(app_id=id)
+                t = RancherSvcPubStandby.objects.filter(app_id=id).first()
                 global tt
                 if (t.revisionslinks).find("ioc.com")>-1:
                     tt="ioc"
-                else:
+                elif (t.revisionslinks).find("feiyan.com")>-1:
                     tt="feiyan"
-
+                elif (t.revisionslinks).find("feiyan.uos.com")>-1:
+                    tt="feiyanuos"
                 Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=tt).first()
                 kwargs = {
                     "url": t.revisionslinks,
@@ -632,7 +633,7 @@ class RancherRollbackView(View):
                 return json_response({"data": red})
             except Exception as e :
                 logger.error("获取回滚版本失败->"+ str(e))
-        return json_response(error="获取回滚版本失败")
+        return json_response(error="该应用无法获取回滚版本")
 
 
     def post(self, request,id):

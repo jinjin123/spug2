@@ -1068,20 +1068,20 @@ class Mytest(unittest.TestCase):
     #         m.save()
 
     def test(self):
-    #     kwargs = {
-    #         # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
-    #         "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:testcmap",
-    #         "headers": {"Authorization": 'Bearer token-s6mvd:vqf7qjrktx8fdlwq28z9bb94mxwgg55t7ssd645qhxjlb47blx9xc2', "Content-Type": "application/json"},
-    #         # "data": json.dumps({
-    #         #     "type":"configMap",
-    #         #     "data":{"a": "666"},
-    #         #     "labels":{},
-    #         #     "id": "spug:spugtest",
-    #         #     "namespaceId": "spug"
-    #         # })
-    #     }
-        # res = RequestApiAgent().list(**kwargs)
-        # # print(res)
+        kwargs = {
+            # "url": "https://rancher.ioc.com/v3/project/c-5tk6p:p-55knm/workloads/deployment:spug:test1234/revisions",
+            "url": "https://rancher.feiyan.uos.com/v3/project/local:p-vlzv8/workloads/deployment:app:ioc-yqmap-job",
+            "headers": {"Authorization": 'Bearer token-pt2n8:khnxtrk5mwn5x2q4x9g9gvmg4zt7nmxpwcnx6dtb89kwcvbz2vgphj', "Content-Type": "application/json"},
+            # "data": json.dumps({
+            #     "type":"configMap",
+            #     "data":{"a": "666"},
+            #     "labels":{},
+            #     "id": "spug:spugtest",
+            #     "namespaceId": "spug"
+            # })
+        }
+        res = RequestApiAgent().list(**kwargs)
+        print(res)
         # list = json.loads(res.content)
         # print(list)
         # print(json.dumps(list))
@@ -1094,7 +1094,6 @@ class Mytest(unittest.TestCase):
         # for x in t:
         #     for xx in ast.literal_eval(x['top_project']):
         #         print(type(xx))
-
         return
 
 
