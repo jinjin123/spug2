@@ -105,13 +105,13 @@ class Index extends React.Component {
             </Radio.Group>
           </Col>
           <Col span={8} style={{textAlign: 'right'}}>
-            <AuthFragment auth="deploy.request.patch">
+            {/* <AuthFragment auth="deploy.request.patch">
                 <Button type="primary" > <Icon type="thunderbolt" />批量发布</Button>
               </AuthFragment>
               <Divider type="vertical"/>
             <AuthFragment auth="deploy.request.del">
               <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
-            </AuthFragment>
+            </AuthFragment> */}
             {/* <AuthFragment auth="deploy.request.add">
               <Button
                 type="primary"

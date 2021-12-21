@@ -226,7 +226,7 @@ class ComTable extends React.Component {
               <Column title="创建人" dataIndex="create_by"/>
               <Column title="创建时间" dataIndex="create_time"/>
 
-              {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
+              {hasPermission('deploy.rancher.approve|deploy.rancher.del') && (
                 <Column title="操作" fixed="right" render={info => (
                   <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"svc")}  style={{ width: 100 }} >
                     {/* <Option value={1}>编辑</Option> */}
