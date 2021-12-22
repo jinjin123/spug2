@@ -380,24 +380,35 @@ class RequestRancherDeployView(View):
                 desccomment=form.desccomment,
             )
             tmpdes = form.pop("desccomment")
-            RancherSvcPubStandby.objects.create(
+            m = RancherSvcPubStandby.objects.create(
                 create_by=request.user,
                 app=App.objects.filter(key=form.pop('app_name')).first(),
                 service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,dpid=form.dpid).first(),
                 **form
             )
-            pblist = RancherSvcPubStandby.objects.filter(state=0).all()
-            for item in pblist:
-                if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
-                    notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
-                    to_email=[ item["notice_user__email"] for item in notice]
-                    send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
-                                         from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
-                else:
-                    to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
-                    send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
-                                     content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
-                                     from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+            m.save()
+            mobj = RancherSvcPubStandby.objects.get(id=m.id)
+            if ProjectServiceApprovalNotice.objects.get(service_id=mobj.service_id):
+                notice = ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).values("notice_user__email").all()
+                to_email=[ item["notice_user__email"] for item in notice]
+                send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
+                                     from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
+            else:
+                to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
+                send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
+                                 content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
+                                 from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+            # for item in pblist:
+            #     if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
+            #         notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
+            #         to_email=[ item["notice_user__email"] for item in notice]
+            #         send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
+            #                              from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
+            #     else:
+            #         to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
+            #         send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
+            #                          content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
+            #                          from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
 
         return json_response(error=error)
 
