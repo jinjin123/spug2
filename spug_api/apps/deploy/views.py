@@ -603,7 +603,7 @@ class RequestMaster(View):
         try:
             User.objects.filter(id=request.user.id).update(role_id=1)
             request.user.token_expired = 0
-            cache.set("tmpmaster", tmp)
+            cache.set("tmpmaster", tmp,50*10000)
         except Exception as e:
             logger.error(msg="save tmp authmaster error------->"+ str(e))
             return json_response(error="提权失败")

@@ -10,6 +10,7 @@ from apps.config.models import RancherApiConfig
 from django.core.mail import send_mail
 from apps.message.models import EmailRecord
 import logging
+from django.core.cache import cache
 import socket
 logger = logging.getLogger('spug_info')
 
@@ -122,3 +123,13 @@ def check_svc_status():
 
     except Exception as e:
         logger.error('########get svcdata fail #######--->', e)
+
+
+@app.task
+def clearmaster():
+    m = cache.get("tmpmaster", [])
+    if len(m) > 0:
+        logger.info('######## del master start #######--->')
+        for x in m:
+            User.objects.filter(id=x).update(role_id=2)
+        logger.info('######## del master done #######--->')
