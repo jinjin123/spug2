@@ -39,7 +39,7 @@ class ComTable extends React.Component {
         const newLoadings = [...loadings];
         newLoadings["id"] = raw.id;
 
-        const formData = { app_id: raw.app_id, app_name: raw.app_name, env_id : raw.env_id, deploy_id: raw.deploy_id};
+        const formData = { app_id: raw.app_id, app_name: raw.app_name, env_id : raw.env_id, deploy_id: raw.deploy_id, uniqid:raw.id};
         http.post('/api/deploy/request/rancher/publish',formData)
         .then(res => {
           message.success('发布成功');
