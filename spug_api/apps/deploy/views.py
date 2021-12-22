@@ -388,7 +388,7 @@ class RequestRancherDeployView(View):
             )
             m.save()
             mobj = RancherSvcPubStandby.objects.get(id=m.id)
-            if ProjectServiceApprovalNotice.objects.get(service_id=mobj.service_id):
+            if ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).exists():
                 notice = ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).values("notice_user__email").all()
                 to_email=[ item["notice_user__email"] for item in notice]
                 send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
