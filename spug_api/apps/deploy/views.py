@@ -32,8 +32,9 @@ class RequestView(View):
     def get(self, request):
         data, query = [], {}
         # if not request.user.is_supper:
+        #     query['deploy__approve_by_id'] = request.user.id
         #     perms = request.user.deploy_perms
-        #     query['deploy__app_id__in'] = perms['apps']
+        #     query['deploy__approve_by__in__'] = perms['apps']
         query['deploy__env_id__in'] = [1,2]
         for item in DeployRequest.objects.filter(**query).annotate(
                 env_id=F('deploy__env_id'),
@@ -44,6 +45,7 @@ class RequestView(View):
                 app_extend=F('deploy__extend'),
                 created_by_user=F('created_by__nickname'),
                 pub_tag=F('deploy__pub_tag')):
+
             tmp = item.to_dict()
             tmp['env_id'] = item.env_id
             tmp['env_name'] = item.env_name
@@ -518,6 +520,15 @@ class RequestDetailView(View):
             req.save()
             Thread(target=Helper.send_deploy_notify, args=(req, 'approve_rst')).start()
         return json_response(error=error)
+
+    def delete(self,request,envid, r_id ):
+        if r_id:
+            try:
+                m = DeployRequest.objects.get(pk=r_id)
+                m.delete()
+            except Exception as e :
+                logger.error(msg="del approval  err----->"+ str(e))
+        return json_response(error="删除失败")
 
 
 def do_upload(request):
