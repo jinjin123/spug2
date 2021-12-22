@@ -223,7 +223,7 @@ class RancherSvcView(View):
             pvc  = ProjectPvc.objects.filter(tag='ioc').all()
             nodes = RancherNode.objects.filter(tag='ioc').all()
         elif tag == "fangyi":
-            svc = ProjectService.objects.filter(rancher_url__contains="feiyan").all()
+            svc = ProjectService.objects.filter(rancher_url__contains="feiyan.com").all()
             cmap = ProjectConfigMap.objects.filter(tag='feiyan').all()
             pvc = ProjectPvc.objects.filter(tag='feiyan').all()
             nodes = RancherNode.objects.filter(tag='feiyan').all()
