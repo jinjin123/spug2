@@ -52,6 +52,13 @@ class ComTable extends React.Component {
       });
     }, 4000);
   };
+  deletePub = (info) => {
+    http.delete(`/api/deploy/request/2/${info.id}/`)
+    .then(() => {
+      message.success('操作成功');
+      store.fetchRecords()
+    }, () => this.setState({loading: false}))
+  }
   columns = [{
     title: '申请标题',
     dataIndex: 'name',
@@ -235,6 +242,8 @@ class ComTable extends React.Component {
         case '0':
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"运维")}>审核</Action.Button>
+            <Action.Button auth="deploy.request.view" onClick={() => this.deletePub(info) }>撤销发布</Action.Button>
+
             <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}
           </Action>;
