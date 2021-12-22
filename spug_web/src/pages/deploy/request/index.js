@@ -5,14 +5,14 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message,Icon,Divider } from 'antd';
+import { Button, Select, DatePicker, Radio, Row, Col, Modal, Form, Input, message,Icon,Divider,Tag } from 'antd';
 import { SearchForm, AuthFragment, AuthCard } from 'components';
 import SelectApp from './SelectApp';
 import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import Approve from './Approve';
 import ComTable from './Table';
-import http from 'libs/http';
+import {http,FormatDate,GetDateDiff,getDatetime} from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store'
 import store from './store';
@@ -26,7 +26,9 @@ class Index extends React.Component {
     super(props);
     this.state = {
       expire: undefined,
-      count: ''
+      count: '',
+      status: true,
+      tips: ""
     }
   }
 
@@ -37,6 +39,23 @@ class Index extends React.Component {
     if (appStore.records.length === 0) {
       appStore.fetchRecords()
     }
+    let timer = setInterval(() => {
+      var current_time = new Date()
+      var old_time     = new Date(getDatetime());
+      var current_time = FormatDate(current_time ); 
+      var old_time     = FormatDate(old_time); 
+      var res = GetDateDiff( old_time,current_time)
+      if (res <=0){
+        this.setState({
+          status:false,
+        })
+        clearInterval(timer);
+      }else {
+        this.setState({
+          tips: "还差" + res.toString() + "分钟解锁"
+        })
+      }
+    }, 1000)
   }
 
   handleBatchDel = () => {
@@ -65,6 +84,14 @@ class Index extends React.Component {
       },
     })
   };
+  Bootsmater = () => {
+      http.post(`/api/deploy/request/master`)
+      .then(()=> {
+        message.success('提权成功');
+        http.get('/api/account/logout/')
+        this.props.history.push("/")
+      }, () => this.setState({loading: false}))
+  }
 
   render() {
     return (
@@ -105,11 +132,18 @@ class Index extends React.Component {
             </Radio.Group>
           </Col>
           <Col span={8} style={{textAlign: 'right'}}>
+              <AuthFragment auth="deploy.request.view">
+                <div style={{"display":  "flex"}}>
+                  <Button type="primary" disabled={this.state.status} onClick={() =>{this.Bootsmater()}} > <Icon type="android" />临时提权为运维 </Button>
+                  <Tag color="magenta">{this.state.tips}</Tag>
+                </div>
+              </AuthFragment>
+              <Divider type="vertical"/>
             {/* <AuthFragment auth="deploy.request.patch">
                 <Button type="primary" > <Icon type="thunderbolt" />批量发布</Button>
               </AuthFragment>
-              <Divider type="vertical"/>
-            <AuthFragment auth="deploy.request.del">
+              <Divider type="vertical"/> */}
+            {/* <AuthFragment auth="deploy.request.del">
               <Button type="primary" icon="delete" onClick={this.handleBatchDel}>批量删除</Button>
             </AuthFragment> */}
             {/* <AuthFragment auth="deploy.request.add">

@@ -1,3 +1,5 @@
+import { min } from "lodash";
+
 /**
  * Copyright (c) OpenSpug Organization. https://github.com/openspug/spug
  * Copyright (c) <spug.dev@gmail.com>
@@ -99,4 +101,122 @@ export function formatDate(date, fmt = 'yyyy-MM-dd') {
       if (new RegExp("(" + k + ")").test(fmt))
           fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
   return fmt
+}
+
+export function intervalTime(startTime,endTime) {
+  // var timestamp=new Date().getTime(); //计算当前时间戳
+  var timestamp = (Date.parse(new Date()))/1000;//计算当前时间戳 (毫秒级)
+   var date1 = ""; //开始时间
+  if(timestamp<startTime){
+      date1=startTime;
+  }else{
+      date1 = timestamp; //开始时间
+  }
+  var date2 = endTime; //结束时间
+  // var date3 = date2.getTime() - date1.getTime(); //时间差的毫秒数
+  var date3 =  (date2- date1)*1000; //时间差的毫秒数
+  //计算出相差天数
+  var days = Math.floor(date3 / (24 * 3600 * 1000));
+  //计算出小时数
+
+  var leave1 = date3 % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
+  var hours = Math.floor(leave1 / (3600 * 1000));
+  //计算相差分钟数
+  var leave2 = leave1 % (3600 * 1000); //计算小时数后剩余的毫秒数
+  var minutes = Math.floor(leave2 / (60 * 1000));
+
+  //计算相差秒数
+
+  var leave3 = leave2 % (60 * 1000); //计算分钟数后剩余的毫秒数
+  var seconds = Math.round(leave3 / 1000);
+  console.log(days + "天 " + hours + "小时 ")
+  // return   days + "天 " + hours + "小时 " + minutes + " 分钟" + seconds + " 秒"
+  return   days + "天 " + hours + "小时 "
+}
+
+export function getDatetime() {
+  var now = new Date();
+  var year = now.getFullYear();       
+  var month = now.getMonth() + 1;     
+  var day = now.getDate();            
+  var hh = now.getHours();            
+  var mm = now.getMinutes();          
+  var ss = now.getSeconds();          
+  var clock = year + "-";
+  if (month < 10)
+      clock += "0";
+  clock += month + "-";
+  if (day < 10)
+      clock += "0";
+  clock += day + " ";
+  if (hh < 10)
+      clock += "0";
+  // clock += hh + ":";
+  // if (mm < 10) clock += '0';
+  // clock += mm + ":";
+  // if (ss < 10) clock += '0';
+  // clock += ss;
+  clock += " 18:00:00 "
+  return clock;}
+
+
+export function get_time_diff(time) {
+  var diff = '';
+  var time_diff = new Date().getTime() - time;
+  // 计算相差天数  
+  var days = Math.floor(time_diff / (24 * 3600 * 1000));
+  if (days > 0) {
+    diff += days + '天';
+  }
+  // 计算相差小时数  
+  var leave1 = time_diff % (24 * 3600 * 1000);
+  var hours = Math.floor(leave1 / (3600 * 1000));
+  if (hours > 0) {
+    diff += hours + '小时';
+  } else {
+    if (diff !== '') {
+      diff += hours + '小时';
+    }
+  }
+  // 计算相差分钟数  
+  var leave2 = leave1 % (3600 * 1000);
+  var minutes = Math.floor(leave2 / (60 * 1000));
+  if (minutes > 0) {
+    diff += minutes + '分';
+  } else {
+    if (diff !== '') {
+      diff += minutes + '分';
+    }
+  }
+  // 计算相差秒数  
+  var leave3 = leave2 % (60 * 1000);
+  var seconds = Math.round(leave3 / 1000);
+  if (seconds > 0) {
+    diff += seconds + '秒';
+  } else {
+    if (diff !== '') {
+      diff += seconds + '秒';
+    }
+  }
+
+  return diff;
+}
+
+export function FormatDate(now) {
+  var year = now.getFullYear();   //获取获取当前年份  
+  var month = now.getMonth() + 1;   //获取获取当前月份
+  var date = now.getDate();       //获取获取当前日期
+  var hour = now.getHours();      //获取时
+  var minute = now.getMinutes();  //获取分  
+  var second = now.getSeconds();  //获取秒
+  //时间格式 ：年-月-日   
+  return year + "-" + month + "-" + date + " "+ hour+":"+minute+":"+second ;
+}
+//计算时间差
+export function GetDateDiff(startDate, endDate) {
+  var startTime = new Date(Date.parse(startDate.replace(/-/g, "/"))).getTime();
+  var endTime = new Date(Date.parse(endDate.replace(/-/g, "/"))).getTime();
+  // console.log(startTime-endTime)
+  var dates = Math.floor((startTime - endTime)) / (1000 * 60 );
+  return parseInt(dates);
 }
