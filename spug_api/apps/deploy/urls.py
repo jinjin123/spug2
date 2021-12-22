@@ -12,4 +12,6 @@ urlpatterns = [
     path('request/upload/', do_upload),
     path('request/<int:envid>/<int:r_id>/', RequestDetailView.as_view()),
     path('request/rancher/publish', RancherPublishView.as_view()),
+    path('request/master', RequestMaster.as_view()),
+
 ]

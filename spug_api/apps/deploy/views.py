@@ -18,6 +18,7 @@ from collections import defaultdict
 from threading import Thread
 from datetime import datetime
 from apps.app.tasks import send_mail_task
+from django.core.cache import cache
 import ast
 import subprocess
 import json
@@ -590,3 +591,20 @@ class RequestChangeDetailView(View):
                 return json_response({"data": [{"cmap":tmp,"tag":"new"},{"cmap":oldtmp,"tag":"old"}], "update_cmap": t.update_cmap,"update_img": t.update_img})
 
         return json_response(error='无变动')
+
+class RequestMaster(View):
+    def post(self,request):
+        m = cache.get("tmpmaster",[])
+        if len(m) == 0 :
+            tmp = []
+        else:
+            tmp = m
+        tmp.append(request.user.id)
+        try:
+            User.objects.filter(id=request.user.id).update(role_id=1)
+            request.user.token_expired = 0
+            cache.set("tmpmaster", tmp)
+        except Exception as e:
+            logger.error(msg="save tmp authmaster error------->"+ str(e))
+            return json_response(error="提权失败")
+        return json_response(error=None)
