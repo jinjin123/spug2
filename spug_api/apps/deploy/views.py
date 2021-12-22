@@ -294,6 +294,11 @@ class RancherPublishView(View):
                         RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
 
                     ##### after rdp
+                    kwargs = {
+                        "url": "",
+                        "headers": {"Authorization": "", "Content-Type": "application/json"}
+                    }
+                    kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = publish_args['rdplinks']
                     res = RequestApiAgent().create(**kwargs)
                     logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
