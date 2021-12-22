@@ -183,6 +183,7 @@ class RancherPublishView(View):
             Argument('app_name', help='请输申请应用标题'),
             Argument('env_id',type=int,help='环境丢失'),
             Argument('deploy_id', type=int, help='环境丢失'),
+            Argument('uniqid', type=int, help='uniqid'),
         ).parse(request.body)
         if error is None:
             kwargs = {
@@ -190,7 +191,7 @@ class RancherPublishView(View):
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
 
-            publish_args = (RancherSvcPubStandby.objects.filter(app_id=form.app_id).first()).to_dict()
+            publish_args = (RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).first()).to_dict()
             try:
                 Action = ""
                 logger.info(msg="#######redeploy pod start ########")
@@ -222,7 +223,7 @@ class RancherPublishView(View):
                         kwargs['data'] = json.dumps(oldcd)
                         imgres = RequestApiAgent().put(**kwargs)
                         if imgres.status_code != 200:
-                            DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
+                            DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
                             logger.error("### pubish redeploy rancher ## error->" + str(imgres))
                             return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         imgdd = json.loads(imgres.content)
@@ -232,8 +233,8 @@ class RancherPublishView(View):
                         del t["id"]
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
                         ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'])
-                        DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
+                        DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
 
                     if publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
@@ -289,17 +290,19 @@ class RancherPublishView(View):
                         del t["id"]
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
                         ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp)
-                        DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(app_id=form.app_id).update(state=1)
+                        DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
 
-
-                    # res = RequestApiAgent().create(**kwargs)
-                    # print(res)
-                    # logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
-                    # if res.status_code != 200:
-                    #     logger.error(msg="#####rancher redploy prod call:###### " + str(res))
-                    #     return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                    ##### after rdp
+                    kwargs["url"] = publish_args['rdplinks']
+                    res = RequestApiAgent().create(**kwargs)
+                    logger.info(msg="#####rancher redploy prod call:###### " + str(res.status_code))
+                    if res.status_code != 200:
+                        logger.error(msg="#####rancher redploy prod call:###### " + str(res))
+                        return json_response(error="重新部署rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                     # DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status=3)
+                    logger.info(msg="#######redeploy pod done ########")
+
             except Exception as  e:
                 print(e)
                 logger.error("#######redeploy pod faild: ########" + str(e))
@@ -321,7 +324,7 @@ class RequestRancherDeployView(View):
             Argument('developer', help='developer',required=False),
             Argument('opsper', help='opsper',required=False),
             Argument('env_id', help='env_id',required=False),
-            Argument('img', help='img',required=False),
+            Argument('img', handler=str.strip,help='img',required=False),
             Argument('nsid', help='nsid',required=False),
             Argument('nsname', help='nsname',required=False),
             Argument('is_audit', help='is_audit',required=False),
