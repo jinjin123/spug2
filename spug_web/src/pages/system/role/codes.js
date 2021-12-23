@@ -178,4 +178,14 @@ export default [{
       {key: 'del', label: '删除联系组'},
     ]
   }]
+}, {
+  key: 'nettool',
+  label: '网络诊断',
+  pages: [{
+    key: 'nettool',
+    label: '网络诊断',
+    perms: [
+      {key: 'view', label: '查看使用工具'},
+    ]
+  }]
 }]

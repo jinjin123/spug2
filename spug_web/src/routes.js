@@ -18,6 +18,7 @@ import monitorRoutes from './pages/monitor/routes';
 import alarmRoutes from './pages/alarm/routes';
 import configRoutes from './pages/config/routes';
 import deployRoutes from './pages/deploy/routes';
+import nettoolRoutes from './pages/nettool/routes';
 
 
 export default [
@@ -34,4 +35,6 @@ export default [
   makeModuleRoute('/alarm', alarmRoutes),
   makeModuleRoute('/config', configRoutes),
   makeModuleRoute('/deploy', deployRoutes),
+  makeModuleRoute('/net',nettoolRoutes ),
+
 ]

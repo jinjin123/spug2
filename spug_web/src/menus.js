@@ -72,4 +72,9 @@ export default [
       {title: '系统设置', auth: 'system.setting.view', path: '/system/setting'},
     ]
   },
+  {
+    icon: 'tool', title: '网络诊断', auth: "net.request.view", child: [
+      {title: '诊断工具', auth: 'net.request.view', path: '/net/tool'},
+    ]
+  }
 ]
