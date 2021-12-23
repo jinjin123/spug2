@@ -519,28 +519,44 @@ class RancherSvcOpView(View):
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
+            logger.info(msg="#####rancher create deployment start:###### ")
+
             Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC", tag=form.tag).first()
-            newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
+            global newUrl
+            newUrl = ""
+            if form.tag == "feiyanuos":
+                newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname'],rancher_url__contains="feiyan.uos").first()).pjid)
+            elif form.tag == "feiyan":
+                newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname'],rancher_url__contains="feiyan.com").first()).pjid)
+            elif form.tag == "ioc":
+                newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname'],rancher_url__contains="ioc.com").first()).pjid)
+            logger.info(msg=str(kwargs))
+
             kwargs["headers"]["Authorization"] = Action.token
             kwargs["url"] = newUrl
             kwargs['data'] = json.dumps(svc)
             res = RequestApiAgent().create(**kwargs)
             logger.info(msg="#####rancher create deployment call:###### " + str(res.status_code))
             red = json.loads(res.content)
+            logger.info(msg="#####rancher create deployment call:###### " + str(red))
             if res.status_code != 201:
-                logger.error(msg="#####rancher create deployment call:###### " + str(res))
+                logger.error(msg="#####rancher create deployment call:###### " + str(red))
                 return json_response(error="重新部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
 
             kwargs = {
                 "url": newUrl + "/"+ "deployment:" + (form.data)['namespaceId'] + ":" + (form.data)['name'],
                 "headers": {"Authorization":  Action.token, "Content-Type": "application/json"}
             }
+            logger.info(msg=str(kwargs))
             res = RequestApiAgent().list(**kwargs)
+            logger.info(msg=str(res.content))
             if res.status_code != 200:
                 logger.error(msg="#####rancher create deployment call:###### " + str(res))
-                return json_response(error="部署rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
+                return json_response(error="获取rancher deployment api 出现异常，请重试一次！如还有问题请联系运维！")
 
+            logger.info(msg="##get deployment api start###")
             red = json.loads(res.content)
+            logger.info(msg=str(red))
             tmpenv= []
             if red['containers'][0].get('environment'):
                 tmpenv.append(red['containers'][0].get('environment'))
@@ -590,20 +606,29 @@ class RancherSvcOpView(View):
             )
             m.save()
             if (form.data)['cmapid'] is not None:
-                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGCMAP",tag=form.tag).first()
-                newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid,(form.data)['cmapid'])
-                kwargs = {
-                    "url": newUrl,
-                    "headers": {"Authorization": Action.token, "Content-Type": "application/json"}
-                }
-                cres = RequestApiAgent().list(**kwargs)
-                cred = json.loads(cres.content)
-                kvtmp = []
-                if cred.get("data",None):
-                    for k,v in dict.items(cred["data"]):
-                        kvtmp.append({"k":k,"v":v})
+                try:
+                    Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGCMAP",tag=form.tag).first()
+                    # newUrl = (Action.url).format((ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid,(form.data)['cmapid'])
+                    newUrl = (Action.url).format(red['projectId'],(form.data)['cmapid'])
+                    kwargs = {
+                        "url": newUrl,
+                        "headers": {"Authorization": Action.token, "Content-Type": "application/json"}
+                    }
+                    logger.info(msg="####svc configmap args######")
+                    logger.info(msg=str(kwargs))
+                    cres = RequestApiAgent().list(**kwargs)
+                    cred = json.loads(cres.content)
+                    logger.info(msg=str(cred))
+                    kvtmp = []
+                    if cred.get("data",None):
+                        for k,v in dict.items(cred["data"]):
+                            kvtmp.append({"k":k,"v":v})
 
-                ProjectService.objects.filter(dpid=red['id']).update(configId=cred['id'],configName=cred['name'], configMap=kvtmp)
+                    ProjectService.objects.filter(pjid=red['projectId'],dpid=red['id']).update(configId=cred['id'],configName=cred['name'], configMap=kvtmp)
+                except Exception as e:
+                    logger.error(msg="###svc cmap save error ->>>>>>>"+str(e))
+
+            logger.info(msg="#####rancher create deployment done###### ")
 
 
         return json_response(error=error)
