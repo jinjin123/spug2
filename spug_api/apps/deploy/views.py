@@ -532,8 +532,10 @@ class RequestDetailView(View):
     def delete(self,request,envid, r_id ):
         if r_id:
             try:
+                logger.info(msg="del approval  start----->")
                 m = DeployRequest.objects.get(id=r_id)
                 m.delete()
+                logger.info(msg="del approval  done----->")
             except Exception as e :
                 logger.error(msg="del approval  err----->"+ str(e))
         return json_response(error="删除失败")
