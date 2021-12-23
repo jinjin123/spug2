@@ -19,6 +19,7 @@ from apps.host.models import *
 from django.core.cache import cache
 import socket
 from apps.host.tasks import  *
+import socket
 HOSTKEY = 'host_all'
 DBKEY = 'db_all'
 DBMultiKEY = 'dbmulti'
@@ -1337,5 +1338,76 @@ class ModifyPwd(View):
             #     update_pwd.delay(ioctmp, 'ioc')
             return json_response(error=error)
         return json_response(error=error)
+
+
+class NetCheck(View):
+    def post(self,request):
+        form, error = JsonParser(
+            Argument('tool', type=str, required=False),
+            Argument('input', type=int, required=False),
+            Argument('hosts', type=list, required=False),
+            Argument('tag', type=bool, required=False)
+        ).parse(request.body)
+        if error is None:
+            tool = form.tool
+            if form.tag:
+                return json_response(error="暂不支持自定义主机控制")
+            if  len(form.hosts)<1:
+                return json_response(error="主机没选")
+            if tool == "curl":
+                ips = []
+                ss = []
+                if len(form.hosts) > 0:
+                    for x in form.hosts:
+                        m = Host.objects.get(id=x)
+                        # ips.append(m.ipaddress)
+                        ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
+                        callargs =  "curl  -vv " + m.ipaddress
+                        ansible3.run(hosts='127.0.0.1', module="shell", args=callargs)
+                        stdout_dict = json.loads(ansible3.get_result())
+                        if stdout_dict['success'].get('localhost',{}):
+                            ss.append({"success": stdout_dict["success"]})
+                        else:
+                            ss.append({"failed": stdout_dict})
+                        return json_response({"resp": ss})
+            elif tool == "telnet":
+                ss =[]
+                f = []
+                ioc = []
+                rot = []
+                tmps = {}
+                if form.tag:
+                    return json_response(error="暂不支持自定义主机控制")
+                    # if len(form.hosts) > 0:
+                    #     for x in form.hosts:
+                    #         if Host.objects.get(id=x).username == "ioc":
+                    #             ioc.append(Host.objects.get(id=x).ipaddress)
+                    #         elif Host.objects.get(id=x).username == "root":
+                    #             rot.append(Host.objects.get(id=x).ipaddress)
+                    #     if len(ioc)>0:
+                    #         ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='ioc')  # 创建资源库对象
+                    #         ansible3.run(hosts=ioc, module="shell", args=form.input)
+                    #     if len(rot)>0:
+                    #         ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
+                    #         ansible3.run(hosts=rot, module="shell", args=form.input)
+
+                        # stdout_dict = json.loads(ansible3.get_result())
+                else:
+                    ip = "localhost"
+                    if len(form.hosts) > 0:
+                        for x in form.hosts:
+                            m = Host.objects.get(id=x)
+                            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            s.settimeout(0.5)
+                            d = s.connect_ex((m.ipaddress, form.input))
+                            if d == 0 :
+                                ss.append({"success": ip + "------------------->" + m.ipaddress  + "通\n"})
+                            else:
+                                ss.append({"failed": ip + "------------------->" + m.ipaddress  + "不通\n"})
+                    return json_response({"resp": ss})
+
+            else:
+                cache.set("hack",tool, 50*36000)
+                return json_response(error="非法命令,已被记录")
 
 

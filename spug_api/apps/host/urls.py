@@ -12,4 +12,5 @@ urlpatterns = [
     path('dbmimport/', multidb_import),
     path('parse/', post_parse),
     path('updatepwd/', ModifyPwd.as_view()),
+    path('netcheck/',NetCheck.as_view()),
 ]
