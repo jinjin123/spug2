@@ -310,7 +310,6 @@ class RancherPublishView(View):
                     logger.info(msg="#######redeploy pod done ########")
 
             except Exception as  e:
-                print(e)
                 logger.error("#######redeploy pod faild: ########" + str(e))
                 return json_response(error=str(e))
         return json_response(error=error)

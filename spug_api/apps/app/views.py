@@ -340,7 +340,14 @@ class RancherPvcOpView(View):
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
-            ex = ProjectService.objects.filter(pjname=(form.data)['pjname']).values('pjid')
+            tmptag = ""
+            if form.tag == "feiyanuos":
+                 tmptag = "feiyan.uos"
+            elif form.tag == "feiyan":
+                tmptag = "feiyan.com"
+            elif form.tag == "ioc":
+                tmptag = "ioc.com"
+            ex = ProjectService.objects.filter(pjname=(form.data)['pjname'],verifyurl__contains=tmptag).values('pjid')
             if ex.exists():
                 d = ex.first()
                 global pvarg
@@ -430,13 +437,20 @@ class RancherCmapOpView(View):
                 "url": "",
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
+            tmptag = ""
+            if form.tag == "feiyanuos":
+                 tmptag = "feiyan.uos"
+            elif form.tag == "feiyan":
+                tmptag = "feiyan.com"
+            elif form.tag == "ioc":
+                tmptag = "ioc.com"
             cmap = cmapargs()
             cmap['data'] = (form.data)['data']
             cmap['name']=  (form.data)['name']
             cmap['namespaceId']= (form.data)['namespaceId']
             Action = RancherApiConfig.objects.filter(env_id=form.env, label="ADDCONFIGMAP",tag=form.tag).first()
             kwargs["headers"]["Authorization"] = Action.token
-            kwargs["url"] = (Action.url).format((ProjectConfigMap.objects.filter(pjname=(form.data)['pjname']).first()).pjid)
+            kwargs["url"] = (Action.url).format((ProjectConfigMap.objects.filter(pjname=(form.data)['pjname'],verifyurl__contains=tmptag).first()).pjid)
             kwargs['data'] = json.dumps(cmap)
             res = RequestApiAgent().create(**kwargs)
             logger.info(msg="#####rancher create cmap call:###### " + str(res.status_code))
