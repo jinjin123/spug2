@@ -48,6 +48,7 @@ class Index extends React.Component {
       if (res <=0){
         this.setState({
           status:false,
+          tips: "可解锁提权为运维权限"
         })
         clearInterval(timer);
       }else {
