@@ -572,7 +572,15 @@ class DeployForm extends React.Component {
                                       <div>
                                         <Input onChange={e => item['vol'] = e.target.value} placeholder="默认卷名vol1" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
                                         <Input onChange={e => item['mode'] = e.target.value}  placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
-                                        <Select onChange={v => item['pvc'] = v} >
+                                        <Select 
+                                        showSearch
+                                        filterOption={(input, option) =>
+                                          option.props.children.indexOf(input)  >= 0
+                                        }
+                                        filterSort={(optionA, optionB) =>
+                                          optionA.props.children.localeCompare(optionB.props.children)
+                                        }
+                                        onChange={v => item['pvc'] = v} >
                                           {this.state.tmppvc.map((item,index) =>(
                                               <Option key={index} value={item}>{item}</Option>
                                           ))}
@@ -585,7 +593,15 @@ class DeployForm extends React.Component {
                                       <div>
                                         <Input  onChange={e => item['vol'] = e.target.value}  placeholder="默认卷名vol2" defaultValue={"vol"+index.toString()} value={"vol"+index.toString()}  style={{ width: 350}}/>
                                         <Input  onChange={e => item['mode'] = e.target.value} placeholder="默认权限模式" defaultValue="256" style={{ width: 350}}/>
-                                        <Select onChange={v => {item['config'] = v;this.setState({"cmapid": v}) }} >
+                                        <Select 
+                                        showSearch
+                                        filterOption={(input, option) =>
+                                          option.props.children.indexOf(input)  >= 0
+                                        }
+                                        filterSort={(optionA, optionB) =>
+                                          optionA.props.children.localeCompare(optionB.props.children)
+                                        }
+                                        onChange={v => {item['config'] = v;this.setState({"cmapid": v}) }} >
                                           {this.state.tmpcmp.map(item =>(
                                               <Option key={item} value={item}>{item}</Option>
                                           ))}
