@@ -211,8 +211,8 @@ class DeployForm extends React.Component {
     http.post('/api/app/deploy/svcop/', {"data":formData,"env":2,"tag":"feiyanuos"})
     .then(() => {
         message.success('操作成功');
-        store.deployForm = false;
-        store.fetchRecords()
+        // store.deployForm = false;
+        // store.fetchRecords()
       
     }, () => this.setState({loading: false}))
     console.log(formData)

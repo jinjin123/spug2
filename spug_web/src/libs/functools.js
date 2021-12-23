@@ -149,8 +149,8 @@ export function getDatetime() {
   if (day < 10)
       clock += "0";
   clock += day + " ";
-  if (hh < 10)
-      clock += "0";
+  // if (hh < 10)
+  //     clock += "0";
   // clock += hh + ":";
   // if (mm < 10) clock += '0';
   // clock += mm + ":";
