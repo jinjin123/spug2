@@ -96,7 +96,7 @@ class Store {
     this.cmpForm = true;
     this.cmaprecord = {};
     this.fullmode=[false];
-    this.ranchercmp=[{"k":"","v":""}]
+    this.ranchercmp=[{"k":"","v":"占位填充，需要自行删除------------------------------------------>"}]
   }
   showRancerExtForm = (e, app_id, info, isClone, isReadOnly = false) => {
     if (e) e.stopPropagation();

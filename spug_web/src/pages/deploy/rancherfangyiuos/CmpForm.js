@@ -313,11 +313,11 @@ class CmpForm extends React.Component {
                             ))                          
                         }
                         {info.id ?
-                            <Button type="dashed" block  onClick={() =>{info["configMap"].push({"k":"","v":""});fullmode.push(false)}}>
+                            <Button type="dashed" block  onClick={() =>{info["configMap"].push({"k":"","v":"占位填充，需要自行删除------------------------------------------>"});fullmode.push(false)}}>
                             <i type="plus">添加配置映射值</i>
                             </Button>
                           :                            
-                            <Button type="dashed" block  onClick={() =>{store.ranchercmp.push({"k":"","v":""});fullmode.push(false)}}>
+                            <Button type="dashed" block  onClick={() =>{store.ranchercmp.push({"k":"","v":"占位填充，需要自行删除------------------------------------------>"});fullmode.push(false)}}>
                                 <i type="plus">添加配置映射值</i>
                             </Button>
                         }
