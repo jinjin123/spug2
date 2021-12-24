@@ -217,9 +217,8 @@ class RancherPublishView(View):
                     kwargs["headers"]["Authorization"] = Action.token
                     kwargs["url"] = publish_args['statuslinks']
                     oldres = RequestApiAgent().list(**kwargs)
-
                     oldcd = json.loads(oldres.content)
-                    if publish_args["update_img"]:
+                    if not publish_args["update_img"]:
                         oldcd["containers"][0]['image'] =publish_args['img']
                         kwargs['data'] = json.dumps(oldcd)
                         imgres = RequestApiAgent().put(**kwargs)
@@ -237,7 +236,7 @@ class RancherPublishView(View):
                         DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
                         RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
 
-                    if publish_args["update_cmap"]:
+                    if not publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
                             Action = RancherApiConfig.objects.filter(env_id=2, label="GETSIGCMAP",tag="ioc").first()
                         elif (publish_args['statuslinks']).find("feiyan.com") > -1:
@@ -408,6 +407,7 @@ class RequestRancherDeployView(View):
                 send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
                                  content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
                                  from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+            #----
             # for item in pblist:
             #     if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
             #         notice = ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).values("notice_user__email").all()
@@ -533,12 +533,17 @@ class RequestDetailView(View):
         if r_id:
             try:
                 logger.info(msg="del approval  start----->")
-                m = DeployRequest.objects.get(id=r_id)
-                m.delete()
-                logger.info(msg="del approval  done----->")
+                if DeployRequest.objects.filter(id=r_id).exists():
+                    m = DeployRequest.objects.get(id=r_id)
+                    m.delete()
+                    d = RancherSvcPubStandby.objects.get(id=r_id)
+                    d.delete()
+                    logger.info(msg="del approval  done----->")
+                    return json_response(error=None)
+                else:
+                    return json_response(error="已经删除/记录不存在,刷新一下")
             except Exception as e :
                 logger.error(msg="del approval  err----->"+ str(e))
-        return json_response(error="删除失败")
 
 
 def do_upload(request):
