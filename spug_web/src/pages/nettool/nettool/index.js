@@ -103,17 +103,15 @@ class NetTool extends React.Component {
             })
             this.setState({ "resp": tmp })
             message.success('验证成功');
-            this.setState({loading: "none"})
+            
 
-        })
+        }).finally(()=>this.setState({loading: "none"}))
     }
 
     render() {
         const { tpe,resp } = this.state
         return (
-            <div>
-            {hasPermission('deploy.rancher.view') && (
-                <div>
+            <AuthCard auth="nettool.nettool.view">
                     <Alert
                         closable
                         showIcon
@@ -178,10 +176,8 @@ class NetTool extends React.Component {
                     </Form.Item>
                     <Form.Item label="诊断结果">
                         <TextArea value={resp} placeholder="" autoSize />
-                    </Form.Item>
-                    </div>
-                )}
-            </div>
+                    </Form.Item>                    
+                </AuthCard>            
         )
     }
 

@@ -73,8 +73,8 @@ export default [
     ]
   },
   {
-    icon: 'tool', title: '网络诊断', auth: "net.request.view", child: [
-      {title: '诊断工具', auth: 'net.request.view', path: '/net/tool'},
+    icon: 'tool', title: '网络诊断', auth: "nettool.nettool.view", child: [
+      {title: '诊断工具', auth: 'nettool.nettool.view', path: '/net/tool'},
     ]
   }
 ]

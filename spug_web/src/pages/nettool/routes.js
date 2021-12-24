@@ -4,7 +4,7 @@
  * Released under the AGPL-3.0 License.
  */
 import { makeRoute } from "../../libs/router";
-import NetTool from './index';
+import NetTool from './nettool/index';
 
 
 export default [
