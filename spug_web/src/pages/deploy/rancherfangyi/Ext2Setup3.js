@@ -90,6 +90,8 @@ class Ext2Setup3 extends React.Component {
         message.success('建立发布审批单成功！');
         store.ext2Visible = false;
         store.addRancherVisible = false;
+        store.page = 0;
+
       }, () => this.setState({loading: false}))
   };
 
