@@ -221,25 +221,28 @@ class RancherPublishView(View):
                     oldres = RequestApiAgent().list(**kwargs)
                     oldcd = json.loads(oldres.content)
                     if not publish_args["update_img"]:
-                        oldcd["containers"][0]['image'] =publish_args['img']
-                        kwargs['data'] = json.dumps(oldcd)
-                        logger.info(msg="###update pod args ---->"+json.dumps(kwargs))
-                        imgres = RequestApiAgent().put(**kwargs)
-                        if imgres.status_code != 200:
-                            DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
-                            logger.error("### pubish redeploy rancher ## error->" + str(imgres))
-                            return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
-                        logger.info(msg="###update pod done  #####")
-                        imgdd = json.loads(imgres.content)
+                        if oldcd.get('containers',False):
+                            oldcd["containers"][0]['image'] =publish_args['img']
+                            kwargs['data'] = json.dumps(oldcd)
+                            logger.info(msg="###update pod args ---->"+json.dumps(kwargs))
+                            imgres = RequestApiAgent().put(**kwargs)
+                            if imgres.status_code != 200:
+                                DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
+                                logger.error("### pubish redeploy rancher ## error->" + str(imgres))
+                                return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                            logger.info(msg="###update pod done  #####")
+                            imgdd = json.loads(imgres.content)
 
-                        ts = ProjectService.objects.get(id=publish_args['service_id'])
-                        t = ts.to_dict()
-                        del t["id"]
-                        RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
-                        ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'],modify_time=datetime.datetime.now())
-                        DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.datetime.now())
-                        logger.info(msg="###update pod  into db done  #####")
+                            ts = ProjectService.objects.get(id=publish_args['service_id'])
+                            t = ts.to_dict()
+                            del t["id"]
+                            RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
+                            ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'],modify_time=datetime.datetime.now())
+                            DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                            RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.datetime.now())
+                            logger.info(msg="###update pod  into db done  #####")
+                        else:
+                            return json_response(error="数据跟rancher没同步，走Jenkins发布")
 
                     if not publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
