@@ -221,11 +221,13 @@ class RancherPublishView(View):
                     if not publish_args["update_img"]:
                         oldcd["containers"][0]['image'] =publish_args['img']
                         kwargs['data'] = json.dumps(oldcd)
+                        logger.info(msg="###update pod args ---->"+json.dumps(kwargs))
                         imgres = RequestApiAgent().put(**kwargs)
                         if imgres.status_code != 200:
                             DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
                             logger.error("### pubish redeploy rancher ## error->" + str(imgres))
                             return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
+                        logger.info(msg="###update pod done  #####")
                         imgdd = json.loads(imgres.content)
 
                         ts = ProjectService.objects.get(id=publish_args['service_id'])
@@ -235,6 +237,7 @@ class RancherPublishView(View):
                         ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'])
                         DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
                         RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
+                        logger.info(msg="###update pod  into db done  #####")
 
                     if not publish_args["update_cmap"]:
                         if (publish_args['statuslinks']).find("ioc.com") > -1:
@@ -255,12 +258,14 @@ class RancherPublishView(View):
                         dataargs["id"] = publish_args["configId"]
 
                         kwargs['data'] = json.dumps(dataargs)
+                        logger.info(msg="###update cmap args ---->"+json.dumps(kwargs))
+
                         cres = RequestApiAgent().put(**kwargs)
                         cred = json.loads(cres.content)
 
                         if cres.status_code != 200:
                             DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
-                            logger.error(msg="#####rancher update  configmap call:###### " + str(cres))
+                            logger.error(msg="#####rancher update  configmap call:###### " + json.dumps(cred))
                             return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         try:
                             if (publish_args['statuslinks']).find("ioc.com") > -1:
@@ -284,7 +289,9 @@ class RancherPublishView(View):
                         kvtmp = []
                         for k,v in dict.items(cred["data"]):
                             kvtmp.append({"k":k,"v":v})
-                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'] ,configId=cred['id'], configName=cred['name']).update(configMap=kvtmp)
+
+                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp)
+                        logger.info(msg="###update cmap done ####")
                         ts = ProjectService.objects.get(id=publish_args['service_id'])
                         t = ts.to_dict()
                         del t["id"]
@@ -446,9 +453,9 @@ class RequestDetailView(View):
         if res.status_code != 200:
             logger.error(msg="rancher结果返回失败->>>>"+str(res.content))
             return json_response(error="rancher结果返回失败")
-
+        tlink = r.rancher_url + "p/"+ r.pjid + '/workload/'+ r.dpid
         red = json.loads(res.content)
-        return json_response({"data":red})
+        return json_response({"data":red,"tlink":tlink})
 
 
         # hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
