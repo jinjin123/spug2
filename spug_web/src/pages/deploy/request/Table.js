@@ -188,7 +188,7 @@ class ComTable extends React.Component {
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
   }, {
     title: '操作',
-    className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del') ? null : 'none',
+    className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del|deploy.request.testapprove|deploy.request.devdo') ? null : 'none',
     render: info => {
       const {loadings} = this.state
 
@@ -221,7 +221,7 @@ class ComTable extends React.Component {
                   <Action.Link
                   auth="deploy.request.view"
                   to={`/deploy/do/rancher/${info.id}/1`}>查看</Action.Link> 
-                  <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"测试")}>测试审核</Action.Button>
+                  <Action.Button auth="deploy.request.testapprove" onClick={() => store.showApprove(info,"测试")}>测试审核</Action.Button>
                   <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
 
                 </Action>
@@ -242,7 +242,7 @@ class ComTable extends React.Component {
         case '0':
           return <Action>
             <Action.Button auth="deploy.request.approve" onClick={() => store.showApprove(info,"运维")}>审核</Action.Button>
-            <Action.Button auth="deploy.request.view" onClick={() => this.deletePub(info) }>撤销发布</Action.Button>
+            <Action.Button auth="deploy.request.devdo" onClick={() => this.deletePub(info) }>撤销发布</Action.Button>
 
             <Action.Button auth="deploy.request.view" onClick={() => store.showChange(info)}>查看变更</Action.Button>
             {/* <Action.Button auth="deploy.request.del" onClick={() => this.handleDelete(info)}>删除</Action.Button> */}

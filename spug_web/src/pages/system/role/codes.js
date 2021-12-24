@@ -74,6 +74,8 @@ export default [{
       {key: 'edit', label: '编辑申请'},
       {key: 'del', label: '删除申请'},
       {key: 'approve', label: '审核申请'},
+      {key: 'testapprove', label: '测试审核'},
+      {key: 'devdo', label: '开发撤销'},
       {key: 'do', label: '执行发布'}
     ]
   },{

@@ -106,7 +106,15 @@ class Index extends React.Component {
             </Select>
           </SearchForm.Item>
           <SearchForm.Item span={6} title="应用名称">
-            <Select allowClear value={store.f_app_id} onChange={v => store.f_app_id = v} placeholder="请选择">
+            <Select 
+              showSearch
+              filterOption={(input, option) =>
+                option.props.children.indexOf(input)  >= 0
+              }
+              filterSort={(optionA, optionB) =>
+                optionA.props.children.localeCompare(optionB.props.children)
+              }
+            allowClear value={store.f_app_id} onChange={v => store.f_app_id = v} placeholder="请选择">
               {appStore.records.map(item => (
                 <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
               ))}

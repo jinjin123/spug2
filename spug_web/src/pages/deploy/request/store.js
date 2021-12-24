@@ -102,6 +102,9 @@ class Store {
       ))
       delta = jsondiffpatch.diff(tmp1,tmp2)
       let tmp = jsondiffpatch.formatters.html.format(delta, tmp1)
+      document.getElementById('oldimg').innerHTML =   JSON.stringify(tmp1)
+      document.getElementById('newimg').innerHTML = JSON.stringify(tmp2)
+
       document.getElementById('visual').innerHTML = tmp.replaceAll(/\\n/ig,"<br/>");
     })
     .finally(() => this.isLoading = false)

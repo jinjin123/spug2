@@ -50,6 +50,8 @@ class DiffForm extends React.Component {
         confirmLoading={this.state.loading}
         >
             <div id="visual"></div>
+            <div id="oldimg"></div>
+            <div id="newimg"></div>
 
       </Modal>
 

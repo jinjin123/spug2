@@ -27,7 +27,8 @@ class Ext2Rancher extends React.Component {
       loading: false,
       iFrameHeight: '0px',
       tmplog: null,
-      status:null
+      status:null,
+      to:null
     }
   }
 
@@ -46,9 +47,10 @@ class Ext2Rancher extends React.Component {
   fetch = () => {
     if (!this.timer) this.setState({fetching: true});
     http.get(`/api/deploy/request/2/${this.id}/`)
-      .then((data) => {
-        this.state.tmplog = JSON.stringify(data.data,undefined, 4)
-        var s = (this.state.tmplog).search(/"state": "active"/g)
+      .then(({data,tlink}) => {
+        this.setState({to: tlink});
+        this.setState({tmplog:JSON.stringify(data,undefined, 4)}) ;
+        let s = (this.state.tmplog).search(/"state": "active"/g);
         if(s != -1){
           this.state.status = "#52c41a"
         }else{
@@ -71,7 +73,7 @@ class Ext2Rancher extends React.Component {
 
   render() {
     const { TextArea } = Input;
-    const { tmplog,status } = this.state;
+    const { tmplog,status,to } = this.state;
     return (
       <>
               <SearchForm>
@@ -81,6 +83,9 @@ class Ext2Rancher extends React.Component {
                 <SearchForm.Item span={4} style={{textAlign: 'right'}}>          
                       发布结果：<Icon type="check-circle" theme="twoTone" twoToneColor={status} />
                 </SearchForm.Item>
+                  <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+                    <a href={to} target="_blank" style={{ margin: 0 }}>跳转rancher确认镜像更新</a>
+                  </SearchForm.Item>
               </SearchForm>
               <TextArea 
               value={tmplog}
