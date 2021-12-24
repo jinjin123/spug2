@@ -134,7 +134,7 @@ export function intervalTime(startTime,endTime) {
   return   days + "天 " + hours + "小时 "
 }
 
-export function getDatetime() {
+export function getDatetime(happy) {
   var now = new Date();
   var year = now.getFullYear();       
   var month = now.getMonth() + 1;     
@@ -156,8 +156,13 @@ export function getDatetime() {
   // clock += mm + ":";
   // if (ss < 10) clock += '0';
   // clock += ss;
-  clock += " 18:00:00 "
-  return clock;}
+    if(happy==="week"){
+      return clock;
+    }else{
+      clock += " 18:00:00 "
+      return clock;
+    }
+  }
 
 
 export function get_time_diff(time) {
@@ -219,4 +224,12 @@ export function GetDateDiff(startDate, endDate) {
   // console.log(startTime-endTime)
   var dates = Math.floor((startTime - endTime)) / (1000 * 60 );
   return parseInt(dates);
+}
+
+export function isWeekEnd(date){
+
+  if( "天一二三四五六".charAt(new   Date(date).getDay())=="天" ) return true;
+
+  if( "天一二三四五六".charAt(new   Date(date).getDay())=="六"  )  return true;
+
 }

@@ -12,7 +12,7 @@ import Ext1Form from './Ext1Form';
 import Ext2Form from './Ext2Form';
 import Approve from './Approve';
 import ComTable from './Table';
-import {http,FormatDate,GetDateDiff,getDatetime} from 'libs';
+import {http,FormatDate,GetDateDiff,getDatetime,isWeekEnd} from 'libs';
 import envStore from 'pages/config/environment/store';
 import appStore from 'pages/config/app/store'
 import store from './store';
@@ -39,24 +39,31 @@ class Index extends React.Component {
     if (appStore.records.length === 0) {
       appStore.fetchRecords()
     }
-    let timer = setInterval(() => {
-      var current_time = new Date()
-      var old_time     = new Date(getDatetime());
-      var current_time = FormatDate(current_time ); 
-      var old_time     = FormatDate(old_time); 
-      var res = GetDateDiff( old_time,current_time)
-      if (res <=0){
-        this.setState({
-          status:false,
-          tips: "可解锁提权为运维权限"
-        })
-        clearInterval(timer);
-      }else {
-        this.setState({
-          tips: "还差" + res.toString() + "分钟解锁"
-        })
-      }
-    }, 1000)
+    if(isWeekEnd(getDatetime("week")) === true){
+      this.setState({
+        status:false,
+        tips: "周末例外可解锁提权为运维权限"
+      })
+    }else{
+      let timer = setInterval(() => {
+        var current_time = new Date()
+        var old_time     = new Date(getDatetime());
+        var current_time = FormatDate(current_time ); 
+        var old_time     = FormatDate(old_time); 
+        var res = GetDateDiff( old_time,current_time)
+        if (res <=0){
+          this.setState({
+            status:false,
+            tips: "可解锁提权为运维权限"
+          })
+          clearInterval(timer);
+        }else {
+          this.setState({
+            tips: "还差" + res.toString() + "分钟解锁"
+          })
+        }
+      }, 1000)
+    }
   }
 
   handleBatchDel = () => {
