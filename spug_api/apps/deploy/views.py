@@ -6,6 +6,8 @@ from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
+import datetime
+
 
 from apps.config.models import RancherApiConfig
 from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent,cmapargs
@@ -234,9 +236,9 @@ class RancherPublishView(View):
                         t = ts.to_dict()
                         del t["id"]
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
-                        ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'])
+                        ProjectService.objects.filter(id=publish_args['service_id']).update(img=imgdd['containers'][0]['image'],modify_time=datetime.datetime.now())
                         DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
+                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.datetime.now())
                         logger.info(msg="###update pod  into db done  #####")
 
                     if not publish_args["update_cmap"]:
@@ -290,15 +292,15 @@ class RancherPublishView(View):
                         for k,v in dict.items(cred["data"]):
                             kvtmp.append({"k":k,"v":v})
 
-                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp)
+                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp,modify_time=datetime.datetime.now())
                         logger.info(msg="###update cmap done ####")
                         ts = ProjectService.objects.get(id=publish_args['service_id'])
                         t = ts.to_dict()
                         del t["id"]
                         RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
-                        ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp)
+                        ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp,modify_time=datetime.datetime.now())
                         DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1)
+                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.datetime.now())
 
                     ##### after rdp
                     kwargs = {
