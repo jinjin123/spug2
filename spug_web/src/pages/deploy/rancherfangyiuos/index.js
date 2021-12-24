@@ -54,6 +54,9 @@ class Rancher extends  React.Component {
               <AuthButton auth="deploy.rancher.edit_config" 
                           type="primary" icon="plus" onClick={() => store.showAddForm()}>部署服务</AuthButton>
             </SearchForm.Item>
+            <SearchForm.Item span={4} style={{textAlign: 'right'}}>
+              <AuthButton type="primary" icon="sync" onClick={store.fetchRecords}>刷新</AuthButton>
+            </SearchForm.Item>
         </SearchForm>
         <ComTable/>
         {store.historyDetailVisible && <HistoryDetailForm/>}

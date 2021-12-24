@@ -57,7 +57,7 @@ class HistoryForm extends React.Component {
               showTotal: total => `共 ${total} 条`,
               pageSizeOptions: ['10', '20', '50', '100']
             }}>
-              <Column title="实体项目" dataIndex="top_project"/>
+              {/* <Column title="实体项目" dataIndex="top_project"/> */}
               <Column title="rancher细分项目" dataIndex="pjname"/>
               <Column title="命名空间" dataIndex="nsname"/>
               <Column title="应用" dataIndex="dpname"/>

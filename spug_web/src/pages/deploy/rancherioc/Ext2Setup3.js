@@ -82,11 +82,16 @@ class Ext2Setup3 extends React.Component {
     store.record["pbtype"] = store.pbtype
     store.record["state"] = false
     store.record["desccomment"] = store.desccomment
+    if (store.record['update_img'] === true && store.record['update_cmap'] === true){
+      return message.error("必须更新镜像 或者是  配置映射卷")
+    }
     http.post('/api/deploy/request/rancher/', store.record)
       .then( ()=> {
         message.success('建立发布审批单成功！');
         store.ext2Visible = false;
         store.addRancherVisible = false;
+        store.page = 0;
+
       }, () => this.setState({loading: false}))
   };
 
