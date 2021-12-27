@@ -9,6 +9,7 @@ from apps.app.models import *
 from apps.config.models import Config, RancherApiConfig
 from apps.app.utils import parse_envs, fetch_versions, remove_repo
 from apps.account.models import User
+from apps.message.models import LoggerOpRecord
 import subprocess
 import json
 import os
@@ -740,6 +741,7 @@ class RancherSvcRestartView(View):
                 if res.status_code != 200:
                    return json_response(error="重启失败")
                 ProjectService.objects.filter(id=form.id).update(modify_time=datetime.now())
+                LoggerOpRecord.objects.create(create_by=request.user,content="restart:"+str(t.id)+":"+t.dpname,action="restart")
                 return json_response(error=None)
         return json_response(error="重启资源不存在")
 

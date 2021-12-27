@@ -26,6 +26,8 @@ import json
 import uuid
 import os
 import logging
+from apps.message.models import LoggerOpRecord
+
 logger = logging.getLogger('spug_log')
 
 
@@ -550,6 +552,9 @@ class RequestDetailView(View):
                     d = RancherSvcPubStandby.objects.get(id=r_id)
                     d.delete()
                     logger.info(msg="del approval  done----->")
+                    LoggerOpRecord.objects.create(create_by=request.user,
+                            content="del approval:" + str(r_id) + ":" + d.dpname, action="del")
+
                     return json_response(error=None)
                 else:
                     return json_response(error="已经删除/记录不存在,刷新一下")
@@ -620,8 +625,17 @@ class RequestMaster(View):
         try:
             User.objects.filter(id=request.user.id).update(role_id=1)
             request.user.token_expired = 0
-            cache.set("tmpmaster", tmp,50*10000)
+            cache.set("tmpmaster", tmp,500*10000)
+            LoggerOpRecord.objects.create(create_by=request.user, content="BootsMaster:" + str(request.user.nickname),
+                                          action="updateauth")
         except Exception as e:
             logger.error(msg="save tmp authmaster error------->"+ str(e))
             return json_response(error="提权失败")
         return json_response(error=None)
+
+
+class RequestOplog(View):
+    def get(self,request):
+        m = LoggerOpRecord.objects.all()
+
+        return json_response({"data": [x.to_dict() for x in m ]})

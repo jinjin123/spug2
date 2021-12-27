@@ -1,5 +1,6 @@
 from django.db import models
-
+from apps.account.models import User
+from libs import ModelMixin
 # Create your models here.
 class EmailRecord(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
@@ -31,3 +32,18 @@ class LoggerTaskRecord(models.Model):
     class Meta:
         db_table = 'task_record'
         app_label = 'message'
+
+class LoggerOpRecord(models.Model,ModelMixin):
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='修改时间')
+    create_by = models.ForeignKey(User, on_delete=models.PROTECT, default=1, verbose_name='创建人')
+    content = models.TextField(verbose_name='操作内容')
+    action = models.CharField(max_length=20, db_index=True,verbose_name='op')
+
+    def to_dict(self, *args, **kwargs):
+        tmp = super().to_dict(*args, **kwargs)
+        tmp['opuser'] = self.create_by.nickname
+        return tmp
+
+    class Meta:
+        db_table = 'spug_record'
