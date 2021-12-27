@@ -19,6 +19,7 @@ import alarmRoutes from './pages/alarm/routes';
 import configRoutes from './pages/config/routes';
 import deployRoutes from './pages/deploy/routes';
 import nettoolRoutes from './pages/nettool/routes';
+import oplogRoutes from './pages/oplog/routes';
 
 
 export default [
@@ -36,5 +37,6 @@ export default [
   makeModuleRoute('/config', configRoutes),
   makeModuleRoute('/deploy', deployRoutes),
   makeModuleRoute('/net',nettoolRoutes ),
+  makeModuleRoute('/op',oplogRoutes ),
 
 ]

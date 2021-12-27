@@ -190,4 +190,16 @@ export default [{
       {key: 'view', label: '网络诊断'}
     ]
   }]
-}]
+},
+{
+  key: 'oplog',
+  label: '审计日志',
+  pages: [{
+    key: 'oplog',
+    label: '操作日志',
+    perms: [
+      {key: 'view', label: '操作日志'}
+    ]
+  }]
+}
+]

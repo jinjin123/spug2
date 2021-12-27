@@ -76,5 +76,10 @@ export default [
     icon: 'tool', title: '网络诊断', auth: "nettool.nettool.view", child: [
       {title: '诊断工具', auth: 'nettool.nettool.view', path: '/net/tool'},
     ]
+  },
+  {
+    icon: 'monitor', title: '审计日志', auth: "oplog.oplog.view", child: [
+      {title: '操作日志', auth: 'oplog.oplog.view', path: '/op/log'},
+    ]
   }
 ]
