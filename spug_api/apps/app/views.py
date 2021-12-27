@@ -14,6 +14,7 @@ import json
 import os
 from libs.utils import RequestApiAgent
 import logging
+from datetime import datetime
 logger = logging.getLogger('spug_log')
 
 
@@ -682,12 +683,14 @@ class RancherRollbackView(View):
         if error is None:
             if RancherSvcPubStandby.objects.filter(app_id=id).exists():
                 t = RancherSvcPubStandby.objects.get(app_id=id)
-                global ttt
-                if (t.rollbacklinks).find("ioc.com")>-1:
-                    ttt="ioc"
-                else:
-                    ttt="feiyan"
-                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=ttt).first()
+                global tt
+                if (t.revisionslinks).find("ioc.com")>-1:
+                    tt="ioc"
+                elif (t.revisionslinks).find("feiyan.com")>-1:
+                    tt="feiyan"
+                elif (t.revisionslinks).find("feiyan.uos.com")>-1:
+                    tt="feiyanuos"
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=tt).first()
                 kwargs = {
                     "url": t.rollbacklinks,
                     "headers": {"Authorization": "", "Content-Type": "application/json"}
@@ -709,6 +712,36 @@ class RancherRollbackView(View):
                 return json_response(error=error)
 
         return json_response(error="回滚资源不存在")
+
+class RancherSvcRestartView(View):
+    def post(self, request,):
+        form, error = JsonParser(
+            Argument('id', required=True,type=int, help='rdpid'),
+            Argument('tag', required=True, type=str, help='tag'),
+        ).parse(request.body)
+        if error is None:
+            if ProjectService.objects.filter(pk=form.id).exists():
+                t = ProjectService.objects.filter(pk=form.id).first()
+                global tt
+                if (t.revisionslinks).find("ioc.com")>-1:
+                    tt="ioc"
+                elif (t.revisionslinks).find("feiyan.com")>-1:
+                    tt="feiyan"
+                elif (t.revisionslinks).find("feiyan.uos.com")>-1:
+                    tt="feiyanuos"
+
+                Action = RancherApiConfig.objects.filter(env_id=2, label="GETSVC",tag=tt).first()
+                kwargs = {
+                    "url": t.rdplinks,
+                    "headers": {"Authorization": "", "Content-Type": "application/json"}
+                }
+                kwargs["headers"]["Authorization"] = Action.token
+                res = RequestApiAgent().create(**kwargs)
+                if res.status_code != 200:
+                   return json_response(error="重启失败")
+                ProjectService.objects.filter(id=form.id).update(modify_time=datetime.now())
+                return json_response(error=None)
+        return json_response(error="重启资源不存在")
 
 
 class RancherSvcVersionView(View):
