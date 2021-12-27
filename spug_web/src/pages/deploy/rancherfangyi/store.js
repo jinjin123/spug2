@@ -52,7 +52,9 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
   @observable desccomment;
-
+  @observable restartVisible = false;
+  @observable restartrecord;
+  
   @observable ranchercmp=[{"k":"","v":""}];
   @observable rancherenv=[];
   @observable rancherport=[];

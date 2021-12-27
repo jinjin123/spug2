@@ -33,7 +33,9 @@ class Store {
   // @observable fullmode=[];
   @observable historyVisible = false;
   @observable historyDetailVisible = false;
-
+  @observable restartVisible = false;
+  @observable restartrecord;
+  
   @observable versiontmp = [];
   @observable f_name;
   @observable f_desc;

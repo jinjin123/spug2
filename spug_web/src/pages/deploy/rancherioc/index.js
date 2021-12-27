@@ -14,7 +14,7 @@ import PvcFrom from './PvcForm';
 import CmpFrom from './CmpForm';
 import HistoryForm from './HisotryForm';
 import HistoryDetailForm from './HistoryDetailForm';
-
+import RestartForm from './RestartForm';
 import AddRancherSelect from './AddRancherSelect';
 import Ext2Form from './Ext2Form';
 @observer
@@ -60,6 +60,7 @@ class Rancher extends  React.Component {
         </SearchForm>
         <ComTable/>
         {store.historyDetailVisible && <HistoryDetailForm/>}
+        {store.restartVisible && <RestartForm/>}
 
         {store.historyVisible && <HistoryForm/>}
         {store.deployForm && <DeployForm/>}

@@ -113,6 +113,8 @@ class ComTable extends React.Component {
         break;
       ;
       case 3:
+        store.restartVisible = true      
+        store.restartrecord = info   
         ;;
       case 4:
         break;
@@ -225,6 +227,7 @@ class ComTable extends React.Component {
               <Column title="副本" dataIndex="replica"/>
               <Column title="创建人" dataIndex="create_by"/>
               <Column title="创建时间" dataIndex="create_time"/>
+              <Column title="更新时间" dataIndex="modify_time"/>
 
               {hasPermission('deploy.rancher.approve|deploy.rancher.del') && (
                 <Column title="操作" fixed="right" render={info => (
@@ -233,6 +236,8 @@ class ComTable extends React.Component {
                     {/* <Option value={2}>删除</Option> */}
                     {/* <Option value={3}>伸缩</Option> */}
                     {/* <Option value={4}>终端</Option> */}
+                    <Option value={3}>重启</Option>
+
                     <Option value={5}>申请发布</Option>
                     {/* <Option value={6}>重新部署</Option> */}
                     <Option value={7}>历史版本</Option>
@@ -272,6 +277,7 @@ class ComTable extends React.Component {
                 <Column title="命名空间" dataIndex="nsname"/>
                 <Column title="创建人" dataIndex="create_by"/>
                 <Column title="创建时间" dataIndex="create_time"/>
+                <Column title="更新时间" dataIndex="modify_time"/>
 
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
@@ -316,6 +322,8 @@ class ComTable extends React.Component {
                 <Column title="存储类" dataIndex="storageid"/>
                 <Column title="创建人" dataIndex="create_by"/>
                 <Column title="创建时间" dataIndex="create_time"/>
+                <Column title="更新时间" dataIndex="modify_time"/>
+
                 {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >

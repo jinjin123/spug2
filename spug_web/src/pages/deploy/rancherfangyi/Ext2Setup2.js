@@ -71,6 +71,11 @@ class Ext2Setup2 extends React.Component {
               <Input placeholder="rancher细分项目" disabled/>
             )}
         </Form.Item>
+        <Form.Item required label="命名空间">
+            {getFieldDecorator('pjname', {initialValue: info['nsname']})(
+              <Input placeholder="命名空间" disabled/>
+            )}
+        </Form.Item>
         <Form.Item required label="应用名">
             {getFieldDecorator('dpname', {initialValue: info['dpname']})(
               <Input placeholder="应用名" disabled />

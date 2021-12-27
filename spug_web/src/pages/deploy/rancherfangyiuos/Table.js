@@ -113,6 +113,8 @@ class ComTable extends React.Component {
         break;
       ;
       case 3:
+        store.restartVisible = true      
+        store.restartrecord = info   
         ;;
       case 4:
         break;
@@ -233,6 +235,7 @@ class ComTable extends React.Component {
                     {/* <Option value={2}>删除</Option> */}
                     {/* <Option value={3}>伸缩</Option> */}
                     {/* <Option value={4}>终端</Option> */}
+                    <Option value={3}>重启</Option>
                     <Option value={5}>申请发布</Option>
                     {/* <Option value={6}>重新部署</Option> */}
                     <Option value={7}>历史版本</Option>
