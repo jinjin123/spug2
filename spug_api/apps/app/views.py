@@ -401,6 +401,8 @@ class RancherPvcOpView(View):
                     pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname
                 )
                 m.save()
+                LoggerOpRecord.objects.create(create_by=request.user, content="Createpvc:" + red['name']+str(request.user.nickname),
+                                          action="create")
 
         return json_response(error=error)
 
@@ -484,7 +486,8 @@ class RancherCmapOpView(View):
                 pjname=(ProjectService.objects.filter(pjid=red['projectId']).first()).pjname,
             )
             m.save()
-
+            LoggerOpRecord.objects.create(create_by=request.user,content="Createcmap:" + red['name'] + str(request.user.nickname),
+                                          action="create")
         return json_response(error=error)
 
 
@@ -519,6 +522,23 @@ class RancherSvcOpView(View):
             Argument('tag', required=False, type=str, help='tag'),
         ).parse(request.body)
         if error is None:
+            kwargs = {
+                "url": "",
+                "headers": {"Authorization": "", "Content-Type": "application/json"}
+            }
+            if (form.data)['newNs']:
+                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETNS", tag=form.tag).first()
+                kwargs["headers"]["Authorization"] = Action.token
+                kwargs["url"] = Action.url
+                kwargs['data'] = json.dumps({"type":"namespace","name":(form.data)['namespaceId'],"projectId": (ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid})
+
+                logger.info(msg="#####rancher create namespace######")
+                res = RequestApiAgent().create(**kwargs)
+                if res.status_code != 201:
+                    logger.error(msg="#####rancher create namespace error###### --->" + str(res.status_code) + res.content)
+                    return json_response(error="创建新命名空间失败 请重试一次！如还有问题请联系运维！")
+                LoggerOpRecord.objects.create(create_by=request.user,content="CreateNs:" + str(request.user.nickname),action="create")
+
             svc = svcargs()
             svc['scheduling'] = (form.data)['scheduling']
             svc['volumes'] = (form.data)['volumes']
@@ -531,10 +551,7 @@ class RancherSvcOpView(View):
             svc['containers'][0]['name'] =  (form.data)['name']
             svc['containers'][0]['environment'] =  (form.data)['environment']
             svc['containers'][0]['volumeMounts'] =  (form.data)['volumeMounts']
-            kwargs = {
-                "url": "",
-                "headers": {"Authorization": "", "Content-Type": "application/json"}
-            }
+
             logger.info(msg="#####rancher create deployment start:###### ")
 
             Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSVC", tag=form.tag).first()
@@ -644,6 +661,7 @@ class RancherSvcOpView(View):
                 except Exception as e:
                     logger.error(msg="###svc cmap save error ->>>>>>>"+str(e))
 
+            LoggerOpRecord.objects.create(create_by=request.user,content="CreatePod:" +red['name']+str(request.user.nickname),action="create")
             logger.info(msg="#####rancher create deployment done###### ")
 
 
@@ -709,7 +727,9 @@ class RancherRollbackView(View):
 
                 ProjectService.objects.filter(id=t.service_id).update(img=t.img,configMap=t.configMap)
 
-
+                LoggerOpRecord.objects.create(create_by=request.user,
+                                              content="rollbackPod:" + str(t.dpname) + str(request.user.nickname),
+                                              action="rollback")
                 return json_response(error=error)
 
         return json_response(error="回滚资源不存在")
@@ -753,6 +773,5 @@ class RancherSvcVersionView(View):
                 data = RancherPublishHistory.objects.filter(service_id=id).all()
                 return json_response({"data":  [x.to_dict() for x in data]})
             except Exception as e :
-
                 logger.error("获取回滚版本失败->"+ str(e))
         return json_response(error="无历史版本")
