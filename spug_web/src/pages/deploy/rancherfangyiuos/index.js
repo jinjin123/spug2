@@ -52,7 +52,7 @@ class Rancher extends  React.Component {
               <Input allowClear value={store.app} onChange={e => store.app = (e.target.value).trim()} placeholder="请输入"/>
             </SearchForm.Item>
             <SearchForm.Item span={4} style={{textAlign: 'right'}}>
-              <AuthButton auth="deploy.rancher.edit_config" 
+              <AuthButton auth="deploy.rancher.deploynew" 
                           type="primary" icon="plus" onClick={() => store.showAddForm()}>部署服务</AuthButton>
             </SearchForm.Item>
             <SearchForm.Item span={4} style={{textAlign: 'right'}}>
