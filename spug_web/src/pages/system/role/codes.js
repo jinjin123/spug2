@@ -87,7 +87,11 @@ export default [{
       {key: 'edit', label: '编辑申请'},
       {key: 'del', label: '删除申请'},
       {key: 'approve', label: '审核申请'},
-      {key: 'do', label: '执行发布'}
+      {key: 'do', label: '执行发布'},
+      {key: 'deploynew', label: '部署新pod'},
+      {key: 'cmapdo', label: '编辑configmap'},
+      {key: 'pvcdo', label: '编辑pvc'},
+
     ]
   }
   ] 

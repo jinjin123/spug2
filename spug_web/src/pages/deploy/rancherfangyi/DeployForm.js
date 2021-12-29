@@ -27,17 +27,16 @@ class DeployForm extends React.Component {
         tmpcmp:[],
         tmpimgs:{},
         tmpimgV:null,
+        choosens:{},
+        tmpnsV:null,
         vol:0,
         cmapid: null,
+        newNs:null,
         // rancherBL:{},
         moreAction: [{"id":0,"v":"添加卷..."}]
 
     }
   }
-  // componentDidMount() {
-  //   // historystore.fetchRecords();
-    
-  // }
 
   handleDelete = (text) => {
     Modal.confirm({
@@ -126,6 +125,8 @@ class DeployForm extends React.Component {
     formData["scale"] = this.state.input_value
     formData["image"] = this.state.tmpimgV
     formData["ports"] = store.rancherport
+    formData["namespaceId"] = this.state.tmpnsV
+    formData["newNs"] = this.state.newNs
     if(this.state.cmapid != null){
       formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
     }else{
@@ -215,10 +216,21 @@ class DeployForm extends React.Component {
         store.fetchRecords()
       
     }, () => this.setState({loading: false}))
-    console.log(formData)
+    // console.log(formData)
     store.rancherVolume = []
   };
+  onCallNsChange = e => {
 
+    if(e.target.value === 1){
+      this.setState({
+        choosens: {"tag":"select"},
+      });
+    }else{
+      this.setState({
+        choosens: {"tag":"input"},
+      });
+    }
+  }
   onVolumeChange = (action) => {
     let counter = this.state.vol
     console.log(counter)
@@ -389,11 +401,28 @@ class DeployForm extends React.Component {
                 </Form.Item>
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
                     {getFieldDecorator('namespaceId')(
-                          <Select   style={{ width: 300 }} >
-                            {this.state.tmpns.map((item,index)=>(
-                                <Option key={index} value={item}>{item}</Option>              
-                            ))}
-                          </Select>
+                      <Radio.Group   onChange={this.onCallNsChange} > 
+                        <Radio  value={1}>使用现有：
+                          {this.state.choosens["tag"] =="select"
+                            ?
+                            <Select  
+                            onChange={v=>{this.setState({tmpnsV:v , newNs:false})}} style={{ width: 600 }}
+                            style={{ width: 150 }} >
+                              {this.state.tmpns.map((item,index)=>(
+                                  <Option key={index} value={item}>{item}</Option>              
+                              ))}
+                            </Select>
+                            :null
+                          }
+                        </Radio>
+                        <Radio  value={2}>创建命名空间：
+                          {this.state.choosens["tag"] =="input"
+                            ?
+                              <Input onChange={e =>{this.setState({tmpnsV:e.target.value, newNs: true})}} placeholder="namespace" style={{ width: 150, marginLeft: 10 }}/>
+                            :null
+                          }
+                        </Radio>
+                      </Radio.Group>
                     )}
                 </Form.Item>
                 <Form.Item required label="Docker镜像" rules={[{ required: true, message: '必填镜像名' }]}>

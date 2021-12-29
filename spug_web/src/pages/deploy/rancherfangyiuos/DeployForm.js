@@ -26,7 +26,10 @@ class DeployForm extends React.Component {
         tmppvc:[],
         tmpcmp:[],
         tmpimgs:{},
+        choosens:{},
+
         tmpimgV:null,
+        newNs:null,
         vol:0,
         cmapid: null,
         // rancherBL:{},
@@ -78,10 +81,6 @@ class DeployForm extends React.Component {
     }
   }
   onCallImgChange = e => {
-    console.log('radio checked', e.target.value);
-    // this.setState({
-    //   hostvalue: e.target.value,
-    // });
     if(e.target.value === 1){
       this.setState({
         tmpimgs: {"tag":"select"},
@@ -110,7 +109,6 @@ class DeployForm extends React.Component {
         ))}
         break;;
     }
-    console.log(e)
   }
   
   handleSubmit = () => {
@@ -126,6 +124,8 @@ class DeployForm extends React.Component {
     formData["scale"] = this.state.input_value
     formData["image"] = this.state.tmpimgV
     formData["ports"] = store.rancherport
+    formData["namespaceId"] = this.state.tmpnsV
+    formData["newNs"] = this.state.newNs
     if(this.state.cmapid != null){
       formData["cmapid"] = formData['namespaceId'] + ":"+this.state.cmapid
     }else{
@@ -215,7 +215,7 @@ class DeployForm extends React.Component {
         store.fetchRecords()
       
     }, () => this.setState({loading: false}))
-    console.log(formData)
+    // console.log(formData)
     store.rancherVolume = []
   };
 
@@ -274,7 +274,17 @@ class DeployForm extends React.Component {
         break;
     }
   }
-  
+  onCallNsChange = e => {
+    if(e.target.value === 1){
+      this.setState({
+        choosens: {"tag":"select"},
+      });
+    }else{
+      this.setState({
+        choosens: {"tag":"input"},
+      });
+    }
+  }
   onCallHostItemClick = (index,tindex) => {
     console.log(index,tindex)
     switch(tindex){
@@ -389,11 +399,28 @@ class DeployForm extends React.Component {
                 </Form.Item>
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
                     {getFieldDecorator('namespaceId')(
-                          <Select   style={{ width: 300 }} >
-                            {this.state.tmpns.map((item,index)=>(
-                                <Option key={index} value={item}>{item}</Option>              
-                            ))}
-                          </Select>
+                        <Radio.Group   onChange={this.onCallNsChange} > 
+                          <Radio  value={1}>使用现有：
+                            {this.state.choosens["tag"] =="select"
+                              ?
+                              <Select  
+                              onChange={v=>{this.setState({tmpnsV:v , newNs:false})}} style={{ width: 600 }}
+                              style={{ width: 150 }} >
+                                {this.state.tmpns.map((item,index)=>(
+                                    <Option key={index} value={item}>{item}</Option>              
+                                ))}
+                              </Select>
+                              :null
+                            }
+                          </Radio>
+                          <Radio  value={2}>创建命名空间：
+                            {this.state.choosens["tag"] =="input"
+                              ?
+                                <Input onChange={e =>{this.setState({tmpnsV:e.target.value, newNs: true})}} placeholder="namespace" style={{ width: 150, marginLeft: 10 }}/>
+                              :null
+                            }
+                          </Radio>
+                        </Radio.Group>
                     )}
                 </Form.Item>
                 <Form.Item required label="Docker镜像" rules={[{ required: true, message: '必填镜像名' }]}>
@@ -618,7 +645,6 @@ class DeployForm extends React.Component {
                           </div>
                         ))}
                   </Form.Item>
-
               </Form>
         </Modal>
     )

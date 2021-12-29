@@ -117,6 +117,13 @@ class ComTable extends React.Component {
         store.restartrecord = info   
         ;;
       case 4:
+        console.log(info)
+        store.clonedeploy = info;
+        store.deployForm = true;
+        store.rancherport =  eval(info.cports);
+        store.rancherenv = eval(info.cbox_env);
+ 
+        // console.log(typeof(eval(info.cports)))
         break;
         ;;
       case 5:
@@ -237,6 +244,7 @@ class ComTable extends React.Component {
                     {/* <Option value={3}>伸缩</Option> */}
                     {/* <Option value={4}>终端</Option> */}
                     <Option value={3}>重启</Option>
+                    {/* <Option value={4}>克隆部署</Option> */}
 
                     <Option value={5}>申请发布</Option>
                     {/* <Option value={6}>重新部署</Option> */}
@@ -252,7 +260,7 @@ class ComTable extends React.Component {
           <AuthCard auth="deploy.rancher.view">
                 <SearchForm>
                   <SearchForm.Item span={4} style={{textAlign: 'left'}}>
-                    <AuthButton auth="deploy.rancher.edit_config" 
+                    <AuthButton auth="deploy.rancher.cmapdo" 
                                 type="primary" icon="plus" onClick={() => store.showAddCmpForm()}>添加配置映射</AuthButton>
                   </SearchForm.Item>
                   <SearchForm.Item span={4} title="配置映射文件名">
@@ -279,11 +287,13 @@ class ComTable extends React.Component {
                 <Column title="创建时间" dataIndex="create_time"/>
                 <Column title="更新时间" dataIndex="modify_time"/>
 
-                {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
+                {hasPermission('deploy.rancher.cmapdo') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"cmap")}  style={{ width: 100 }} >
                       <Option value={1}>编辑</Option>
-                      <Option value={2}>删除</Option>
+                      {hasPermission('deploy.rancher.del') && (
+                        <Option value={2}>删除</Option>
+                      )}
                     </Select>
                   )}/>
                 )}
@@ -293,7 +303,7 @@ class ComTable extends React.Component {
             <AuthCard auth="deploy.rancher.view">
                 <SearchForm>
                   <SearchForm.Item span={4} style={{textAlign: 'left'}}>
-                    <AuthButton auth="deploy.rancher.edit_config" 
+                    <AuthButton auth="deploy.rancher.pvcdo" 
                                 type="primary" icon="plus" onClick={() => store.showAddPvcForm()}>添加 PVC</AuthButton>
                   </SearchForm.Item>
                   <SearchForm.Item span={4} title="pvc卷名">
@@ -324,7 +334,7 @@ class ComTable extends React.Component {
                 <Column title="创建时间" dataIndex="create_time"/>
                 <Column title="更新时间" dataIndex="modify_time"/>
 
-                {hasPermission('deploy.rancher.edit|deploy.rancher.del') && (
+                {hasPermission('deploy.rancher.del') && (
                   <Column title="操作" fixed="right" render={info => (          
                     <Select value={info.id == this.state.moreAction[0]["id"] ? this.state.moreAction[0]["v"] : "更多操作...." }  onChange={this.onChange.bind(this,info,"pvc")}  style={{ width: 100 }} >
                       {/* <Option value={1}>编辑</Option> */}
