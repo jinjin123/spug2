@@ -48,3 +48,4 @@ class LoggerOpRecord(models.Model,ModelMixin):
     class Meta:
         db_table = 'spug_record'
         app_label = 'message'
+        ordering = ('-id',)

@@ -264,20 +264,22 @@ class HostView(View):
                             for k, v in dict(zip(one, two)).items():
                                 form["sys_disk"] = [
                                     {"type": "ntfs", "name": k, "total_size": v, "mount": "/", "used": 0}]
+
+                        sys_size = [int(x["total_size"]) for x in form["sys_disk"]][0]
+                        data_size = 0
+                        sysdatasize = ""
+                        if len(form["data_disk"]) > 0:
+                            for x in form["data_disk"]:
+                                data_size += x["size"]
+                        if data_size != 0:
+                            sysdatasize = (str(sys_size) + "G") + "+" + (str(data_size) + "G")
+                        else:
+                            sysdatasize = str(sys_size) + "G"
+                        form["sys_data"] = sysdatasize
                     else:
                         form["sys_disk"] = []
 
-                    sys_size = [int(x["total_size"]) for x in form["sys_disk"]][0]
-                    data_size=0
-                    sysdatasize=""
-                    if len(form["data_disk"]) > 0:
-                        for x in form["data_disk"]:
-                            data_size += x["size"]
-                    if data_size !=0:
-                       sysdatasize = (str(sys_size)+ "G") +"+" + (str(data_size) + "G")
-                    else:
-                        sysdatasize = str(sys_size) + "G"
-                    form["sys_data"] = sysdatasize
+
 
                     host = Host.objects.create(create_by=request.user,  password_hash=pwd,**form)
                     update_hostinfo.delay([form.ipaddress], (ConnctUser.objects.get(pk=form.username)).name)
@@ -1346,23 +1348,27 @@ class NetCheck(View):
             Argument('tool', type=str, required=False),
             Argument('input', type=int, required=False),
             Argument('hosts', type=list, required=False),
-            Argument('tag', type=bool, required=False)
+            Argument('tarhosts', type=list, required=False),
+            Argument('tag', type=bool, required=False),
+            Argument('cust', type=str, required=False),
         ).parse(request.body)
         if error is None:
             tool = form.tool
-            if form.tag:
-                return json_response(error="暂不支持自定义主机控制")
-            if  len(form.hosts)<1:
+            # if form.tag:
+            #     return json_response(error="暂不支持自定义主机控制")
+            if len(form.hosts)<1 or len(form.tarhosts) <1 and form.cust is None:
                 return json_response(error="主机没选")
+            elif len(form.hosts)<1  and form.cust is not None:
+                return json_response(error="主机没选")
+
             if tool == "curl":
                 ips = []
                 ss = []
                 if len(form.hosts) > 0:
                     for x in form.hosts:
                         m = Host.objects.get(id=x)
-                        # ips.append(m.ipaddress)
-                        ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
-                        callargs =  "curl  -vv " + m.ipaddress
+                        ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')
+                        callargs =  "curl  -v --connect-timeout 3  " + m.ipaddress
                         ansible3.run(hosts='127.0.0.1', module="shell", args=callargs)
                         stdout_dict = json.loads(ansible3.get_result())
                         if stdout_dict['success'].get('localhost',{}):
@@ -1371,40 +1377,82 @@ class NetCheck(View):
                             ss.append({"failed": stdout_dict})
                         return json_response({"resp": ss})
             elif tool == "telnet":
-                ss =[]
-                f = []
+                tmpres=[]
                 ioc = []
                 rot = []
-                tmps = {}
-                if form.tag:
-                    return json_response(error="暂不支持自定义主机控制")
-                    # if len(form.hosts) > 0:
-                    #     for x in form.hosts:
-                    #         if Host.objects.get(id=x).username == "ioc":
-                    #             ioc.append(Host.objects.get(id=x).ipaddress)
-                    #         elif Host.objects.get(id=x).username == "root":
-                    #             rot.append(Host.objects.get(id=x).ipaddress)
-                    #     if len(ioc)>0:
-                    #         ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='ioc')  # 创建资源库对象
-                    #         ansible3.run(hosts=ioc, module="shell", args=form.input)
-                    #     if len(rot)>0:
-                    #         ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')  # 创建资源库对象
-                    #         ansible3.run(hosts=rot, module="shell", args=form.input)
-
-                        # stdout_dict = json.loads(ansible3.get_result())
-                else:
-                    ip = "localhost"
-                    if len(form.hosts) > 0:
-                        for x in form.hosts:
-                            m = Host.objects.get(id=x)
-                            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            s.settimeout(0.5)
-                            d = s.connect_ex((m.ipaddress, form.input))
-                            if d == 0 :
-                                ss.append({"success": ip + "------------------->" + m.ipaddress  + "通\n"})
+                for x in form.hosts:
+                    if ConnctUser.objects.get(id=Host.objects.get(id=x).username).name == "ioc":
+                        ioc.append(Host.objects.get(id=x).ipaddress)
+                    elif ConnctUser.objects.get(id=Host.objects.get(id=x).username).name == "root":
+                        rot.append(Host.objects.get(id=x).ipaddress)
+                if len(ioc)>0:
+                    if len(form.tarhosts) == 1 and form.cust is None :
+                        for tip in ioc:
+                            ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',
+                                                   remote_user='ioc')
+                            ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + Host.objects.get(id=form.tarhosts[0]).ipaddress + " " + str(form.input))
+                            stdout_dict = json.loads(ansible3.get_result())
+                            if stdout_dict['success'].get(tip):
+                                tmpres.append({"success":  tip + "------------------->" + Host.objects.get(id=form.tarhosts[0]).ipaddress  + "通\n"})
                             else:
-                                ss.append({"failed": ip + "------------------->" + m.ipaddress  + "不通\n"})
-                    return json_response({"resp": ss})
+                                tmpres.append({"faild":  tip + "------------------->" + Host.objects.get(id=form.tarhosts[0]).ipaddress  + "不通\n"})
+
+                    elif len(form.tarhosts) >1 and form.cust is None:
+                        for tip in ioc:
+                            for ipsid in form.tarhosts:
+                                ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',
+                                                       remote_user='ioc')
+                                ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + Host.objects.get(id=ipsid).ipaddress + " " + str(form.input))
+                                stdout_dict = json.loads(ansible3.get_result())
+                                if stdout_dict['success'].get(tip):
+                                    tmpres.append({"success": tip + "------------------->" + Host.objects.get(id=ipsid).ipaddress + "通\n"})
+                                else:
+                                    tmpres.append({"faild": tip + "------------------->" + Host.objects.get(id=ipsid).ipaddress + "不通\n"})
+                    elif form.cust is not None:
+                        for tip in ioc:
+                            ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',
+                                                   remote_user='ioc')
+                            ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + form.cust + " " + str(form.input))
+                            stdout_dict = json.loads(ansible3.get_result())
+                            if stdout_dict['success'].get(tip):
+                                tmpres.append({"success": tip + "------------------->" + form.cust+ "通\n"})
+                            else:
+                                tmpres.append({"faild": tip + "------------------->" + form.cust + "不通\n"})
+
+
+                if len(rot)>0:
+                    if len(form.tarhosts) == 1 and form.cust is None:
+                        for tip in rot:
+                            ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')
+                            ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + Host.objects.get(id=form.tarhosts[0]).ipaddress + " " + str(form.input))
+                            stdout_dict = json.loads(ansible3.get_result())
+                            if stdout_dict['success'].get(tip):
+                                tmpres.append({"success": tip + "------------------->" + Host.objects.get(id=form.tarhosts[0]).ipaddress + "通\n"})
+                            else:
+                                tmpres.append({"faild": tip + "------------------->" + Host.objects.get(id=form.tarhosts[0]).ipaddress + "不通\n"})
+
+
+                    elif len(form.tarhosts) > 1 and form.cust is None:
+                        for tip in rot:
+                           for ipsid in form.tarhosts:
+                               ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')
+                               ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + Host.objects.get(id=ipsid).ipaddress + " " + str(form.input))
+                               stdout_dict = json.loads(ansible3.get_result())
+                               if stdout_dict['success'].get(tip) :
+                                   tmpres.append({"success": tip + "------------------->" + Host.objects.get(id=ipsid).ipaddress + "通\n"})
+                               else:
+                                   tmpres.append({"faild": tip + "------------------->" + Host.objects.get(id=ipsid).ipaddress + "不通\n"})
+
+                    elif form.cust is not None:
+                        for tip in rot:
+                               ansible3 = MyAnsiable2(inventory='/etc/ansible/hosts', connection='smart',remote_user='root')
+                               ansible3.run(hosts=tip, module="shell", args="/tmp/scan " + form.cust+ " " + str(form.input))
+                               stdout_dict = json.loads(ansible3.get_result())
+                               if stdout_dict['success'].get(tip):
+                                   tmpres.append({"success": tip + "------------------->" + form.cust + "通\n"})
+                               else:
+                                   tmpres.append({"faild": tip + "------------------->" + form.cust + "不通\n"})
+                return json_response({"resp": tmpres})
 
             else:
                 cache.set("hack",tool, 50*36000)

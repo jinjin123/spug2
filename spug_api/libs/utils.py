@@ -151,6 +151,12 @@ class RequestApiAgent:
             "form_data_keys": [],
             "param_keys": [],
         },
+        "patch":{
+            "method": requests.patch,
+            "url": "",
+            "form_data_keys": [],
+            "param_keys": [],
+        },
         "update": {
             "method": requests.put,
             "url": "",
@@ -188,6 +194,9 @@ class RequestApiAgent:
     def put(self, *args, **kwargs):
         return self.send_request("put", kwargs)
         # return self.send_request("put", kwargs).text
+
+    def patch(self, *args, **kwargs):
+        return self.send_request("patch", kwargs)
 
     def list(self, *args, **kwargs):
         return self.send_request("list", kwargs)

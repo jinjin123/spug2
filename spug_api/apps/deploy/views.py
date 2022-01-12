@@ -6,8 +6,9 @@ from django.db.models import F
 from django.conf import settings
 from django.http.response import HttpResponseBadRequest
 from django_redis import get_redis_connection
-
-
+import traceback
+from django.db.models import Q
+from apps.schedule.models import Task
 from apps.config.models import RancherApiConfig
 from libs import json_response, JsonParser, Argument, human_datetime, human_time, RequestApiAgent,cmapargs
 from apps.deploy.models import DeployRequest
@@ -18,7 +19,7 @@ from apps.host.models import Host
 from collections import defaultdict
 from threading import Thread
 from datetime import datetime
-from apps.app.tasks import send_mail_task
+from apps.app.tasks import send_mail_task,patch_task
 from django.core.cache import cache
 import ast
 import subprocess
@@ -27,6 +28,9 @@ import uuid
 import os
 import logging
 from apps.message.models import LoggerOpRecord
+
+
+
 
 logger = logging.getLogger('spug_log')
 
@@ -229,7 +233,7 @@ class RancherPublishView(View):
                             imgres = RequestApiAgent().put(**kwargs)
                             if imgres.status_code != 200:
                                 DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
-                                logger.error("### pubish redeploy rancher ## error->" + str(imgres))
+                                logger.error(msg="### pubish redeploy rancher ## error->" + str(imgres))
                                 return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                             logger.info(msg="###update pod done  #####")
                             imgdd = json.loads(imgres.content)
@@ -285,26 +289,40 @@ class RancherPublishView(View):
                             rdp = RequestApiAgent().create(**kwargs)
                             if rdp.status_code != 200:
                                 DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3",opsstatus=-3)
-                                logger.error("### pubish redeploy rancher ## error->"+ str(rdp) )
+                                logger.error(msg="### pubish redeploy rancher ## error->"+ str(rdp) )
                                 return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
 
                         except Exception as e :
+                            print(e)
+                            traceback.print_exc()
                             DeployRequest.objects.filter(deploy_id=form.deploy_id).update(status="-3", opsstatus=-3)
                             logger.error(msg="### pubish redeploy rancher ## error->"+ str(e))
                             return json_response(error="更新应用rancher api 出现异常，请重试一次！如还有问题请联系运维！")
                         kvtmp = []
-                        for k,v in dict.items(cred["data"]):
-                            kvtmp.append({"k":k,"v":v})
+                        if cred.get('data',False):
+                            for k,v in dict.items(cred["data"]):
+                                kvtmp.append({"k":k,"v":v})
 
-                        ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp,modify_time=datetime.now())
-                        logger.info(msg="###update cmap done ####")
-                        ts = ProjectService.objects.get(id=publish_args['service_id'])
-                        t = ts.to_dict()
-                        del t["id"]
-                        RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
-                        ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp,modify_time=datetime.now())
-                        DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
-                        RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.now())
+                            ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp,modify_time=datetime.now())
+                            logger.info(msg="###update cmap done ####")
+                            ts = ProjectService.objects.get(id=publish_args['service_id'])
+                            t = ts.to_dict()
+                            del t["id"]
+                            RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
+                            ProjectService.objects.filter(id=publish_args['service_id']).update(configMap=kvtmp,modify_time=datetime.now())
+                            DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                            RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.now())
+                        else:
+                            ProjectConfigMap.objects.filter(pjid=cred['projectId'],nsid=cred['namespaceId'],configId=cred['id'],configName=cred['name']).update(configMap=kvtmp,modify_time=datetime.now())
+                            logger.info(msg="###update cmap done ####")
+                            ts = ProjectService.objects.get(id=publish_args['service_id'])
+                            t = ts.to_dict()
+                            del t["id"]
+                            RancherPublishHistory.objects.create(service_id=publish_args['service_id'],**t)
+                            ProjectService.objects.filter(id=publish_args['service_id']).update(configName="", configId="",configMap=kvtmp,modify_time=datetime.now())
+                            DeployRequest.objects.filter(id=form.uniqid,deploy_id=form.deploy_id).update(status=3,opsstatus=3)
+                            RancherSvcPubStandby.objects.filter(id=form.uniqid,app_id=form.app_id).update(state=1,modify_time=datetime.now())
+                            logger.info(msg="configmap not get data svcid-->"+ str(publish_args['service_id']))
 
                     ##### after rdp
                     kwargs = {
@@ -322,7 +340,9 @@ class RancherPublishView(View):
                     logger.info(msg="#######redeploy pod done ########")
 
             except Exception as  e:
-                logger.error("#######redeploy pod faild: ########" + str(e))
+                print(e)
+                traceback.print_exc()
+                logger.error(msg="#######redeploy pod faild: ########" + str(e))
                 return json_response(error=str(e))
         return json_response(error=error)
 
@@ -330,7 +350,7 @@ class RancherPublishView(View):
 class RequestRancherDeployView(View):
     def post(self, request):
         form, error = JsonParser(
-            Argument('app_name',  help='app_name'),
+            Argument('app_name',  help='app_name',required=True),
             Argument('dpname',  help='deployname',required=False),
             Argument('dpid',  help='dpid',required=False),
             Argument('cbox_env',  help='cbox_env',required=False),
@@ -341,7 +361,7 @@ class RequestRancherDeployView(View):
             Argument('developer', help='developer',required=False),
             Argument('opsper', help='opsper',required=False),
             Argument('env_id', help='env_id',required=False),
-            Argument('img', handler=str.strip,help='img',required=False),
+            Argument('img', help='img',required=False),
             Argument('nsid', help='nsid',required=False),
             Argument('nsname', help='nsname',required=False),
             Argument('is_audit', help='is_audit',required=False),
@@ -370,56 +390,87 @@ class RequestRancherDeployView(View):
             Argument('removelinks', help='removelinks', required=False),
             Argument('cports', help='cports', required=False),
             Argument('desccomment', help='desccomment', required=False),
+            Argument('trigger', filter=lambda x: x in dict(Task.TRIGGERS), help='请选择触发器类型'),
+            Argument('trigger_args', help='请输入触发器参数'),
         ).parse(request.body)
         if error is None:
-            deploy_app = App.objects.filter(key=form.app_name).first()
-            if not deploy_app:
-                App.objects.create(
-                    name=form.dpname,
-                    key=form.app_name,
+            try:
+                if App.objects.filter(key=form.app_name).exists():
+                    return json_response(error="申请发布标题唯一命名已存在")
+                deploy_app = App.objects.filter(name=form.dpname,key=form.app_name).first()
+                global  ap,d
+                if not deploy_app :
+                    ap = App.objects.create(
+                        name=form.dpname,
+                        key=form.app_name,
+                        created_by=request.user
+                    )
+                    ap.save()
+                deploy = Deploy.objects.filter(app=App.objects.filter(name=form.dpname,key=form.app_name).first()).first()
+                if not deploy :
+                    d = Deploy.objects.create(
+                        app=App.objects.filter(name=form.dpname,key=form.app_name).first(),
+                        env_id=form.env_id,
+                        host_ids=[],
+                        is_audit=1,
+                        extend=2,
+                        rst_notify='{"mode": "0"}',
+                        created_by=request.user,
+                        pub_tag=2
+                    )
+                    d.save()
+                dr = DeployRequest.objects.create(
+                    created_by=request.user,
+                    name=form.app_name,
+                    type=form.pbtype,
+                    extra='[null]',
+                    host_ids='[]',
+                    status=0,
+                    deploy=Deploy.objects.filter(app=App.objects.filter(name=form.dpname,key=form.app_name).first()).first(),
+                    desccomment=form.desccomment,
+                    trigger_args=form.trigger_args
+                )
+                dr.save()
+                Task.objects.create(
+                    command=json.dumps({"app_id":ap.id, "uniqid": dr.id,"app_name": form.app_name,"env_id": 2,"deploy_id": d.id }),
+                    tag="rancher",
+                    name=form.app_name,
+                    rst_notify=json.dumps({"mode":"0"}),
+                    targets=json.dumps(["local"]),
+                    trigger=form.trigger,
+                    trigger_args=form.trigger_args,
+                    type="TEST",
+                    is_active=False,
                     created_by=request.user
                 )
-            deploy = Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first()
-            if not deploy:
-                Deploy.objects.create(
-                    app=App.objects.filter(key=form.app_name).first(),
-                    env_id=form.env_id,
-                    host_ids=[],
-                    is_audit=1,
-                    extend=2,
-                    rst_notify='{"mode": "0"}',
-                    created_by=request.user,
-                    pub_tag=2
+
+                tmptrigger = form.pop("trigger")
+                tmptrigger_args = form.pop("trigger_args")
+                tmpdes = form.pop("desccomment")
+                m = RancherSvcPubStandby.objects.create(
+                    create_by=request.user,
+                    app=App.objects.filter(key=form.pop('app_name')).first(),
+                    service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,dpid=form.dpid).first(),
+                    **form
                 )
-            DeployRequest.objects.create(
-                created_by=request.user,
-                name=form.app_name,
-                type=form.pbtype,
-                extra='[null]',
-                host_ids='[]',
-                status=0,
-                deploy=Deploy.objects.filter(app=App.objects.filter(key=form.app_name).first()).first(),
-                desccomment=form.desccomment,
-            )
-            tmpdes = form.pop("desccomment")
-            m = RancherSvcPubStandby.objects.create(
-                create_by=request.user,
-                app=App.objects.filter(key=form.pop('app_name')).first(),
-                service=ProjectService.objects.filter(top_project=form.top_project,dpname=form.dpname,dpid=form.dpid).first(),
-                **form
-            )
-            m.save()
-            mobj = RancherSvcPubStandby.objects.get(id=m.id)
-            if ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).exists():
-                notice = ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).values("notice_user__email").all()
-                to_email=[ item["notice_user__email"] for item in notice]
-                send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
-                                     from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
-            else:
-                to_email = [item["email"] for item in User.objects.filter(role_id=1).values("email").all()]
-                send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
-                                 content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
-                                 from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+                m.save()
+                patch_task.delay()
+                mobj = RancherSvcPubStandby.objects.get(id=m.id)
+                if ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).exists():
+                    notice = ProjectServiceApprovalNotice.objects.filter(service_id=mobj.service_id).exclude(email__isnull=True).values("notice_user__email").all()
+                    to_email=[ item["notice_user__email"] for item in notice]
+                    send_mail_task.delay(subject="%s-%s应用发布审核申请"%(form.top_project,form.dpname), content="申请人:{} \n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project,form.dpname,tmpdes,form.verifyurl),
+                                         from_mail=settings.DEFAULT_FROM_EMAIL,to_email=",".join(to_email))
+                else:
+                    to_email = [item["email"] for item in User.objects.filter(role_id=1).exclude(email__isnull=True).values("email").all()]
+                    send_mail_task.delay(subject="%s-%s应用发布审核申请" % (form.top_project, form.dpname),
+                                     content="申请人:{}\n{}项目\n{}应用发布审核申请\n发布功能:\n{}\n查看 {}".format(request.user.nickname,form.top_project, form.dpname,tmpdes,form.verifyurl),
+                                     from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
+
+
+            except Exception as e:
+                print(e)
+                logger.error(msg="auth order  create error->"+str(traceback.format_exc()))
             #----
             # for item in pblist:
             #     if ProjectServiceApprovalNotice.objects.filter(service_id=item.service_id).first():
@@ -434,6 +485,8 @@ class RequestRancherDeployView(View):
             #                          from_mail=settings.DEFAULT_FROM_EMAIL, to_email=",".join(to_email))
 
         return json_response(error=error)
+
+
 
 
 class RequestDetailView(View):

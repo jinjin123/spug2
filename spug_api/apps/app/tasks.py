@@ -8,6 +8,7 @@ import json
 from apps.app.models import *
 from apps.config.models import RancherApiConfig
 from django.core.mail import send_mail
+from apps.schedule.models import Task
 from apps.message.models import EmailRecord
 import logging
 from django.core.cache import cache
@@ -129,7 +130,41 @@ def check_svc_status():
 def clearmaster():
     m = cache.get("tmpmaster", [])
     if len(m) > 0:
-        logger.info('######## del master start #######--->')
+        logger.info(msg='######## del master start #######--->')
         for x in m:
             User.objects.filter(id=x).update(role_id=2)
-        logger.info('######## del master done #######--->')
+        logger.info(msg='######## del master done #######--->')
+
+
+@app.task
+def patch_task():
+    kwargs = {
+        "url": "",
+        "headers": {"X-Token": User.objects.get(id=1).access_token, "Content-Type": "application/json","x-forwarded-for":"19.104.50.128","x-real-ip":"19.104.50.128"},
+    }
+    try:
+        for task in Task.objects.filter(is_active=False):
+            kwargs['url'] = "http://19.104.50.128:8011/api/schedule/"
+            kwargs['data'] = json.dumps({"id": task.id, "is_active": True})
+            logger.info(msg='#### patch job  start ####')
+            res = RequestApiAgent().patch(**kwargs)
+            logger.info(msg='### contnet '+str(json.loads(res.content)))
+            logger.info(msg='#### patch job  done ####')
+    except Exception as e:
+        logger.error(msg="patch job update error->"+ str(e))
+
+@app.task
+def updatetoken():
+    try:
+        kwargs = {
+            "url": "",
+            "headers": {"X-Token": User.objects.get(username='deploy').access_token, "Content-Type": "application/json","x-forwarded-for":"19.104.50.128","x-real-ip":"19.104.50.128"}
+        }
+        kwargs['url'] = "http://19.104.50.128:8011/api/account/login/"
+        kwargs['data'] = json.dumps({"username":"deploy","password":"test123","type":"default"})
+        logger.info(msg="update deploy status start")
+        res = RequestApiAgent().create(**kwargs)
+        logger.info(msg="update deploy status ->" + str(json.loads(res.content)))
+
+    except Exception as e:
+        logger.error(msg="update token error->"+ str(e))

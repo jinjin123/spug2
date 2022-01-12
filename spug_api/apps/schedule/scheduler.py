@@ -106,7 +106,7 @@ class Scheduler:
                 dispatch,
                 trigger,
                 id=str(task.id),
-                args=(task.command, json.loads(task.targets)),
+                args=(task.command, json.loads(task.targets),task.tag,task.name),
             )
 
     def run(self):
@@ -123,7 +123,7 @@ class Scheduler:
                     dispatch,
                     trigger,
                     id=str(task.id),
-                    args=(task.command, task.targets),
+                    args=(task.command, task.targets,task.tag,task.name),
                     replace_existing=True
                 )
             elif task.action == 'remove':

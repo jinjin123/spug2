@@ -448,6 +448,23 @@ class RancherCmapOpView(View):
                 tmptag = "feiyan.com"
             elif form.tag == "ioc":
                 tmptag = "ioc.com"
+
+            if (form.data)['newNs']:
+                global Action
+                if (form.data)['pjname'] == "自动化发布":
+                    Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGNS", tag=form.tag).first()
+                else:
+                    Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETNS", tag=form.tag).first()
+                kwargs["headers"]["Authorization"] = Action.token
+                kwargs["url"] = Action.url
+                kwargs['data'] = json.dumps({"type":"namespace","name":(form.data)['namespaceId'],"projectId": (ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid})
+                logger.info(msg="#####rancher create namespace######")
+                res = RequestApiAgent().create(**kwargs)
+                if res.status_code != 201:
+                    logger.error(msg="#####rancher create namespace error###### --->" + str(res.status_code) + str(res.content))
+                    return json_response(error="创建新命名空间失败 请重试一次！如还有问题请联系运维！")
+                LoggerOpRecord.objects.create(create_by=request.user,content="CreateNs:" + str(request.user.nickname),action="create")
+
             cmap = cmapargs()
             cmap['data'] = (form.data)['data']
             cmap['name']=  (form.data)['name']
@@ -460,7 +477,7 @@ class RancherCmapOpView(View):
             logger.info(msg="#####rancher create cmap call:###### " + str(res.status_code))
             red = json.loads(res.content)
             if res.status_code != 201:
-                logger.error(msg="#####rancher create configmap call:###### " + str(res))
+                logger.error(msg="#####rancher create configmap call:###### " + str(red))
                 return json_response(error="重新部署rancher configmap api 出现异常，请重试一次！如还有问题请联系运维！")
             vfurl = ""
             if form.tag == "ioc" :
@@ -527,15 +544,18 @@ class RancherSvcOpView(View):
                 "headers": {"Authorization": "", "Content-Type": "application/json"}
             }
             if (form.data)['newNs']:
-                Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETNS", tag=form.tag).first()
+                global Action
+                if (form.data)['pjname'] == "自动化发布":
+                    Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETSIGNS", tag=form.tag).first()
+                else:
+                    Action = RancherApiConfig.objects.filter(env_id=form.env, label="GETNS", tag=form.tag).first()
                 kwargs["headers"]["Authorization"] = Action.token
                 kwargs["url"] = Action.url
                 kwargs['data'] = json.dumps({"type":"namespace","name":(form.data)['namespaceId'],"projectId": (ProjectService.objects.filter(pjname=(form.data)['pjname']).first()).pjid})
-
                 logger.info(msg="#####rancher create namespace######")
                 res = RequestApiAgent().create(**kwargs)
                 if res.status_code != 201:
-                    logger.error(msg="#####rancher create namespace error###### --->" + str(res.status_code) + res.content)
+                    logger.error(msg="#####rancher create namespace error###### --->" + str(res.status_code) + str(res.content))
                     return json_response(error="创建新命名空间失败 请重试一次！如还有问题请联系运维！")
                 LoggerOpRecord.objects.create(create_by=request.user,content="CreateNs:" + str(request.user.nickname),action="create")
 

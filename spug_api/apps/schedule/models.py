@@ -50,6 +50,7 @@ class Task(models.Model, ModelMixin):
     created_by = models.ForeignKey(User, models.PROTECT, related_name='+')
     updated_at = models.CharField(max_length=20, null=True)
     updated_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)
+    tag = models.CharField(max_length=40,null=True)
 
     def to_dict(self, *args, **kwargs):
         tmp = super().to_dict(*args, **kwargs)

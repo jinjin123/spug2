@@ -38,3 +38,22 @@ def permission_required(perm_list):
         return wrapper
 
     return decorate
+
+def permission_check(perm_list):
+    def decorate(view_func):
+        codes = (perm_list,) if isinstance(perm_list, str) else perm_list
+
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            request = None
+            for item in args:
+                if hasattr(item, 'user'):
+                    request = item
+                    break
+            if request is None or (not request.user.is_supper and not request.user.has_perms(codes)):
+                return json_response(error='拒绝访问')
+            return view_func(*args, **kwargs)
+
+        return wrapper
+
+    return decorate
