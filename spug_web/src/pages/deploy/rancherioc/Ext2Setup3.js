@@ -5,12 +5,13 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Input, Button, message, Divider, Alert, Icon, Select } from 'antd';
+import { Form, Input, Button, message, Alert, Icon } from 'antd';
 import Editor from 'react-ace';
+import { http,hasHostPermission,FormatDate } from 'libs';
 import 'ace-builds/src-noconflict/mode-sh';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import styles from './index.module.css';
-import { http, cleanCommand } from 'libs';
+
 import store from './store';
 import lds from 'lodash';
 import 'codemirror/lib/codemirror.js';
@@ -82,6 +83,10 @@ class Ext2Setup3 extends React.Component {
     store.record["pbtype"] = store.pbtype
     store.record["state"] = false
     store.record["desccomment"] = store.desccomment
+    store.record["app_name"] = store.record['dpname']+FormatDate(new Date(),"sec")
+    store.record['trigger'] = 'date'
+    store.record['trigger_args'] = store.tmptime
+
     if (store.record['update_img'] === true && store.record['update_cmap'] === true){
       return message.error("必须更新镜像 或者是  配置映射卷")
     }

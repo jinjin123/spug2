@@ -25,7 +25,6 @@ class ComTable extends React.Component {
     store.fetchRecords()
   }
   enterLoading = (raw,index) => {
-    console.log(raw)
     this.setState(({ loadings }) => {
       const newLoadings = [...loadings];
       newLoadings["load"] = true;
@@ -39,7 +38,7 @@ class ComTable extends React.Component {
         const newLoadings = [...loadings];
         newLoadings["id"] = raw.id;
 
-        const formData = { app_id: raw.app_id, app_name: raw.app_name, env_id : raw.env_id, deploy_id: raw.deploy_id, uniqid:raw.id};
+        const formData = { app_id: raw.app_id, app_name: raw.name, env_id : raw.env_id, deploy_id: raw.deploy_id, uniqid:raw.id};
         http.post('/api/deploy/request/rancher/publish',formData)
         .then(res => {
           message.success('发布成功');
@@ -186,6 +185,10 @@ class ComTable extends React.Component {
     title: '申请时间',
     dataIndex: 'created_at',
     sorter: (a, b) => a['created_at'].localeCompare(b['created_at'])
+  }, {
+    title: '定时发布时间',
+    dataIndex: 'trigger_args',
+    sorter: (a, b) => a['trigger_args'].localeCompare(b['trigger_args'])
   }, {
     title: '操作',
     className: hasPermission('deploy.request.do|deploy.request.edit|deploy.request.approve|deploy.request.del|deploy.request.testapprove|deploy.request.devdo') ? null : 'none',

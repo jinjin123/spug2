@@ -5,13 +5,14 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Modal, Form, Input, Checkbox, Row, Col, message, Button, Radio, Select, Card, Icon, Tag } from 'antd';
+import { Modal, Form, Input, Checkbox, Row, Col, message, Button, Radio, Select, Card, Icon, Tag,notification } from 'antd';
 import { http, hasPermission } from 'libs';
 import store from './store';
 // import historystore from '../rancherconfhisotry/store';
 // import './form.css';
 import { Action } from "components";
 import styles from "./index.module.css";
+import { clone } from 'lodash';
 @observer
 class DeployForm extends React.Component {
   constructor(props) {
@@ -37,10 +38,43 @@ class DeployForm extends React.Component {
 
     }
   }
-  // componentDidMount() {
-  //   // historystore.fetchRecords();
-
-  // }
+  componentDidMount() {
+    if( !!store.clonedeploy && store.clonedeploy.replica != 1){
+      this.setState({"input_value": store.clonedeploy.replica})
+    }
+    if (!!store.clonedeploy){
+      this.setState({"tmpimgs": {"tag": "select"}})
+      this.setState({"choosens": {"tag": "select"}})
+      this.setState({
+        tmppvc: [],
+        tmpcmp: []
+      })
+      let pvc = []
+      let cmap = []
+      let newArr = store.pvcrecords.filter(x => x['nsname'] === store.clonedeploy['nsname'])
+      newArr.map(dd => {
+        pvc.push(dd['pvcname'])
+      })
+      let newBrr = store.cmaprecords.filter(x => x['nsname'] === store.clonedeploy['nsname'])
+      newBrr.map(de => {
+        cmap.push(de["configName"])
+      })
+  
+      this.setState({
+        tmppvc: [... new Set(pvc)],
+        tmpcmp: [... new Set(cmap)]
+      })
+    }
+    const args = {
+      message: '卷名提示方便查询后填入添加卷。。。',
+      placement: 'topLeft',
+      description:
+        "mountPath 为容器挂在路径 ||| name 为配置映射卷名 或者是 pvc的卷名 用来在数据卷选择 ||| subPath为挂载在容器的子路径(即/ + xxxxx = mountPath) ||| "+
+        store.clonedeploy.v_mount,
+      duration: 0,
+    };
+    notification.open(args);
+  }
 
   handleDelete = (text) => {
     Modal.confirm({
@@ -90,7 +124,6 @@ class DeployForm extends React.Component {
     }
   }
   onCallNsChange = e => {
-
     if (e.target.value === 1) {
       this.setState({
         choosens: { "tag": "select" },
@@ -243,7 +276,7 @@ class DeployForm extends React.Component {
 
   onVolumeChange = (action) => {
     let counter = this.state.vol
-    console.log(counter)
+    // console.log(counter)
     switch (action) {
       case "host":
         store.rancherVolume.push({ "t": "映射主机目录", "tt": 0, "tag": "host", "vol": "vol" + (counter).toString(), "mode": 256, "hostPath": "", "mountPath": "", "subPath": "" })
@@ -364,14 +397,21 @@ class DeployForm extends React.Component {
     })
 
   }
+  clearObj = () =>{
+    store.deployForm = false
+    store.clonedeploy=null
+    store.rancherport = []
+    store.rancherenv = []
+    store.rancherVolume = []
+    notification.destroy()
+  }
 
   render() {
     const clonedata = store.clonedeploy
-
     const { value,input_value } = this.state;
     const { Option } = Select;
     const { getFieldDecorator } = this.props.form;
-
+    
     return (
       <Modal
         visible
@@ -380,7 +420,7 @@ class DeployForm extends React.Component {
         wrapClassName={'modalbox'}
         maskClosable={false}
         title={store.clonedeploy ? '克隆应用服务部署' : '以现有应用服务部署'}
-        onCancel={() => (store.deployForm = false,store.clonedeploy=null)}
+        onCancel={() => this.clearObj() }
         onOk={this.handleSubmit}
       >
         {
@@ -393,15 +433,16 @@ class DeployForm extends React.Component {
               </Form.Item>
               <Form.Item required label="工作负载类型" rules={[{ required: true, message: '工作负载数量' }]}>
                 {getFieldDecorator('workloadnum')(
-                  <Radio.Group onChange={this.onChange} >
-                    <div className={styles.RadioVisbale}>
-                      <Radio value={1}>Deployment: 部署无状态应用:<Input style={{ width: 50, marginLeft: 10 }} placeholder="" onChange={this.onRadioInputChange} />个 Pods</Radio>
-                      <Radio value={2}>DaemonSet: 每台主机部署 {input_value} 个Pods</Radio>
-                      <Radio value={3}>StatefulSet: 部署有状态应用 {input_value}个Pods </Radio>
-                      <Radio value={4}>CronJob: 定时运行{input_value} 个Pods</Radio>
-                      <Radio value={5}>Job: 一次性运行{input_value} 个Pods</Radio>
-                    </div>
-                  </Radio.Group>
+                        <Radio.Group onChange={this.onChange} >
+                            <div className={styles.RadioVisbale}>
+                              <Radio value={1}>Deployment: 部署无状态应用:<Input style={{ width: 50, marginLeft: 10 }} defaultValue={input_value} placeholder="" onChange={this.onRadioInputChange} />个 Pods</Radio>
+                              <Radio value={2}>DaemonSet: 每台主机部署 {input_value} 个Pods</Radio>
+                              <Radio value={3}>StatefulSet: 部署有状态应用 {input_value}个Pods </Radio>
+                              <Radio value={4}>CronJob: 定时运行{input_value} 个Pods</Radio>
+                              <Radio value={5}>Job: 一次性运行{input_value} 个Pods</Radio>
+                            </div>
+                        </Radio.Group>
+    
                 )}
               </Form.Item>
               <Form.Item required label="rancher项目" rules={[{ required: true, message: '必填项目' }]}>
@@ -519,7 +560,7 @@ class DeployForm extends React.Component {
                     <Col style={{ display: 'flex' }}>
                       <Input placeholder="键" defaultValue={item["k"]} onChange={e => item['k'] = e.target.value} style={{ marginRight: 10, width: 300 }} />
                       <Tag style={{ height: 32 }}>=</Tag>
-                      <Input defaultValue={item["v"]} onChange={e => item['v'] = e.target.value} placeholder="值" style={{ width: 300 }} />
+                      <Input defaultValue={item["v"]} onChange={e => item['v'] = e.target.value} placeholder="值" style={{ width: 450 }} />
                       <div onClick={() => store.rancherenv.splice(index, 1)}>
                         <Icon type="minus-circle" />移除
                       </div>

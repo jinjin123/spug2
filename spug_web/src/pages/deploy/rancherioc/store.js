@@ -53,7 +53,7 @@ class Store {
   @observable rancherPublish = false;
   @observable addRancherVisible = false;
   @observable desccomment;
-
+  @observable targets = [undefined];
   @observable ranchercmp=[{"k":"","v":""}];
   @observable rancherenv=[];
   @observable rancherport=[];
@@ -62,6 +62,7 @@ class Store {
   @observable cmaprecord = {};
   @observable historytmpdetail = {};
   @observable clonedeploy = null;
+  @observable tmptime =null;
 
   // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
   // {"itemid":2,"itemdata":

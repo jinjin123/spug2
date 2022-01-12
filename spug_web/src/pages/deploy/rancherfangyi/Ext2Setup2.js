@@ -5,11 +5,13 @@
  */
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Form, Button,Input,Row, Col,Checkbox,Switch,message } from "antd";
-import { hasHostPermission,http } from 'libs';
+import { Form, Button,Input,Row, Col,Checkbox,Switch,message,DatePicker } from "antd";
+import { hasHostPermission,http,FormatDate } from 'libs';
 import store from './store';
 import styles from './index.module.css';
 import envStore from 'pages/config/environment/store'
+import moment from 'moment';
+
 @observer
 class Ext2Setup2 extends React.Component {
   constructor(props) {
@@ -17,6 +19,8 @@ class Ext2Setup2 extends React.Component {
     this.state = {
       loading: false,
       // updatecmap: true,
+      args: {"date": null},
+
     }
   }
   
@@ -27,14 +31,46 @@ class Ext2Setup2 extends React.Component {
     store.record["update_img"] = true
     store.record["app_name"] = ""
     store.record["update_cmap"] = true
+    store.record["trigger"] = "" 
+    store.record["trigger_args"] = "" 
   }
+  handleArgs = (type, value) => {
+    // value = moment(value).format('YYYY-MM-DD HH:mm:ss')
+    // console.log(moment(value).format('YYYY-MM-DD HH:mm:ss'))
+    // console.log(moment(),moment(value),moment.locale());
+    const args = Object.assign(this.state.args, {"date": value});
+    this.setState({args})
+    store.tmptime = moment(this.state.args['date']).format('YYYY-MM-DD HH:mm:ss') 
+
+  };
+  _parse_args = (trigger) => {
+    switch (trigger) {
+      case 'date':
+        return moment(this.state.args['date']).format('YYYY-MM-DD HH:mm:ss');
+      case 'cron':
+        const {rule, start, stop} = this.state.args['cron'];
+        return JSON.stringify({
+          rule,
+          start: start ? moment(start).format('YYYY-MM-DD HH:mm:ss') : null,
+          stop: stop ? moment(stop).format('YYYY-MM-DD HH:mm:ss') : null
+        });
+      default:
+        return this.state.args[trigger];
+    }
+  };
   handleSubmit = () => {
+    if (this.state.args['date'] <= moment()) {
+      return message.error('任务执行时间不能早于当前时间')
+    }
     this.props.form.validateFields((err, formData) => {
         if(!err){
           this.setState({loading: true});
           store.record["pbtype"] = store.pbtype
           store.record["state"] = false
           store.record["desccomment"] = store.desccomment
+          store.record["app_name"] = store.record['dpname']+FormatDate(new Date(),"sec")
+          store.record['trigger'] = 'date'
+          store.record['trigger_args'] = moment(this.state.args['date']).format('YYYY-MM-DD HH:mm:ss') 
           if (store.record['update_img'] === true && store.record['update_cmap'] === true){
             return message.error("必须更新镜像 或者是  配置映射卷")
         }
@@ -53,11 +89,13 @@ class Ext2Setup2 extends React.Component {
   render() {
     const info = store.record;
     const envs = [info.env_id];
+    const {args} = this.state;
+
     const {getFieldDecorator} = this.props.form;
     return (
       <Form labelCol={{span: 6}} wrapperCol={{span: 14}}>
         <Form.Item required label="发布版本命名唯一" >
-            {getFieldDecorator('app_name', {rules: [{required: true, message: '必填发布名 '}]})(
+            {getFieldDecorator('app_name', {initialValue: info['dpname']+FormatDate(new Date(),"sec"),rules: [{required: true, message: '必填发布名 '}]})(
               <Input placeholder="填写发版命名唯一方便追溯" onChange={e => info.app_name = e.target.value} />
             )}
         </Form.Item>
@@ -104,6 +142,18 @@ class Ext2Setup2 extends React.Component {
                 <Col span={9} className={styles.ellipsis}>{item.desc}</Col>
               </Row>
             ))}
+          </Form.Item>
+          <Form.Item required label="发布时间" extra="仅在指定时间运行一次。">
+            {getFieldDecorator('trigger', {valuePropName: 'activeKey',initialValue: 'date' })(
+              <DatePicker
+                showTime
+                disabledDate={v => v && v.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD')}
+                style={{width: 150}}
+                placeholder="请选择发布时间+1分钟"
+                onOk={() => false}
+                value={args['date'] ? moment(args['date']) : undefined}
+                onChange={v => this.handleArgs('date', v)}/>
+              )}
           </Form.Item>
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Switch

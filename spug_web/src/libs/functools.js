@@ -207,15 +207,22 @@ export function get_time_diff(time) {
   return diff;
 }
 
-export function FormatDate(now) {
+export function FormatDate(now,gett) {
   var year = now.getFullYear();   //获取获取当前年份  
   var month = now.getMonth() + 1;   //获取获取当前月份
   var date = now.getDate();       //获取获取当前日期
   var hour = now.getHours();      //获取时
   var minute = now.getMinutes();  //获取分  
   var second = now.getSeconds();  //获取秒
+  var milsecond = now.getMilliseconds();
   //时间格式 ：年-月-日   
-  return year + "-" + month + "-" + date + " "+ hour+":"+minute+":"+second ;
+  switch (gett){
+    case "str":
+      return year + "-" + month + "-" + date + " "+ hour+":"+minute+":"+second ;
+    case "sec":
+      return  year.toString()+month.toString()+date.toString()+hour.toString()+minute.toString()+second.toString()+milsecond.toString()  ;
+  }
+
 }
 //计算时间差
 export function GetDateDiff(startDate, endDate) {
@@ -233,3 +240,4 @@ export function isWeekEnd(date){
   if( "天一二三四五六".charAt(new   Date(date).getDay())=="六"  )  return true;
 
 }
+

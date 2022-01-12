@@ -62,6 +62,8 @@ class Store {
   @observable rancherCallhost=[];
   @observable cmaprecord = {};
   @observable historytmpdetail = {};
+  @observable tmptime =null;
+  @observable clonedeploy = null;
 
   // @observable rancherCallhost=[{"itemid":1,"iteminput":"","itemdata":[]},
   // {"itemid":2,"itemdata":

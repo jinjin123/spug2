@@ -117,13 +117,10 @@ class ComTable extends React.Component {
         store.restartrecord = info   
         ;;
       case 4:
-        console.log(info)
         store.clonedeploy = info;
         store.deployForm = true;
         store.rancherport =  eval(info.cports);
         store.rancherenv = eval(info.cbox_env);
- 
-        // console.log(typeof(eval(info.cports)))
         break;
         ;;
       case 5:
@@ -244,7 +241,7 @@ class ComTable extends React.Component {
                     {/* <Option value={3}>伸缩</Option> */}
                     {/* <Option value={4}>终端</Option> */}
                     <Option value={3}>重启</Option>
-                    {/* <Option value={4}>克隆部署</Option> */}
+                    <Option value={4}>克隆部署</Option>
 
                     <Option value={5}>申请发布</Option>
                     {/* <Option value={6}>重新部署</Option> */}

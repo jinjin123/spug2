@@ -48,8 +48,8 @@ class Index extends React.Component {
       let timer = setInterval(() => {
         var current_time = new Date()
         var old_time     = new Date(getDatetime());
-        var current_time = FormatDate(current_time ); 
-        var old_time     = FormatDate(old_time); 
+        var current_time = FormatDate(current_time, "str" ); 
+        var old_time     = FormatDate(old_time,"str"); 
         var res = GetDateDiff( old_time,current_time)
         if (res <=0){
           this.setState({

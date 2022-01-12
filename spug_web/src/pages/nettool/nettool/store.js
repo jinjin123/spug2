@@ -16,11 +16,14 @@ class Store {
   // @observable permissions = lds.cloneDeep(codes);
   @observable deployRel = {};
   @observable hostPerms = [];
+  @observable tarhostPerms = [];
+
   @observable isFetching = false;
   @observable formVisible = false;
   @observable pagePermVisible = false;
   @observable deployPermVisible = false;
   @observable hostPermVisible = false;
+  @observable custhost ="";
 
   @observable f_name;
 

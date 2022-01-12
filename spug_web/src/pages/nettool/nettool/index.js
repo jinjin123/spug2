@@ -34,7 +34,8 @@ class NetTool extends React.Component {
             wtool: null,
             inct: null,
             resp: null,
-            tag: false,
+            tag: true,
+            cust: false
         }
     }
     componentDidMount() {
@@ -88,7 +89,9 @@ class NetTool extends React.Component {
         }
     }
     HandleSubmit = () => {
-        const formData = { "tool": this.state.wtool, "input": this.state.inct, "hosts": store.hostPerms , "tag": this.state.tag}
+        console.log(store.hostPerms, store.tarhostPerms)
+
+        const formData = { "tool": this.state.wtool, "input": this.state.inct, "hosts": store.hostPerms ,"tarhosts":store.tarhostPerms , "tag": this.state.tag, "cust": store.custhost}
         this.setState({loading: "block"})
         return http.post('/api/host/netcheck/', formData).then(({ resp }) => {
             
@@ -109,7 +112,7 @@ class NetTool extends React.Component {
     }
 
     render() {
-        const { tpe,resp } = this.state
+        const { tpe,resp,cust } = this.state
         return (
             <AuthCard auth="nettool.nettool.view">
                     <Alert
@@ -118,7 +121,7 @@ class NetTool extends React.Component {
                         type="info"
                         message="小提示"
                         style={{ width: 600, margin: '0 auto 20px', color: '#31708f !important' }}
-                        description="默认调用堡垒机去19.104.50.128去诊断支持常见网络错误,
+                        description="诊断支持常见网络错误,
                         如自我判断后无法解决再把结果截图联系运维架构师---->李衡" />
                     <Form.Item label="自定义主机调用">
                         <Switch
@@ -163,7 +166,7 @@ class NetTool extends React.Component {
                         onClick={() => this.HandleSubmit()}     >提交检测</Button>
                     </Form.Item>
 
-                    <Form.Item label="设置可访问的主机" style={{ padding: '0 20px' }}>
+                    <Form.Item label="原主机" style={{ padding: '0 20px' }}>
                         <Transfer
                             showSearch
                             listStyle={{ width: 740, maxHeight: 1600, minHeight: 300 }}
@@ -174,8 +177,41 @@ class NetTool extends React.Component {
                             filterOption={(inputValue, option) => `${option.top_project}${option.ipaddress}`.toLowerCase().indexOf(inputValue.toLowerCase()) > -1}
                             render={item => `${item.ipaddress} - ${item.top_project}`} />
                     </Form.Item>
+
+                    <Form.Item label="自定义目标主机调用">
+                        <Switch
+                            checkedChildren="开启"
+                            unCheckedChildren="关闭"
+                            onChange={v => {
+                                if(this.state.cust){
+                                    store.custhost = ""
+                                    this.setState({"cust":false})
+
+                                }else{
+                                    store.custhost = ""
+                                    this.setState({"cust":true})
+                                }
+                            }}
+                        />
+                        
+                    </Form.Item>
+                    <Form.Item label="目标主机" style={{ padding: '0 20px' }}>
+                        {
+                            !cust ? 
+                                <Transfer
+                                    showSearch
+                                    listStyle={{ width: 740, maxHeight: 1600, minHeight: 300 }}
+                                    titles={['所有主机', '已选主机']}
+                                    dataSource={this.state.hosts}
+                                    targetKeys={store.tarhostPerms}
+                                    onChange={keys => store.tarhostPerms = keys}
+                                    filterOption={(inputValue, option) => `${option.top_project}${option.ipaddress}`.toLowerCase().indexOf(inputValue.toLowerCase()) > -1}
+                                    render={item => `${item.ipaddress} - ${item.top_project}`} />
+                            : <Input onChange={e => store.custhost= e.target.value } placeholder="1.1.1.1"/>
+                        }
+                    </Form.Item>
                     <Form.Item label="诊断结果">
-                        <TextArea value={resp} placeholder="" autoSize />
+                        <TextArea value={resp} placeholder=""   autoSize />
                     </Form.Item>                    
                 </AuthCard>            
         )

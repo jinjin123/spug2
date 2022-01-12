@@ -56,7 +56,10 @@ class CmpForm extends React.Component {
         pvctype:[],
         fullmode:[],
         fullmode_flag: 0,
-        moreAction: [{"id":0,"v":"添加卷..."}]
+        moreAction: [{"id":0,"v":"添加卷..."}],
+        choosens: {},
+        tmpnsV: null,
+        newNs: null,
 
     }
   }
@@ -122,6 +125,9 @@ class CmpForm extends React.Component {
       // tmp['"' + item['k'] + '"']= item["v"]
       tmp[item['k']]= item["v"]
     ))
+    formData["namespaceId"] = this.state.tmpnsV
+    formData["newNs"] = this.state.newNs
+
     formData["data"] = tmp
     formData["dbdata"] =  store.ranchercmp
     formData["type"] = "configMap"
@@ -182,6 +188,17 @@ class CmpForm extends React.Component {
     store.ranchercmp[index]["v"] = value[3]
     // console.log(value[3])
   };
+  onCallNsChange = e => {
+    if (e.target.value === 1) {
+      this.setState({
+        choosens: { "tag": "select" },
+      });
+    } else {
+      this.setState({
+        choosens: { "tag": "input" },
+      });
+    }
+  }
   render() {
     const info = store.cmaprecord;
     const {value} = this.state;
@@ -191,9 +208,7 @@ class CmpForm extends React.Component {
     const fullmode = store.fullmode;
     const codeRead = store.codeRead;
 
-    // if (historystore.f_name) {
-    //   data = data.filter(item => item['namespace'].toLowerCase().includes(historystore.f_name.toLowerCase()))
-    // }
+
     return (
         <Modal
         visible
@@ -232,19 +247,30 @@ class CmpForm extends React.Component {
 
                 <Form.Item required label="命名空间" rules={[{ required: true, message: '必填命名空间' }]}>
                       {getFieldDecorator('namespaceId',{initialValue:info['nsname']} )(
-                        (info.id ? 
-                        <Select   style={{ width: 150 }} >
-                          {this.state.tmpns.map((item,index)=>(
-                              <Option key={index} value={item}>{item}</Option>
-                          ))} 
-                          </Select>
-                        :  
-                          <Select    style={{ width: 150 }} >
-                            {this.state.tmpns.map((item,index)=>(
-                              <Option key={index} value={item}>{item}</Option>
-                            ))}    
-                          </Select>
-                        )
+                        <Radio.Group  onChange={this.onCallNsChange} >
+                          <Radio value={1}>使用现有：
+                            { this.state.choosens["tag"] == "select"
+                            ?
+                              <Select   
+                              onChange={v => { this.setState({ tmpnsV: v, newNs: false }) }} 
+                              style={{ width: 150 }} >
+                                {this.state.tmpns.map((item,index)=>(
+                                    <Option key={index} value={item}>{item}</Option>
+                                ))} 
+                                </Select>
+                            :  
+                                null
+                            }
+                            </Radio>
+                            <Radio value={2}>创建命名空间：
+                                {this.state.choosens["tag"] == "input"
+                                  ?
+                                  <Input defaultValue={info.nsname} onChange={e => { this.setState({ tmpnsV: e.target.value, newNs: true }) }} placeholder="namespace" style={{ width: 150, marginLeft: 10 }} />
+                                  : null
+                                }
+                              </Radio>
+                          </Radio.Group>
+                        
                     )}
                 </Form.Item>
                 <Form.Item required label="配置映射" >
