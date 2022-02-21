@@ -1,0 +1,57 @@
+{
+  "name": "spug_web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@antv/data-set": "^0.10.2",
+    "ace-builds": "^1.4.7",
+    "axios": "^0.21.1",
+    "bizcharts": "^3.5.6",
+    "codemirror": "^5.62.3",
+    "history": "^4.10.1",
+    "http-proxy-middleware": "^0.20.0",
+    "js-yaml": "^4.1.0",
+    "jsondiffpatch": "^0.4.1",
+    "lodash": "^4.17.21",
+    "mobx": "^5.15.0",
+    "mobx-react": "^6.1.4",
+    "moment": "^2.24.0",
+    "react": "^16.11.0",
+    "react-ace": "^8.0.0",
+    "react-codemirror2": "^7.2.1",
+    "react-dom": "^16.11.0",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.2.0",
+    "xterm": "^4.6.0",
+    "xterm-addon-fit": "^0.4.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@ant-design/icons": "^2.1.1",
+    "@babel/plugin-proposal-decorators": "^7.7.0",
+    "antd": "^3.26.14",
+    "babel-plugin-import": "^1.12.2",
+    "customize-cra": "^0.8.0",
+    "react-app-rewired": "^2.1.5"
+  }
+}

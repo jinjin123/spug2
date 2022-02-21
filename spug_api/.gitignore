@@ -1,0 +1,17 @@
+*.pyc
+/venv/
+__pycache__/
+/.idea/
+/db.sqlite3
+migrations/
+/access.log
+/repos/*
+/logs/*
+celerybeat-schedule
+spug/settings.py
+out/
+nohup.out
+upload/*
+libs/key/*
+/build/
+/dist/
