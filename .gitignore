@@ -1,3 +1,6 @@
 /.idea/
-venv/
+spug_api/venv
 spug_api/nohup.out
+spug_api/out
+spug_api/spug/settings.py
+venv
