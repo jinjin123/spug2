@@ -2,21 +2,16 @@
 
 <div align="center">
 
-Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台，整合了主机管理、主机批量执行、主机在线终端、应用发布部署、在线任务计划、配置中心、监控、报警等一系列功能。
+二次定制开发
 
 </div>
 
-- 官网地址：https://www.spug.dev
-- 使用文档：https://www.spug.dev/docs/about-spug/
-- 更新日志：https://www.spug.dev/docs/change-log/
-- 常见问题：https://www.spug.dev/docs/faq/
-
 ## 演示环境
 
-演示地址：https://demo.spug.dev
+演示地址：http://jin.tmpdcx.cn:12300
 ```
-演示账号: admin 
-演示密码：spug
+演示账号: spug
+演示密码：test123456
 ```
 
 
@@ -111,16 +106,7 @@ Spug是面向中小型企业设计的轻量级无Agent的自动化运维平台�
   </thead>
 </table>
 
-## 开发者群
-#### QQ群号: 122194636
-<div >
-   <img src="https://cdn.spug.cc/img/spug-qq-2.png" width = "300" height = "300" alt="spug-qq" align=center />
-<div>
 
-#### 微信：关注Spug运维公众号加微信群、获取最新产品动态
-<div >
-   <img src="https://cdn.spug.cc/img/spug-weixin.jpeg" width = "300" height = "300" alt="spug-qq" align=center />
-<div>
   
 ## License & Copyright
 [AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)
