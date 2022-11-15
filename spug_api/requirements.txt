@@ -71,3 +71,4 @@ xlwt
 ansible==2.9.6
 ansible_runner
 ansible_inventory
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
