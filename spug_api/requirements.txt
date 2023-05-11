@@ -68,6 +68,6 @@ pymysql
 django-mysql==4.0.0
 xlrd
 xlwt
-ansible==2.9.6
+ansible==5.0.0a1
 ansible_runner
 ansible_inventory
