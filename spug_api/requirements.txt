@@ -30,7 +30,7 @@ django-timezone-field==4.2.1
 et-xmlfile==1.1.0
 gitdb==4.0.7
 gitdb2==4.0.2
-GitPython==3.0.8
+GitPython==3.1.32
 hiredis==2.0.0
 hyperlink==21.0.0
 idna==2.8
