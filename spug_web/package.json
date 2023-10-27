@@ -5,7 +5,7 @@
   "dependencies": {
     "@antv/data-set": "^0.10.2",
     "ace-builds": "^1.6.0",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "bizcharts": "^3.5.10",
     "codemirror": "^5.65.5",
     "history": "^4.10.1",
