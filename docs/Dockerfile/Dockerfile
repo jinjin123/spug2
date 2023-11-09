@@ -2,7 +2,7 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 
-FROM python:3.11.0b1-slim-buster as builder
+FROM python:3.11.0rc1-slim-buster as builder
 
 RUN echo -e "http://mirrors.aliyun.com/alpine/v3.11/main\nhttp://mirrors.aliyun.com/alpine/v3.11/community" > /etc/apk/repositories
 RUN apk update && apk add --no-cache  nodejs-npm git build-base openldap-dev supervisor
@@ -18,7 +18,7 @@ RUN cd /spug/spug_web/ && npm i --registry=https://registry.npm.taobao.org && np
 
 
 
-FROM python:3.11.0b1-slim-buster
+FROM python:3.11.0rc1-slim-buster
 ENV VERSION=2.2.0
 RUN echo -e "http://mirrors.aliyun.com/alpine/v3.11/main\nhttp://mirrors.aliyun.com/alpine/v3.11/community" > /etc/apk/repositories
 
