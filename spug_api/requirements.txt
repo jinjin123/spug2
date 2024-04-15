@@ -33,7 +33,7 @@ gitdb2==4.0.2
 GitPython==3.0.8
 hiredis==2.0.0
 hyperlink==21.0.0
-idna==2.8
+idna==3.7
 incremental==21.3.0
 jdcal==1.4.1
 kombu==5.1.0
